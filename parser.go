@@ -85,10 +85,68 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(IfToken) {
 		return p.parseIfStatement()
 	}
+	if p.match(WhileToken) {
+		return p.parseWhileStatement()
+	}
+	if p.match(ForToken) {
+		return p.parseForStatement()
+	}
 	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
 		return p.parseAssignment()
 	}
 	panic("Unexpected token: " + p.peek().Value)
+}
+
+// for var i = 1; i <= 3; i = i + 1 {
+//     print i
+// }
+
+// var i = 1
+//
+//	while i <= 3 {
+//	    print i
+//	    i = i + 1
+//	}
+func (p *Parser) parseForStatement() Stmt {
+	// parse the initializer (var i = 1)
+	var initializer Stmt = nil
+	if p.match(VarToken) {
+		initializer = p.parseVarDeclaration()
+	} else {
+		// if not var declaration, check if direct assignment like i = 1
+		if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
+			initializer = p.parseAssignment()
+		}
+	}
+	p.expect(SemiColonToken)
+
+	// parse the condition  (i <= 3)
+	condition := p.parseExpression()
+	p.expect(SemiColonToken)
+
+	// parse the step (i = i + 1)
+	increment := p.parseAssignment()
+
+	// parse the loop body ({print i })
+	p.expect(LBraceToken)
+	loopBody := p.parseBlockStatement()
+
+	// inc clause at the end of the loop's statement
+	loopBody.Body = append(loopBody.Body, increment)
+
+	whileLoop := &WhileStmt{
+		Type:      WhileStmtNode,
+		Condition: condition,
+		Body:      loopBody,
+	}
+
+	// make parent block to hold initializer and while loop
+	parentBlock := &BlockStmt{
+		Type: BlockStmtNode,
+		Body: []Stmt{initializer, whileLoop},
+	}
+
+	return parentBlock
 }
 
 // parse var
@@ -137,6 +195,19 @@ func (p *Parser) parseIfStatement() *IfStmt {
 		Condition:  condition,
 		ThenBranch: thenBranch,
 		ElseBranch: elseBranch,
+	}
+}
+
+func (p *Parser) parseWhileStatement() *WhileStmt {
+	condition := p.parseExpression()
+
+	p.expect(LBraceToken)
+	body := p.parseBlockStatement()
+
+	return &WhileStmt{
+		Type:      WhileStmtNode,
+		Condition: condition,
+		Body:      body,
 	}
 }
 

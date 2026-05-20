@@ -61,6 +61,30 @@ func main() {
 		}
 		print d
 		
+		var g = 1
+		while g <= 5 {
+			print "loop step: " + g
+			g = g + 1
+		}
+
+		print "Starting for loop:"
+        for var i = 1; i <= 3; i = i + 1 {
+            print "i is: " + i
+        }
+        print "Loop complete"
+
+		print "Starting for loop2:"
+        for var i = 6; i >= 2; i = i - 1 {
+            print "i is: " + i
+        }
+        print "Loop2 complete"
+
+		var i = 2
+		print "Starting for loop3:"
+		for i = 3; i < 6; i = i + 1 {
+			print "i is:" + i
+		}
+		print "Loop3 complete"
 
 	`
 	tokens := Lex(input)

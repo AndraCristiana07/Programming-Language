@@ -28,6 +28,9 @@ const (
 	ElseToken         TokenType = "ELSE"
 	LBraceToken       TokenType = "LBRACE"
 	RBraceToken       TokenType = "RBRACE"
+	WhileToken        TokenType = "WHILE"
+	ForToken          TokenType = "FOR"
+	SemiColonToken    TokenType = "SEMICOLON"
 )
 
 var keywords = map[string]TokenType{
@@ -37,6 +40,8 @@ var keywords = map[string]TokenType{
 	"false": FalseToken,
 	"if":    IfToken,
 	"else":  ElseToken,
+	"while": WhileToken,
+	"for":   ForToken,
 }
 
 type Token struct {
@@ -176,6 +181,13 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RBraceToken, string(char)))
+		case ';':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(SemiColonToken, string(char)))
+
 		default:
 			currentToken += string(char)
 		}
