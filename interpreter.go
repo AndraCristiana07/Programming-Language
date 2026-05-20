@@ -10,6 +10,8 @@ func Eval(node Stmt, env *Environment) any {
 			Eval(stmt, env)
 		}
 		return nil
+	case *BooleanLiteral:
+		return n.Value
 	case *VarDeclaration:
 		value := Eval(n.Value, env)
 		env.vars[n.Identifier] = value
@@ -18,12 +20,11 @@ func Eval(node Stmt, env *Environment) any {
 		value := Eval(n.Value, env)
 		fmt.Println(value)
 		return nil
-
 	case *BinaryExpr:
 		leftVal := Eval(n.Left, env)
 		rightVal := Eval(n.Right, env)
 
-		// TODO: handle type checking and string concatenation
+		// handle type checking and string concatenation
 		_, leftIsString := leftVal.(string)
 		_, rightIsString := rightVal.(string)
 
@@ -52,6 +53,14 @@ func Eval(node Stmt, env *Environment) any {
 				panic("Division by zero")
 			}
 			return left / right
+		case "<":
+			return left < right
+		case ">":
+			return left > right
+		case "==":
+			return left == right
+		case "!=":
+			return left != right
 		default:
 			panic("Unknown operator: " + n.Operator)
 		}
