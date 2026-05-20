@@ -10,6 +10,7 @@ const (
 	NumericLiteralNode NodeType = "NumericLiteral"
 	IdentifierNode     NodeType = "Identifier"
 	BinaryExprNode     NodeType = "BinaryExpr"
+	PrintStmtNode      NodeType = "PrintStmt"
 )
 
 type Stmt interface {
@@ -26,7 +27,13 @@ type Program struct {
 	Body []Stmt
 }
 
-func (p *Program) GetType() NodeType { return p.Type }
+type PrintStmt struct {
+	Type  NodeType
+	Value Expr
+}
+
+func (p *PrintStmt) GetType() NodeType { return p.Type }
+func (p *Program) GetType() NodeType   { return p.Type }
 
 type BinaryExpr struct {
 	Type     NodeType
@@ -71,6 +78,9 @@ func printAST(node Stmt, indent string) {
 		}
 	case *VarDeclaration:
 		fmt.Printf("%sVarDeclaration: %s\n", indent, n.Identifier)
+		printAST(n.Value, indent+"  ")
+	case *PrintStmt:
+		fmt.Printf("%sPrintStmt\n", indent)
 		printAST(n.Value, indent+"  ")
 	case *BinaryExpr:
 		fmt.Printf("%sBinaryExpr: %s\n", indent, n.Operator)

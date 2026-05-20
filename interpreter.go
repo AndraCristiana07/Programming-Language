@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func Eval(node Stmt, env *Environment) int {
 	switch n := node.(type) {
 	case *Program:
@@ -12,6 +14,11 @@ func Eval(node Stmt, env *Environment) int {
 		value := Eval(n.Value, env)
 		env.vars[n.Identifier] = value
 		return value
+	case *PrintStmt:
+		value := Eval(n.Value, env)
+		fmt.Println(value)
+		return 0
+
 	case *BinaryExpr:
 		left := Eval(n.Left, env)
 		right := Eval(n.Right, env)

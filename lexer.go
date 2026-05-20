@@ -14,9 +14,14 @@ const (
 	MinusToken      TokenType = "MINUS"
 	StarToken       TokenType = "STAR"
 	SlashToken      TokenType = "SLASH"
+	PrintToken      TokenType = "PRINT"
 )
 
 // TODO: add keywords
+var keywords = map[string]TokenType{
+	"var":   VarToken,
+	"print": PrintToken,
+}
 
 type Token struct {
 	Type  TokenType
@@ -88,16 +93,16 @@ func Lex(input string) []Token {
 	return tokens
 }
 
-// check if the token is a keyword ("var"), a number, or an identifier
+// check if the token is a keyword, a number, or an identifier
 func classifyToken(token string) Token {
-	switch token {
-	case "var":
-		return NewToken(VarToken, token)
-	default:
-		if isNumber(token) {
-			return NewToken(NumberToken, token)
-		}
+	if tokenType, ok := keywords[token]; ok {
+		return NewToken(tokenType, token)
+	} else if isNumber(token) {
+		return NewToken(NumberToken, token)
+	} else if isAlphabetic(token) {
 		return NewToken(IdentifierToken, token)
+	} else {
+		panic("Unknown token: " + token)
 	}
 }
 

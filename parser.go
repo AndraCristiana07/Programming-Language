@@ -78,6 +78,9 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(VarToken) {
 		return p.parseVarDeclaration()
 	}
+	if p.match(PrintToken) {
+		return p.parsePrintStatement()
+	}
 	panic("Unexpected token: " + p.peek().Value)
 }
 
@@ -91,6 +94,15 @@ func (p *Parser) parseVarDeclaration() *VarDeclaration {
 		Type:       VarDeclarationNode,
 		Identifier: identifierToken.Value,
 		Value:      value,
+	}
+}
+
+// parse print
+func (p *Parser) parsePrintStatement() *PrintStmt {
+	value := p.parseExpression()
+	return &PrintStmt{
+		Type:  PrintStmtNode,
+		Value: value,
 	}
 }
 
