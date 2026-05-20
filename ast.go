@@ -13,6 +13,7 @@ const (
 	PrintStmtNode      NodeType = "PrintStmt"
 	StringLiteralNode  NodeType = "StringLiteral"
 	AssignmentNode     NodeType = "Assignment"
+	BooleanLiteralNode NodeType = "BooleanLiteral"
 )
 
 type Stmt interface {
@@ -71,6 +72,14 @@ type StringLiteral struct {
 func (s *StringLiteral) GetType() NodeType { return s.Type }
 func (s *StringLiteral) expressionNode()   {}
 
+type BooleanLiteral struct {
+	Type  NodeType
+	Value bool
+}
+
+func (b *BooleanLiteral) GetType() NodeType { return b.Type }
+func (b *BooleanLiteral) expressionNode()   {}
+
 type VarDeclaration struct {
 	Type       NodeType
 	Identifier string
@@ -113,6 +122,8 @@ func printAST(node Stmt, indent string) {
 	case *Assignment:
 		fmt.Printf("%sAssignment: %s\n", indent, n.Identifier)
 		printAST(n.Value, indent+"  ")
+	case *BooleanLiteral:
+		fmt.Printf("%sBooleanLiteral: %t\n", indent, n.Value)
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

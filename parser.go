@@ -124,7 +124,25 @@ func (p *Parser) parsePrintStatement() *PrintStmt {
 
 // parse expression
 func (p *Parser) parseExpression() Expr {
-	return p.parseAddition()
+	return p.parseComparison()
+}
+
+func (p *Parser) parseComparison() Expr {
+	left := p.parseAddition() // math first
+
+	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) || p.match(LessEqualToken) || p.match(GreaterEqualToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseAddition()
+
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+
+	return left
 }
 
 func (p *Parser) parseAddition() Expr {
@@ -177,6 +195,16 @@ func (p *Parser) parsePrimary() Expr {
 		return &StringLiteral{
 			Type:  StringLiteralNode,
 			Value: p.tokens[p.pos-1].Value,
+		}
+	} else if p.match(TrueToken) {
+		return &BooleanLiteral{
+			Type:  BooleanLiteralNode,
+			Value: true,
+		}
+	} else if p.match(FalseToken) {
+		return &BooleanLiteral{
+			Type:  BooleanLiteralNode,
+			Value: false,
 		}
 	} else {
 		panic("Unexpected token: " + p.peek().Value)

@@ -22,6 +22,19 @@ func main() {
 		print "a is now: " + a
 		a = "is string now"
 		print "a is now: " + a
+
+		var target = 20
+        print target > 15
+        print target == 10 + 10
+        print 5 != 5
+        var truth = true
+        print truth
+
+		var b = 10 <= 5
+		print b
+		var c = 10 >= 5
+		print c
+		print 10 >= 9
 	
 	`
 	tokens := Lex(input)

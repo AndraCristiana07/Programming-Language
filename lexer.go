@@ -6,22 +6,31 @@ package main
 type TokenType string
 
 const (
-	VarToken        TokenType = "VAR"
-	IdentifierToken TokenType = "IDENTIFIER"
-	EqualsToken     TokenType = "EQUALS"
-	NumberToken     TokenType = "NUMBER"
-	PlusToken       TokenType = "PLUS"
-	MinusToken      TokenType = "MINUS"
-	StarToken       TokenType = "STAR"
-	SlashToken      TokenType = "SLASH"
-	PrintToken      TokenType = "PRINT"
-	StringToken     TokenType = "STRING"
+	VarToken          TokenType = "VAR"
+	IdentifierToken   TokenType = "IDENTIFIER"
+	EqualsToken       TokenType = "EQUALS"
+	NumberToken       TokenType = "NUMBER"
+	PlusToken         TokenType = "PLUS"
+	MinusToken        TokenType = "MINUS"
+	StarToken         TokenType = "STAR"
+	SlashToken        TokenType = "SLASH"
+	PrintToken        TokenType = "PRINT"
+	StringToken       TokenType = "STRING"
+	LessToken         TokenType = "LESS"
+	GreaterToken      TokenType = "GREATER"
+	EqualEqualToken   TokenType = "EQUALEQUAL"
+	BangEqualToken    TokenType = "BANGEQUAL"
+	TrueToken         TokenType = "TRUE"
+	FalseToken        TokenType = "FALSE"
+	LessEqualToken    TokenType = "LESSEQUAL"
+	GreaterEqualToken TokenType = "GREATEREQUAL"
 )
 
-// TODO: add keywords
 var keywords = map[string]TokenType{
 	"var":   VarToken,
 	"print": PrintToken,
+	"true":  TrueToken,
+	"false": FalseToken,
 }
 
 type Token struct {
@@ -104,7 +113,51 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(EqualsToken, string(char)))
+			// check if "=="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(EqualEqualToken, "=="))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(EqualsToken, string(char)))
+			}
+		case '!':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			// Look ahead to see if it's "!="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(BangEqualToken, "!="))
+				i++ // Skip the '='
+			} else {
+				panic("Unexpected character '!' without '='")
+			}
+
+		case '<':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			// check if "<="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(LessEqualToken, "<="))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(LessToken, string(char)))
+			}
+
+		case '>':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			// check if ">="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(GreaterEqualToken, ">="))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(GreaterToken, string(char)))
+			}
 
 		default:
 			currentToken += string(char)
