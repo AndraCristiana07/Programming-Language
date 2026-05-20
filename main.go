@@ -13,4 +13,8 @@ func main() {
 	parser := NewParser(tokens)
 	ast := parser.Parse()
 	printAST(ast, "")
+
+	env := NewEnvironment()
+	result := Eval(ast, env)
+	fmt.Printf("x = %d\n", result)
 }
