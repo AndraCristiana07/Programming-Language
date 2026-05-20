@@ -18,7 +18,12 @@ func Eval(node Stmt, env *Environment) int {
 		switch n.Operator {
 		case "+":
 			return left + right
-
+		case "-":
+			return left - right
+		case "*":
+			return left * right
+		case "/":
+			return left / right
 		default:
 			panic("Unknown operator: " + n.Operator)
 		}

@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	input := "var x = 10 + 20"
+	input := "var x = 10 + 5 - 10 / 2 * 2"
 	tokens := Lex(input)
 
 	for _, t := range tokens {
@@ -17,4 +17,5 @@ func main() {
 	env := NewEnvironment()
 	result := Eval(ast, env)
 	fmt.Printf("x = %d\n", result)
+
 }

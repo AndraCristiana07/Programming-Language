@@ -96,10 +96,31 @@ func (p *Parser) parseVarDeclaration() *VarDeclaration {
 
 // parse expression
 func (p *Parser) parseExpression() Expr {
-	// for now, we only support binary expressions with + operator
-	left := p.parsePrimary()
+	return p.parseAddition()
+}
 
-	for p.match(PlusToken) {
+func (p *Parser) parseAddition() Expr {
+	// call highest lvl first
+	left := p.parseMultiplication()
+
+	for p.match(PlusToken) || p.match(MinusToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseMultiplication() // call next lvl for right side
+
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+
+	return left
+}
+
+func (p *Parser) parseMultiplication() Expr {
+	left := p.parsePrimary()
+	for p.match(StarToken) || p.match(SlashToken) {
 		operator := p.tokens[p.pos-1].Value
 		right := p.parsePrimary()
 		left = &BinaryExpr{
@@ -109,7 +130,6 @@ func (p *Parser) parseExpression() Expr {
 			Right:    right,
 		}
 	}
-
 	return left
 }
 

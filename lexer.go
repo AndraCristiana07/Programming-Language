@@ -11,6 +11,9 @@ const (
 	EqualsToken     TokenType = "EQUALS"
 	NumberToken     TokenType = "NUMBER"
 	PlusToken       TokenType = "PLUS"
+	MinusToken      TokenType = "MINUS"
+	StarToken       TokenType = "STAR"
+	SlashToken      TokenType = "SLASH"
 )
 
 // TODO: add keywords
@@ -48,6 +51,24 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(PlusToken, string(char)))
+		case '-':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(MinusToken, string(char)))
+		case '*':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(StarToken, string(char)))
+		case '/':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(SlashToken, string(char)))
 		case '=':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))
