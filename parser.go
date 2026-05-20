@@ -85,6 +85,9 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(IfToken) {
 		return p.parseIfStatement()
 	}
+	if p.match(WhileToken) {
+		return p.parseWhileStatement()
+	}
 	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
 		return p.parseAssignment()
 	}
@@ -137,6 +140,19 @@ func (p *Parser) parseIfStatement() *IfStmt {
 		Condition:  condition,
 		ThenBranch: thenBranch,
 		ElseBranch: elseBranch,
+	}
+}
+
+func (p *Parser) parseWhileStatement() *WhileStmt {
+	condition := p.parseExpression()
+
+	p.expect(LBraceToken)
+	body := p.parseBlockStatement()
+
+	return &WhileStmt{
+		Type:      WhileStmtNode,
+		Condition: condition,
+		Body:      body,
 	}
 }
 

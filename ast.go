@@ -16,6 +16,7 @@ const (
 	BooleanLiteralNode NodeType = "BooleanLiteral"
 	IfStmtNode         NodeType = "IfStmt"
 	BlockStmtNode      NodeType = "BlockStmt"
+	WhileStmtNode      NodeType = "WhileStmt"
 )
 
 type Stmt interface {
@@ -114,6 +115,14 @@ type IfStmt struct {
 
 func (i *IfStmt) GetType() NodeType { return i.Type }
 
+type WhileStmt struct {
+	Type      NodeType
+	Condition Expr
+	Body      *BlockStmt
+}
+
+func (w *WhileStmt) GetType() NodeType { return w.Type }
+
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
@@ -157,6 +166,12 @@ func printAST(node Stmt, indent string) {
 			fmt.Printf("%sElseBranch:\n", indent+"  ")
 			printAST(n.ElseBranch, indent+"    ")
 		}
+	case *WhileStmt:
+		fmt.Println(indent + "WhileStmt")
+		fmt.Println(indent + "  Condition:")
+		printAST(n.Condition, indent+"    ")
+		fmt.Println(indent + "  Body:")
+		printAST(n.Body, indent+"    ")
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

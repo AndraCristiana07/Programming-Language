@@ -28,6 +28,7 @@ const (
 	ElseToken         TokenType = "ELSE"
 	LBraceToken       TokenType = "LBRACE"
 	RBraceToken       TokenType = "RBRACE"
+	WhileToken        TokenType = "WHILE"
 )
 
 var keywords = map[string]TokenType{
@@ -37,6 +38,7 @@ var keywords = map[string]TokenType{
 	"false": FalseToken,
 	"if":    IfToken,
 	"else":  ElseToken,
+	"while": WhileToken,
 }
 
 type Token struct {

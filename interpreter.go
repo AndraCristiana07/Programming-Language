@@ -107,6 +107,25 @@ func Eval(node Stmt, env *Environment) any {
 			Eval(n.ElseBranch, env)
 		}
 		return nil
+
+	case *WhileStmt:
+		// evaluate the condition expression on every cycle
+		for {
+			condVal := Eval(n.Condition, env)
+			booleanCond, ok := condVal.(bool)
+			if !ok {
+				panic("While loop condition must evaluate to a boolean")
+			}
+
+			// break the loop if it gets to false
+			if !booleanCond {
+				break
+			}
+
+			// exec the body block
+			Eval(n.Body, env)
+		}
+		return nil
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}

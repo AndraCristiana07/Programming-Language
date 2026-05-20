@@ -61,6 +61,12 @@ func main() {
 		}
 		print d
 		
+		var g = 1
+		while g <= 5 {
+			print "loop step: " + g
+			g = g + 1
+		}
+
 
 	`
 	tokens := Lex(input)
