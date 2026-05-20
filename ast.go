@@ -12,6 +12,7 @@ const (
 	BinaryExprNode     NodeType = "BinaryExpr"
 	PrintStmtNode      NodeType = "PrintStmt"
 	StringLiteralNode  NodeType = "StringLiteral"
+	AssignmentNode     NodeType = "Assignment"
 )
 
 type Stmt interface {
@@ -78,6 +79,14 @@ type VarDeclaration struct {
 
 func (v *VarDeclaration) GetType() NodeType { return v.Type }
 
+type Assignment struct {
+	Type       NodeType
+	Identifier string
+	Value      Expr
+}
+
+func (a *Assignment) GetType() NodeType { return a.Type }
+
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
@@ -101,6 +110,9 @@ func printAST(node Stmt, indent string) {
 		fmt.Printf("%sNumericLiteral: %d\n", indent, n.Value)
 	case *StringLiteral:
 		fmt.Printf("%sStringLiteral: %s\n", indent, n.Value)
+	case *Assignment:
+		fmt.Printf("%sAssignment: %s\n", indent, n.Identifier)
+		printAST(n.Value, indent+"  ")
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

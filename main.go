@@ -15,6 +15,13 @@ func main() {
 		var name = "World!"
 		print greeting + name
 		print "X is " + x
+
+		var a = 10
+		print "a is now: " + a
+		a = a + 5
+		print "a is now: " + a
+		a = "is string now"
+		print "a is now: " + a
 	
 	`
 	tokens := Lex(input)

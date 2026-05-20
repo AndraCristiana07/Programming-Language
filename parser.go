@@ -81,6 +81,9 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(PrintToken) {
 		return p.parsePrintStatement()
 	}
+	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
+		return p.parseAssignment()
+	}
 	panic("Unexpected token: " + p.peek().Value)
 }
 
@@ -92,6 +95,19 @@ func (p *Parser) parseVarDeclaration() *VarDeclaration {
 	value := p.parseExpression()
 	return &VarDeclaration{
 		Type:       VarDeclarationNode,
+		Identifier: identifierToken.Value,
+		Value:      value,
+	}
+}
+
+// parse assignment
+func (p *Parser) parseAssignment() *Assignment {
+	// consume identifier and equals
+	identifierToken := p.expect(IdentifierToken)
+	p.expect(EqualsToken)
+	value := p.parseExpression()
+	return &Assignment{
+		Type:       AssignmentNode,
 		Identifier: identifierToken.Value,
 		Value:      value,
 	}

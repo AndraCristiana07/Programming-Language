@@ -65,6 +65,13 @@ func Eval(node Stmt, env *Environment) any {
 		return n.Value
 	case *StringLiteral:
 		return n.Value
+	case *Assignment:
+		value := Eval(n.Value, env)
+		if _, ok := env.vars[n.Identifier]; !ok {
+			panic("Undefined variable: " + n.Identifier)
+		}
+		env.vars[n.Identifier] = value
+		return value
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}
