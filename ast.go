@@ -10,6 +10,9 @@ const (
 	NumericLiteralNode NodeType = "NumericLiteral"
 	IdentifierNode     NodeType = "Identifier"
 	BinaryExprNode     NodeType = "BinaryExpr"
+	PrintStmtNode      NodeType = "PrintStmt"
+	StringLiteralNode  NodeType = "StringLiteral"
+	AssignmentNode     NodeType = "Assignment"
 )
 
 type Stmt interface {
@@ -26,7 +29,13 @@ type Program struct {
 	Body []Stmt
 }
 
-func (p *Program) GetType() NodeType { return p.Type }
+type PrintStmt struct {
+	Type  NodeType
+	Value Expr
+}
+
+func (p *PrintStmt) GetType() NodeType { return p.Type }
+func (p *Program) GetType() NodeType   { return p.Type }
 
 type BinaryExpr struct {
 	Type     NodeType
@@ -54,6 +63,14 @@ type NumericLiteral struct {
 func (n *NumericLiteral) GetType() NodeType { return n.Type }
 func (n *NumericLiteral) expressionNode()   {}
 
+type StringLiteral struct {
+	Type  NodeType
+	Value string
+}
+
+func (s *StringLiteral) GetType() NodeType { return s.Type }
+func (s *StringLiteral) expressionNode()   {}
+
 type VarDeclaration struct {
 	Type       NodeType
 	Identifier string
@@ -61,6 +78,14 @@ type VarDeclaration struct {
 }
 
 func (v *VarDeclaration) GetType() NodeType { return v.Type }
+
+type Assignment struct {
+	Type       NodeType
+	Identifier string
+	Value      Expr
+}
+
+func (a *Assignment) GetType() NodeType { return a.Type }
 
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
@@ -72,6 +97,9 @@ func printAST(node Stmt, indent string) {
 	case *VarDeclaration:
 		fmt.Printf("%sVarDeclaration: %s\n", indent, n.Identifier)
 		printAST(n.Value, indent+"  ")
+	case *PrintStmt:
+		fmt.Printf("%sPrintStmt\n", indent)
+		printAST(n.Value, indent+"  ")
 	case *BinaryExpr:
 		fmt.Printf("%sBinaryExpr: %s\n", indent, n.Operator)
 		printAST(n.Left, indent+"  ")
@@ -80,6 +108,11 @@ func printAST(node Stmt, indent string) {
 		fmt.Printf("%sIdentifier: %s\n", indent, n.Symbol)
 	case *NumericLiteral:
 		fmt.Printf("%sNumericLiteral: %d\n", indent, n.Value)
+	case *StringLiteral:
+		fmt.Printf("%sStringLiteral: %s\n", indent, n.Value)
+	case *Assignment:
+		fmt.Printf("%sAssignment: %s\n", indent, n.Identifier)
+		printAST(n.Value, indent+"  ")
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

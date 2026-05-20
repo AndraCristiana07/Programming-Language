@@ -1,20 +1,44 @@
 package main
 
-func Eval(node Stmt, env *Environment) int {
+import "fmt"
+
+func Eval(node Stmt, env *Environment) any {
 	switch n := node.(type) {
 	case *Program:
-		var result int
+		// var result int
 		for _, stmt := range n.Body {
-			result = Eval(stmt, env)
+			Eval(stmt, env)
 		}
-		return result
+		return nil
 	case *VarDeclaration:
 		value := Eval(n.Value, env)
 		env.vars[n.Identifier] = value
 		return value
+	case *PrintStmt:
+		value := Eval(n.Value, env)
+		fmt.Println(value)
+		return nil
+
 	case *BinaryExpr:
-		left := Eval(n.Left, env)
-		right := Eval(n.Right, env)
+		leftVal := Eval(n.Left, env)
+		rightVal := Eval(n.Right, env)
+
+		// TODO: handle type checking and string concatenation
+		_, leftIsString := leftVal.(string)
+		_, rightIsString := rightVal.(string)
+
+		if leftIsString || rightIsString {
+			if n.Operator == "+" {
+				return fmt.Sprintf("%v%v", leftVal, rightVal)
+			} else {
+				panic("Unsupported operator for strings: " + n.Operator)
+			}
+		}
+
+		// if not str, go back to int
+		left := leftVal.(int)
+		right := rightVal.(int)
+
 		switch n.Operator {
 		case "+":
 			return left + right
@@ -23,6 +47,10 @@ func Eval(node Stmt, env *Environment) int {
 		case "*":
 			return left * right
 		case "/":
+			// check for division by zero
+			if right == 0 {
+				panic("Division by zero")
+			}
 			return left / right
 		default:
 			panic("Unknown operator: " + n.Operator)
@@ -35,6 +63,15 @@ func Eval(node Stmt, env *Environment) int {
 		return val
 	case *NumericLiteral:
 		return n.Value
+	case *StringLiteral:
+		return n.Value
+	case *Assignment:
+		value := Eval(n.Value, env)
+		if _, ok := env.vars[n.Identifier]; !ok {
+			panic("Undefined variable: " + n.Identifier)
+		}
+		env.vars[n.Identifier] = value
+		return value
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}

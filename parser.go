@@ -78,6 +78,12 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(VarToken) {
 		return p.parseVarDeclaration()
 	}
+	if p.match(PrintToken) {
+		return p.parsePrintStatement()
+	}
+	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
+		return p.parseAssignment()
+	}
 	panic("Unexpected token: " + p.peek().Value)
 }
 
@@ -91,6 +97,28 @@ func (p *Parser) parseVarDeclaration() *VarDeclaration {
 		Type:       VarDeclarationNode,
 		Identifier: identifierToken.Value,
 		Value:      value,
+	}
+}
+
+// parse assignment
+func (p *Parser) parseAssignment() *Assignment {
+	// consume identifier and equals
+	identifierToken := p.expect(IdentifierToken)
+	p.expect(EqualsToken)
+	value := p.parseExpression()
+	return &Assignment{
+		Type:       AssignmentNode,
+		Identifier: identifierToken.Value,
+		Value:      value,
+	}
+}
+
+// parse print
+func (p *Parser) parsePrintStatement() *PrintStmt {
+	value := p.parseExpression()
+	return &PrintStmt{
+		Type:  PrintStmtNode,
+		Value: value,
 	}
 }
 
@@ -144,6 +172,11 @@ func (p *Parser) parsePrimary() Expr {
 		return &NumericLiteral{
 			Type:  NumericLiteralNode,
 			Value: atoi(p.tokens[p.pos-1].Value),
+		}
+	} else if p.match(StringToken) {
+		return &StringLiteral{
+			Type:  StringLiteralNode,
+			Value: p.tokens[p.pos-1].Value,
 		}
 	} else {
 		panic("Unexpected token: " + p.peek().Value)
