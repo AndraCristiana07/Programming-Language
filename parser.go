@@ -1,5 +1,7 @@
 package main
 
+// TODO: make boolean assertion possible b = true; if b == true: ...
+// TODO: add scope to conditionals so declared variables stay in the scope
 type Parser struct {
 	tokens []Token
 	pos    int
@@ -81,6 +83,9 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(PrintToken) {
 		return p.parsePrintStatement()
 	}
+	if p.match(IfToken) {
+		return p.parseIfStatement()
+	}
 	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
 		return p.parseAssignment()
 	}
@@ -110,6 +115,46 @@ func (p *Parser) parseAssignment() *Assignment {
 		Type:       AssignmentNode,
 		Identifier: identifierToken.Value,
 		Value:      value,
+	}
+}
+
+// parse if statement
+func (p *Parser) parseIfStatement() *IfStmt {
+	condition := p.parseExpression()
+
+	p.expect(LBraceToken) // consume "{"
+	thenBranch := p.parseBlockStatement()
+
+	var elseBranch *BlockStmt = nil
+
+	// handle optional else branch
+	if p.match(ElseToken) {
+		p.expect(LBraceToken)
+		elseBranch = p.parseBlockStatement()
+	}
+
+	return &IfStmt{
+		Type:       IfStmtNode,
+		Condition:  condition,
+		ThenBranch: thenBranch,
+		ElseBranch: elseBranch,
+	}
+}
+
+// parse block statement
+func (p *Parser) parseBlockStatement() *BlockStmt {
+	var body []Stmt
+
+	// if block starts with "{" we consume it
+	for !p.isAtEnd() && p.peek().Type != RBraceToken {
+		body = append(body, p.parseStatement())
+	}
+
+	p.expect(RBraceToken) // consume '}'
+
+	return &BlockStmt{
+		Type: BlockStmtNode,
+		Body: body,
 	}
 }
 

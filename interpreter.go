@@ -85,6 +85,28 @@ func Eval(node Stmt, env *Environment) any {
 		}
 		env.vars[n.Identifier] = value
 		return value
+
+	case *BlockStmt:
+		for _, stmt := range n.Body {
+			Eval(stmt, env)
+		}
+		return nil
+
+	case *IfStmt:
+		// eval conditional leaf expression
+		condVal := Eval(n.Condition, env)
+
+		booleanCond, ok := condVal.(bool)
+		if !ok {
+			panic("Condition expression must evaluate to a boolean value")
+		}
+
+		if booleanCond {
+			Eval(n.ThenBranch, env)
+		} else if n.ElseBranch != nil {
+			Eval(n.ElseBranch, env)
+		}
+		return nil
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}

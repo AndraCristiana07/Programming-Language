@@ -35,7 +35,27 @@ func main() {
 		var c = 10 >= 5
 		print c
 		print 10 >= 9
-	
+
+		if 10 > 3 {
+			print "bigger"
+		} else {
+			print "smaller"
+		}
+
+		if target >= 15 {
+			print "it is bigger!"
+		}
+
+		
+		if target > 40 {
+			print "bigger"
+
+		} else 
+		
+		{
+			print "smaller" 
+		}	
+
 	`
 	tokens := Lex(input)
 

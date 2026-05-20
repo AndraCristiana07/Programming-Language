@@ -14,6 +14,8 @@ const (
 	StringLiteralNode  NodeType = "StringLiteral"
 	AssignmentNode     NodeType = "Assignment"
 	BooleanLiteralNode NodeType = "BooleanLiteral"
+	IfStmtNode         NodeType = "IfStmt"
+	BlockStmtNode      NodeType = "BlockStmt"
 )
 
 type Stmt interface {
@@ -96,6 +98,22 @@ type Assignment struct {
 
 func (a *Assignment) GetType() NodeType { return a.Type }
 
+type BlockStmt struct {
+	Type NodeType
+	Body []Stmt
+}
+
+func (b *BlockStmt) GetType() NodeType { return b.Type }
+
+type IfStmt struct {
+	Type       NodeType
+	Condition  Expr
+	ThenBranch *BlockStmt
+	ElseBranch *BlockStmt
+}
+
+func (i *IfStmt) GetType() NodeType { return i.Type }
+
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
@@ -124,6 +142,21 @@ func printAST(node Stmt, indent string) {
 		printAST(n.Value, indent+"  ")
 	case *BooleanLiteral:
 		fmt.Printf("%sBooleanLiteral: %t\n", indent, n.Value)
+	case *BlockStmt:
+		fmt.Printf("%sBlockStmt\n", indent)
+		for _, stmt := range n.Body {
+			printAST(stmt, indent+"  ")
+		}
+	case *IfStmt:
+		fmt.Printf("%sIfStmt\n", indent)
+		fmt.Printf("%sCondition:\n", indent+"  ")
+		printAST(n.Condition, indent+"    ")
+		fmt.Printf("%sThenBranch:\n", indent+"  ")
+		printAST(n.ThenBranch, indent+"    ")
+		if n.ElseBranch != nil {
+			fmt.Printf("%sElseBranch:\n", indent+"  ")
+			printAST(n.ElseBranch, indent+"    ")
+		}
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}
