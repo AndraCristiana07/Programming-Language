@@ -5,7 +5,6 @@ import "fmt"
 func Eval(node Stmt, env *Environment) any {
 	switch n := node.(type) {
 	case *Program:
-		// var result int
 		for _, stmt := range n.Body {
 			Eval(stmt, env)
 		}
@@ -14,7 +13,7 @@ func Eval(node Stmt, env *Environment) any {
 		return n.Value
 	case *VarDeclaration:
 		value := Eval(n.Value, env)
-		env.vars[n.Identifier] = value
+		env.Define(n.Identifier, value)
 		return value
 	case *PrintStmt:
 		value := Eval(n.Value, env)
@@ -69,7 +68,8 @@ func Eval(node Stmt, env *Environment) any {
 			panic("Unknown operator: " + n.Operator)
 		}
 	case *Identifier:
-		val, ok := env.vars[n.Symbol]
+		val, ok := env.Lookup(n.Symbol)
+
 		if !ok {
 			panic("Undefined variable: " + n.Symbol)
 		}
@@ -80,11 +80,33 @@ func Eval(node Stmt, env *Environment) any {
 		return n.Value
 	case *Assignment:
 		value := Eval(n.Value, env)
-		if _, ok := env.vars[n.Identifier]; !ok {
+		if !env.Assign(n.Identifier, value) {
 			panic("Undefined variable: " + n.Identifier)
 		}
-		env.vars[n.Identifier] = value
 		return value
+
+	case *BlockStmt:
+		blockEnv := NewScope(env)
+		for _, stmt := range n.Body {
+			Eval(stmt, blockEnv)
+		}
+		return nil
+
+	case *IfStmt:
+		// eval conditional leaf expression
+		condVal := Eval(n.Condition, env)
+
+		booleanCond, ok := condVal.(bool)
+		if !ok {
+			panic("Condition expression must evaluate to a boolean value")
+		}
+
+		if booleanCond {
+			Eval(n.ThenBranch, env)
+		} else if n.ElseBranch != nil {
+			Eval(n.ElseBranch, env)
+		}
+		return nil
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}

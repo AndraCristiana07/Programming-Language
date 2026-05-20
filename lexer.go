@@ -24,6 +24,10 @@ const (
 	FalseToken        TokenType = "FALSE"
 	LessEqualToken    TokenType = "LESSEQUAL"
 	GreaterEqualToken TokenType = "GREATEREQUAL"
+	IfToken           TokenType = "IF"
+	ElseToken         TokenType = "ELSE"
+	LBraceToken       TokenType = "LBRACE"
+	RBraceToken       TokenType = "RBRACE"
 )
 
 var keywords = map[string]TokenType{
@@ -31,6 +35,8 @@ var keywords = map[string]TokenType{
 	"print": PrintToken,
 	"true":  TrueToken,
 	"false": FalseToken,
+	"if":    IfToken,
+	"else":  ElseToken,
 }
 
 type Token struct {
@@ -158,7 +164,18 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(GreaterToken, string(char)))
 			}
-
+		case '{':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(LBraceToken, string(char)))
+		case '}':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(RBraceToken, string(char)))
 		default:
 			currentToken += string(char)
 		}
