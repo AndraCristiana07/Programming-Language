@@ -86,6 +86,17 @@ func main() {
 		}
 		print "Loop3 complete"
 
+		func myfn(user) {
+			var i = 1
+			while i < 4 {
+				print "Hi " + user + " at i: " + i
+				i = i + 1
+			}
+		}
+
+		var name = "Ana"
+		myfn(name)
+
 	`
 	tokens := Lex(input)
 

@@ -31,6 +31,10 @@ const (
 	WhileToken        TokenType = "WHILE"
 	ForToken          TokenType = "FOR"
 	SemiColonToken    TokenType = "SEMICOLON"
+	FuncToken         TokenType = "FUNC"
+	CommaToken        TokenType = "COMMA"
+	LParenToken       TokenType = "LPAREN"
+	RParenToken       TokenType = "RPAREN"
 )
 
 var keywords = map[string]TokenType{
@@ -42,6 +46,7 @@ var keywords = map[string]TokenType{
 	"else":  ElseToken,
 	"while": WhileToken,
 	"for":   ForToken,
+	"func":  FuncToken,
 }
 
 type Token struct {
@@ -187,6 +192,25 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(SemiColonToken, string(char)))
+		case ',':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(CommaToken, string(char)))
+		case '(':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(LParenToken, string(char)))
+
+		case ')':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(RParenToken, string(char)))
 
 		default:
 			currentToken += string(char)

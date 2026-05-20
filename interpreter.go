@@ -2,6 +2,11 @@ package main
 
 import "fmt"
 
+type RuntimeFunction struct {
+	Declaration *FuncDecl
+	Env         *Environment
+}
+
 func Eval(node Stmt, env *Environment) any {
 	switch n := node.(type) {
 	case *Program:
@@ -126,6 +131,44 @@ func Eval(node Stmt, env *Environment) any {
 			Eval(n.Body, env)
 		}
 		return nil
+	case *FuncDecl:
+		// store the function decl and its env in a runtime func struct
+		runtimeFunc := &RuntimeFunction{
+			Declaration: n,
+			Env:         env,
+		}
+		env.Define(n.Name, runtimeFunc)
+		return nil
+	case *CallExpr:
+		// look up the function by name
+		funcVal, ok := env.Lookup(n.Callee)
+		if !ok {
+			panic("Undefined function: " + n.Callee)
+		}
+
+		runtimeFunc, ok := funcVal.(*RuntimeFunction)
+		if !ok {
+			panic("Attempting to call a non-function value: " + n.Callee)
+		}
+
+		// check argument count
+		if len(n.Arguments) != len(runtimeFunc.Declaration.Parameters) {
+			panic(fmt.Sprintf("Expected %d arguments but got %d", len(runtimeFunc.Declaration.Parameters), len(n.Arguments)))
+		}
+
+		// create new env for the func call with the declaration env as parent
+		funcEnv := NewScope(runtimeFunc.Env)
+
+		// evaluate arguments and bind to parameter names in the new env
+		for i, argExpr := range n.Arguments {
+			argVal := Eval(argExpr, env)
+			paramName := runtimeFunc.Declaration.Parameters[i]
+			funcEnv.Define(paramName, argVal)
+		}
+
+		// execute the function body in the new env
+		return Eval(runtimeFunc.Declaration.Body, funcEnv)
+
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}

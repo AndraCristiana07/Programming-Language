@@ -51,6 +51,13 @@ func (p *Parser) advance() Token {
 	return p.tokens[p.pos-1]
 }
 
+func (p *Parser) lookAhead(offset int) Token {
+	if p.pos+offset >= len(p.tokens) {
+		return Token{Type: "EOF", Value: ""}
+	}
+	return p.tokens[p.pos+offset]
+}
+
 // check if current token matches expected type
 func (p *Parser) match(expectedType TokenType) bool {
 	if p.isAtEnd() {
@@ -91,7 +98,15 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(ForToken) {
 		return p.parseForStatement()
 	}
-	if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
+	if p.match(FuncToken) {
+		return p.parseFunctionDeclaration()
+	}
+	// check for function invocations
+	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == LParenToken {
+		return p.parseExpression()
+	}
+
+	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == EqualsToken {
 		return p.parseAssignment()
 	}
 	panic("Unexpected token: " + p.peek().Value)
@@ -114,7 +129,7 @@ func (p *Parser) parseForStatement() Stmt {
 		initializer = p.parseVarDeclaration()
 	} else {
 		// if not var declaration, check if direct assignment like i = 1
-		if p.peek().Type == IdentifierToken && p.tokens[p.pos+1].Type == EqualsToken {
+		if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == EqualsToken {
 			initializer = p.parseAssignment()
 		}
 	}
@@ -147,6 +162,33 @@ func (p *Parser) parseForStatement() Stmt {
 	}
 
 	return parentBlock
+}
+
+func (p *Parser) parseFunctionDeclaration() *FuncDecl {
+	nameToken := p.expect(IdentifierToken)
+
+	p.expect(LParenToken) // expect '('
+	var params []string
+	if p.peek().Type != RParenToken {
+		for {
+			paramToken := p.expect(IdentifierToken)
+			params = append(params, paramToken.Value)
+			if !p.match(CommaToken) {
+				break
+			}
+		}
+	}
+	p.expect(RParenToken) // expect ')'
+
+	p.expect(LBraceToken) // expect '{'
+	body := p.parseBlockStatement()
+
+	return &FuncDecl{
+		Type:       FuncDeclNode,
+		Name:       nameToken.Value,
+		Parameters: params,
+		Body:       body,
+	}
 }
 
 // parse var
@@ -297,10 +339,29 @@ func (p *Parser) parseMultiplication() Expr {
 // parse leaf nodes (identifiers, numbers)
 func (p *Parser) parsePrimary() Expr {
 	if p.match(IdentifierToken) {
-		return &Identifier{
-			Type:   IdentifierNode,
-			Symbol: p.tokens[p.pos-1].Value,
+		name := p.tokens[p.pos-1].Value
+
+		// check if the identifier is followed by a '('
+		if p.match(LParenToken) {
+			var args []Expr
+			if p.peek().Type != RParenToken {
+				for {
+					args = append(args, p.parseExpression())
+					if !p.match(CommaToken) {
+						break
+					}
+				}
+			}
+			p.expect(RParenToken)
+
+			return &CallExpr{
+				Type:      CallExprNode,
+				Callee:    name,
+				Arguments: args,
+			}
 		}
+
+		return &Identifier{Type: IdentifierNode, Symbol: name}
 	} else if p.match(NumberToken) {
 		return &NumericLiteral{
 			Type:  NumericLiteralNode,
