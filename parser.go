@@ -1,7 +1,6 @@
 package main
 
 // TODO: make boolean assertion possible b = true; if b == true: ...
-// TODO: add scope to conditionals so declared variables stay in the scope
 type Parser struct {
 	tokens []Token
 	pos    int

@@ -42,19 +42,25 @@ func main() {
 			print "smaller"
 		}
 
-		if target >= 15 {
-			print "it is bigger!"
+		var f = 10
+		print "f:" + f
+		if true {
+			var f = 50
+			print "f:" + f
+			
 		}
+		print "f:" + f
 
+		var d = 10
+		print d
+		if true {
+			d = 50
+			print d
+			var e = 20
+			print e
+		}
+		print d
 		
-		if target > 40 {
-			print "bigger"
-
-		} else 
-		
-		{
-			print "smaller" 
-		}	
 
 	`
 	tokens := Lex(input)
