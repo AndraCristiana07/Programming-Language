@@ -6,22 +6,24 @@ package main
 type TokenType string
 
 const (
-	VarToken        TokenType = "VAR"
-	IdentifierToken TokenType = "IDENTIFIER"
-	EqualsToken     TokenType = "EQUALS"
-	NumberToken     TokenType = "NUMBER"
-	PlusToken       TokenType = "PLUS"
-	MinusToken      TokenType = "MINUS"
-	StarToken       TokenType = "STAR"
-	SlashToken      TokenType = "SLASH"
-	PrintToken      TokenType = "PRINT"
-	StringToken     TokenType = "STRING"
-	LessToken       TokenType = "LESS"
-	GreaterToken    TokenType = "GREATER"
-	EqualEqualToken TokenType = "EQUALEQUAL"
-	BangEqualToken  TokenType = "BANGEQUAL"
-	TrueToken       TokenType = "TRUE"
-	FalseToken      TokenType = "FALSE"
+	VarToken          TokenType = "VAR"
+	IdentifierToken   TokenType = "IDENTIFIER"
+	EqualsToken       TokenType = "EQUALS"
+	NumberToken       TokenType = "NUMBER"
+	PlusToken         TokenType = "PLUS"
+	MinusToken        TokenType = "MINUS"
+	StarToken         TokenType = "STAR"
+	SlashToken        TokenType = "SLASH"
+	PrintToken        TokenType = "PRINT"
+	StringToken       TokenType = "STRING"
+	LessToken         TokenType = "LESS"
+	GreaterToken      TokenType = "GREATER"
+	EqualEqualToken   TokenType = "EQUALEQUAL"
+	BangEqualToken    TokenType = "BANGEQUAL"
+	TrueToken         TokenType = "TRUE"
+	FalseToken        TokenType = "FALSE"
+	LessEqualToken    TokenType = "LESSEQUAL"
+	GreaterEqualToken TokenType = "GREATEREQUAL"
 )
 
 var keywords = map[string]TokenType{
@@ -136,14 +138,27 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(LessToken, string(char)))
+			// check if "<="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(LessEqualToken, "<="))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(LessToken, string(char)))
+			}
 
 		case '>':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(GreaterToken, string(char)))
+			// check if ">="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(GreaterEqualToken, ">="))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(GreaterToken, string(char)))
+			}
+
 		default:
 			currentToken += string(char)
 		}

@@ -61,6 +61,10 @@ func Eval(node Stmt, env *Environment) any {
 			return left == right
 		case "!=":
 			return left != right
+		case "<=":
+			return left <= right
+		case ">=":
+			return left >= right
 		default:
 			panic("Unknown operator: " + n.Operator)
 		}

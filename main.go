@@ -29,6 +29,12 @@ func main() {
         print 5 != 5
         var truth = true
         print truth
+
+		var b = 10 <= 5
+		print b
+		var c = 10 >= 5
+		print c
+		print 10 >= 9
 	
 	`
 	tokens := Lex(input)

@@ -130,7 +130,7 @@ func (p *Parser) parseExpression() Expr {
 func (p *Parser) parseComparison() Expr {
 	left := p.parseAddition() // math first
 
-	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) {
+	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) || p.match(LessEqualToken) || p.match(GreaterEqualToken) {
 		operator := p.tokens[p.pos-1].Value
 		right := p.parseAddition()
 
