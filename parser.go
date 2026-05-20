@@ -157,6 +157,11 @@ func (p *Parser) parsePrimary() Expr {
 			Type:  NumericLiteralNode,
 			Value: atoi(p.tokens[p.pos-1].Value),
 		}
+	} else if p.match(StringToken) {
+		return &StringLiteral{
+			Type:  StringLiteralNode,
+			Value: p.tokens[p.pos-1].Value,
+		}
 	} else {
 		panic("Unexpected token: " + p.peek().Value)
 	}

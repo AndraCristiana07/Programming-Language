@@ -15,6 +15,7 @@ const (
 	StarToken       TokenType = "STAR"
 	SlashToken      TokenType = "SLASH"
 	PrintToken      TokenType = "PRINT"
+	StringToken     TokenType = "STRING"
 )
 
 // TODO: add keywords
@@ -39,8 +40,27 @@ func Lex(input string) []Token {
 	var tokens []Token
 	var currentToken string
 
-	for _, char := range input {
+	for i := 0; i < len(input); i++ {
+		char := input[i]
 		switch char {
+		case '"':
+			// for string literals, we read until the closing quote
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken))
+				currentToken = ""
+			}
+			var strValue string
+			i++ // skip the opening quote
+			// consume chars until we find the closing quote
+			for i < len(input) && input[i] != '"' {
+				strValue += string(input[i])
+				i++
+			}
+			if i >= len(input) {
+				panic("Unterminated string literal")
+			}
+			tokens = append(tokens, NewToken(StringToken, strValue))
+
 		case ' ', '\t', '\n':
 			// for space, nl or tab, we finalize the current token and reset it
 			if currentToken != "" {
@@ -49,6 +69,7 @@ func Lex(input string) []Token {
 			}
 			// skip
 			continue
+
 		case '+':
 			// for operators, we finalize the current token and add the operator token
 			if currentToken != "" {
@@ -56,24 +77,28 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(PlusToken, string(char)))
+
 		case '-':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(MinusToken, string(char)))
+
 		case '*':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(StarToken, string(char)))
+
 		case '/':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(SlashToken, string(char)))
+
 		case '=':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken))

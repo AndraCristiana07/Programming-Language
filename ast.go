@@ -11,6 +11,7 @@ const (
 	IdentifierNode     NodeType = "Identifier"
 	BinaryExprNode     NodeType = "BinaryExpr"
 	PrintStmtNode      NodeType = "PrintStmt"
+	StringLiteralNode  NodeType = "StringLiteral"
 )
 
 type Stmt interface {
@@ -61,6 +62,14 @@ type NumericLiteral struct {
 func (n *NumericLiteral) GetType() NodeType { return n.Type }
 func (n *NumericLiteral) expressionNode()   {}
 
+type StringLiteral struct {
+	Type  NodeType
+	Value string
+}
+
+func (s *StringLiteral) GetType() NodeType { return s.Type }
+func (s *StringLiteral) expressionNode()   {}
+
 type VarDeclaration struct {
 	Type       NodeType
 	Identifier string
@@ -90,6 +99,8 @@ func printAST(node Stmt, indent string) {
 		fmt.Printf("%sIdentifier: %s\n", indent, n.Symbol)
 	case *NumericLiteral:
 		fmt.Printf("%sNumericLiteral: %d\n", indent, n.Value)
+	case *StringLiteral:
+		fmt.Printf("%sStringLiteral: %s\n", indent, n.Value)
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

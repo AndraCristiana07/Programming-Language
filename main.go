@@ -10,7 +10,13 @@ func main() {
 		print x
 		print y
 		print z
-		`
+
+		var greeting = "Hello, "
+		var name = "World!"
+		print greeting + name
+		print "X is " + x
+	
+	`
 	tokens := Lex(input)
 
 	for _, t := range tokens {
