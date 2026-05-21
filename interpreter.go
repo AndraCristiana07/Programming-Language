@@ -71,6 +71,10 @@ func Eval(node Stmt, env *Environment) any {
 				panic("Modulo by zero")
 			}
 			return left % right
+		case "++":
+			return left + 1
+		case "--":
+			return left - 1
 		case "<":
 			return left < right
 		case ">":

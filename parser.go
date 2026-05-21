@@ -108,6 +108,10 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(ReturnToken) {
 		return p.parseReturnStatement()
 	}
+	// check for inc/dec statements
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
+		return p.parseIncDecStatement()
+	}
 	// check for function invocations
 	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == LParenToken {
 		return p.parseExpression()
@@ -146,8 +150,13 @@ func (p *Parser) parseForStatement() Stmt {
 	condition := p.parseExpression()
 	p.expect(SemiColonToken)
 
-	// parse the step (i = i + 1)
-	increment := p.parseAssignment()
+	// parse the step (i = i + 1) or (i++)
+	var increment Stmt
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
+		increment = p.parseIncDecStatement()
+	} else {
+		increment = p.parseAssignment()
+	}
 
 	// parse the loop body ({print i })
 	p.expect(LBraceToken)
@@ -319,6 +328,31 @@ func (p *Parser) parseComparison() Expr {
 	}
 
 	return left
+}
+
+func (p *Parser) parseIncDecStatement() Stmt {
+	identifierToken := p.expect(IdentifierToken)
+	opToken := p.advance() // consume inc/dec token
+
+	var operator string
+	if opToken.Type == IncToken {
+		operator = "++"
+	} else if opToken.Type == DecToken {
+		operator = "--"
+	} else {
+		panic("Expected '++' or '--' after identifier")
+	}
+
+	return &Assignment{
+		Type:       AssignmentNode,
+		Identifier: identifierToken.Value,
+		Value: &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     &Identifier{Type: IdentifierNode, Symbol: identifierToken.Value},
+			Right:    &NumericLiteral{Type: NumericLiteralNode, Value: 1},
+		},
+	}
 }
 
 func (p *Parser) parseAddition() Expr {

@@ -116,6 +116,15 @@ func main() {
 
 		print 10 % 3
 		print 2 ** 3
+
+
+		var counter = 10
+		counter--
+		print "Counter down to: " + counter 
+
+		for var i = 1; i <= 3; i++ {
+			print "Looping: " + i
+		}
 	`
 	tokens := Lex(input)
 

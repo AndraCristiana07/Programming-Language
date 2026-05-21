@@ -38,6 +38,8 @@ const (
 	ReturnToken       TokenType = "RETURN"
 	ModuloToken       TokenType = "MODULO"
 	ExponentialToken  TokenType = "EXPONENTIAL"
+	IncToken          TokenType = "INC"
+	DecToken          TokenType = "DEC"
 )
 
 var keywords = map[string]TokenType{
@@ -112,14 +114,25 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
-
+			// look ahead to check if it's "++"
+			if i+1 < len(input) && input[i+1] == '+' {
+				tokens = append(tokens, NewToken(IncToken, "++", currentLine))
+				i++ // skip the next '+'
+			} else {
+				tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
+			}
 		case '-':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(MinusToken, string(char), currentLine))
+			// look ahead to check if it's "--"
+			if i+1 < len(input) && input[i+1] == '-' {
+				tokens = append(tokens, NewToken(DecToken, "--", currentLine))
+				i++ // skip the next '-'
+			} else {
+				tokens = append(tokens, NewToken(MinusToken, string(char), currentLine))
+			}
 
 		case '*':
 			if currentToken != "" {
