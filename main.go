@@ -125,6 +125,17 @@ func main() {
 		for var i = 1; i <= 3; i++ {
 			print "Looping: " + i
 		}
+
+		var score = 10
+		score += 5
+		print "Score after += is: " + score 
+
+		score *= 2
+		print "Score after *= is: " + score 
+
+		for var i = 0; i <= 6; i += 2 {
+			print "Step: " + i
+		}
 	`
 	tokens := Lex(input)
 

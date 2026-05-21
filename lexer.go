@@ -40,6 +40,10 @@ const (
 	ExponentialToken  TokenType = "EXPONENTIAL"
 	IncToken          TokenType = "INC"
 	DecToken          TokenType = "DEC"
+	PlusEqualToken    TokenType = "PLUSEQUAL"
+	MinusEqualToken   TokenType = "MINUSEQUAL"
+	StarEqualToken    TokenType = "STAREQUAL"
+	SlashEqualToken   TokenType = "SLASHEQUAL"
 )
 
 var keywords = map[string]TokenType{
@@ -118,6 +122,11 @@ func Lex(input string) []Token {
 			if i+1 < len(input) && input[i+1] == '+' {
 				tokens = append(tokens, NewToken(IncToken, "++", currentLine))
 				i++ // skip the next '+'
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "+="
+				tokens = append(tokens, NewToken(PlusEqualToken, "+=", currentLine))
+				i++ // skip the next '='
+
 			} else {
 				tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
 			}
@@ -130,6 +139,10 @@ func Lex(input string) []Token {
 			if i+1 < len(input) && input[i+1] == '-' {
 				tokens = append(tokens, NewToken(DecToken, "--", currentLine))
 				i++ // skip the next '-'
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "-="
+				tokens = append(tokens, NewToken(MinusEqualToken, "-=", currentLine))
+				i++ // skip the next '='
 			} else {
 				tokens = append(tokens, NewToken(MinusToken, string(char), currentLine))
 			}
@@ -143,6 +156,10 @@ func Lex(input string) []Token {
 			if i+1 < len(input) && input[i+1] == '*' {
 				tokens = append(tokens, NewToken(ExponentialToken, "**", currentLine))
 				i++ // skip the next '*'
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "*="
+				tokens = append(tokens, NewToken(StarEqualToken, "*=", currentLine))
+				i++ // skip the next '='
 			} else {
 				tokens = append(tokens, NewToken(StarToken, string(char), currentLine))
 			}
@@ -152,7 +169,13 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(SlashToken, string(char), currentLine))
+			// look ahead to check if it's "/="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(SlashEqualToken, "/=", currentLine))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(SlashToken, string(char), currentLine))
+			}
 
 		case '=':
 			if currentToken != "" {

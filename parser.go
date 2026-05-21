@@ -112,6 +112,11 @@ func (p *Parser) parseStatement() Stmt {
 	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
 		return p.parseIncDecStatement()
 	}
+	// check for assignment statements (x += 1)
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) {
+		return p.parseCompAssignment()
+	}
+
 	// check for function invocations
 	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == LParenToken {
 		return p.parseExpression()
@@ -154,6 +159,8 @@ func (p *Parser) parseForStatement() Stmt {
 	var increment Stmt
 	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
 		increment = p.parseIncDecStatement()
+	} else if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) {
+		increment = p.parseCompAssignment()
 	} else {
 		increment = p.parseAssignment()
 	}
@@ -242,6 +249,39 @@ func (p *Parser) parseAssignment() *Assignment {
 		Type:       AssignmentNode,
 		Identifier: identifierToken.Value,
 		Value:      value,
+	}
+}
+
+// parse compound assignment (x += 1)
+func (p *Parser) parseCompAssignment() *Assignment {
+	identifierToken := p.expect(IdentifierToken)
+	opToken := p.advance() // consume the compound assignment token
+
+	var operator string
+	switch opToken.Type {
+	case PlusEqualToken:
+		operator = "+="
+	case MinusEqualToken:
+		operator = "-="
+	case StarEqualToken:
+		operator = "*="
+	case SlashEqualToken:
+		operator = "/="
+	default:
+		panic("Expected compound assignment operator")
+	}
+
+	value := p.parseExpression()
+
+	return &Assignment{
+		Type:       AssignmentNode,
+		Identifier: identifierToken.Value,
+		Value: &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator[:len(operator)-1], // convert "+=" to "+"
+			Left:     &Identifier{Type: IdentifierNode, Symbol: identifierToken.Value},
+			Right:    value,
+		},
 	}
 }
 
