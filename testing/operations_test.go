@@ -215,8 +215,102 @@ func TestMultipleOperations(t *testing.T) {
 			input:    "var testResult = 20 / 2 - 10",
 			expected: 0,
 		},
+		{
+			name:     "Simple division and addition",
+			input:    "var testResult = 20 / 2 + 10",
+			expected: 20,
+		},
 	}
 
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tokens := my_language.Lex(tc.input)
+			parser := my_language.NewParser(tokens)
+			program := parser.Parse()
+
+			env := my_language.NewEnvironment()
+
+			my_language.Eval(program, env)
+
+			// check the saved result
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("'testResult' variable was not created by the engine")
+			}
+
+			if result != tc.expected {
+				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
+					tc.input, tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestModulo(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Basic modulo",
+			input:    "var testResult = 10 % 2",
+			expected: 0,
+		},
+		{
+			name:     "Chained modulo ",
+			input:    "var testResult = 27 % 11 % 2",
+			expected: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tokens := my_language.Lex(tc.input)
+			parser := my_language.NewParser(tokens)
+			program := parser.Parse()
+
+			env := my_language.NewEnvironment()
+
+			my_language.Eval(program, env)
+
+			// check the saved result
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("'testResult' variable was not created by the engine")
+			}
+
+			if result != tc.expected {
+				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
+					tc.input, tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestIncDec(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Basic Inc",
+			input: `
+				var testResult = 4
+				testResult++
+			`,
+			expected: 5,
+		},
+		{
+			name: "Basic Dec",
+			input: `
+				var testResult = 4
+				testResult--
+			`,
+			expected: 3,
+		},
+	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tokens := my_language.Lex(tc.input)

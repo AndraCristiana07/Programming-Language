@@ -1,4 +1,4 @@
-package main
+package my_language
 
 //  var x = 10 + 20
 // [ varToken, identifierToken(x), equalsToken(=), numberToken(10), PlusToken(+), numberToken(20) ]

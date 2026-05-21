@@ -1,4 +1,4 @@
-package main
+package my_language
 
 import "fmt"
 
@@ -181,23 +181,23 @@ func (a *ArrayLiteral) expressionNode()   {}
 func (i *IndexExpr) GetType() NodeType    { return i.Type }
 func (i *IndexExpr) expressionNode()      {}
 
-func printAST(node Stmt, indent string) {
+func PrintAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
 		fmt.Println(indent + "Program")
 		for _, stmt := range n.Body {
-			printAST(stmt, indent+"  ")
+			PrintAST(stmt, indent+"  ")
 		}
 	case *VarDeclaration:
 		fmt.Printf("%sVarDeclaration: %s\n", indent, n.Identifier)
-		printAST(n.Value, indent+"  ")
+		PrintAST(n.Value, indent+"  ")
 	case *PrintStmt:
 		fmt.Printf("%sPrintStmt\n", indent)
-		printAST(n.Value, indent+"  ")
+		PrintAST(n.Value, indent+"  ")
 	case *BinaryExpr:
 		fmt.Printf("%sBinaryExpr: %s\n", indent, n.Operator)
-		printAST(n.Left, indent+"  ")
-		printAST(n.Right, indent+"  ")
+		PrintAST(n.Left, indent+"  ")
+		PrintAST(n.Right, indent+"  ")
 	case *Identifier:
 		fmt.Printf("%sIdentifier: %s\n", indent, n.Symbol)
 	case *NumericLiteral:
@@ -206,43 +206,43 @@ func printAST(node Stmt, indent string) {
 		fmt.Printf("%sStringLiteral: %s\n", indent, n.Value)
 	case *Assignment:
 		fmt.Printf("%sAssignment: %s\n", indent, n.Identifier)
-		printAST(n.Value, indent+"  ")
+		PrintAST(n.Value, indent+"  ")
 	case *BooleanLiteral:
 		fmt.Printf("%sBooleanLiteral: %t\n", indent, n.Value)
 	case *BlockStmt:
 		fmt.Printf("%sBlockStmt\n", indent)
 		for _, stmt := range n.Body {
-			printAST(stmt, indent+"  ")
+			PrintAST(stmt, indent+"  ")
 		}
 	case *IfStmt:
 		fmt.Printf("%sIfStmt\n", indent)
 		fmt.Printf("%sCondition:\n", indent+"  ")
-		printAST(n.Condition, indent+"    ")
+		PrintAST(n.Condition, indent+"    ")
 		fmt.Printf("%sThenBranch:\n", indent+"  ")
-		printAST(n.ThenBranch, indent+"    ")
+		PrintAST(n.ThenBranch, indent+"    ")
 		if n.ElseBranch != nil {
 			fmt.Printf("%sElseBranch:\n", indent+"  ")
-			printAST(n.ElseBranch, indent+"    ")
+			PrintAST(n.ElseBranch, indent+"    ")
 		}
 	case *WhileStmt:
 		fmt.Println(indent + "WhileStmt")
 		fmt.Println(indent + "  Condition:")
-		printAST(n.Condition, indent+"    ")
+		PrintAST(n.Condition, indent+"    ")
 		fmt.Println(indent + "  Body:")
-		printAST(n.Body, indent+"    ")
+		PrintAST(n.Body, indent+"    ")
 
 	case *FuncDecl:
 		fmt.Printf("%sFuncDecl: %s(%v)\n", indent, n.Name, n.Parameters)
-		printAST(n.Body, indent+"  ")
+		PrintAST(n.Body, indent+"  ")
 
 	case *CallExpr:
 		fmt.Printf("%sCallExpr: %s\n", indent, n.Callee)
 		for _, arg := range n.Arguments {
-			printAST(arg, indent+"  ")
+			PrintAST(arg, indent+"  ")
 		}
 	case *ReturnStmt:
 		fmt.Printf("%sReturnStmt\n", indent)
-		printAST(n.Value, indent+"  ")
+		PrintAST(n.Value, indent+"  ")
 
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
