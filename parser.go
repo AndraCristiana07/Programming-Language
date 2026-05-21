@@ -113,7 +113,7 @@ func (p *Parser) parseStatement() Stmt {
 		return p.parseIncDecStatement()
 	}
 	// check for assignment statements (x += 1)
-	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) {
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) || p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == ModuloEqualToken || p.lookAhead(1).Type == ExponentialEqualToken) {
 		return p.parseCompAssignment()
 	}
 
@@ -159,7 +159,7 @@ func (p *Parser) parseForStatement() Stmt {
 	var increment Stmt
 	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
 		increment = p.parseIncDecStatement()
-	} else if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) {
+	} else if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) || p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == ModuloEqualToken || p.lookAhead(1).Type == ExponentialEqualToken) {
 		increment = p.parseCompAssignment()
 	} else {
 		increment = p.parseAssignment()
@@ -267,6 +267,10 @@ func (p *Parser) parseCompAssignment() *Assignment {
 		operator = "*="
 	case SlashEqualToken:
 		operator = "/="
+	case ModuloEqualToken:
+		operator = "%="
+	case ExponentialEqualToken:
+		operator = "**="
 	default:
 		panic("Expected compound assignment operator")
 	}

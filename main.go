@@ -136,6 +136,14 @@ func main() {
 		for var i = 0; i <= 6; i += 2 {
 			print "Step: " + i
 		}
+
+		var exp = 2
+		exp **= 3
+		print "Exp after **= is: " + exp 
+
+		var mod = 10
+		mod %= 3
+		print "Mod after %= is: " + mod 
 	`
 	tokens := Lex(input)
 
