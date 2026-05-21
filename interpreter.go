@@ -63,6 +63,14 @@ func Eval(node Stmt, env *Environment) any {
 				panic("Division by zero")
 			}
 			return left / right
+		case "**":
+			return power(left, right)
+		case "%":
+			// check for division by zero
+			if right == 0 {
+				panic("Modulo by zero")
+			}
+			return left % right
 		case "<":
 			return left < right
 		case ">":
@@ -75,6 +83,7 @@ func Eval(node Stmt, env *Environment) any {
 			return left <= right
 		case ">=":
 			return left >= right
+
 		default:
 			panic("Unknown operator: " + n.Operator)
 		}
@@ -203,4 +212,15 @@ func Eval(node Stmt, env *Environment) any {
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}
+}
+
+func power(base, exp int) int {
+	if exp < 0 {
+		panic("Negative exponent not supported")
+	}
+	result := 1
+	for range exp {
+		result *= base
+	}
+	return result
 }

@@ -114,6 +114,8 @@ func main() {
 		}
 		print printsmth(count)
 
+		print 10 % 3
+		print 2 ** 3
 	`
 	tokens := Lex(input)
 

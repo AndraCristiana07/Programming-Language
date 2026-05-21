@@ -341,8 +341,24 @@ func (p *Parser) parseAddition() Expr {
 }
 
 func (p *Parser) parseMultiplication() Expr {
+	left := p.parseExponent()
+	for p.match(StarToken) || p.match(SlashToken) || p.match(ModuloToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseExponent()
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+	return left
+}
+
+// parse exponenwnt
+func (p *Parser) parseExponent() Expr {
 	left := p.parsePrimary()
-	for p.match(StarToken) || p.match(SlashToken) {
+	for p.match(ExponentialToken) {
 		operator := p.tokens[p.pos-1].Value
 		right := p.parsePrimary()
 		left = &BinaryExpr{

@@ -36,6 +36,8 @@ const (
 	LParenToken       TokenType = "LPAREN"
 	RParenToken       TokenType = "RPAREN"
 	ReturnToken       TokenType = "RETURN"
+	ModuloToken       TokenType = "MODULO"
+	ExponentialToken  TokenType = "EXPONENTIAL"
 )
 
 var keywords = map[string]TokenType{
@@ -124,7 +126,13 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(StarToken, string(char), currentLine))
+			// look ahead to check if it's "**"
+			if i+1 < len(input) && input[i+1] == '*' {
+				tokens = append(tokens, NewToken(ExponentialToken, "**", currentLine))
+				i++ // skip the next '*'
+			} else {
+				tokens = append(tokens, NewToken(StarToken, string(char), currentLine))
+			}
 
 		case '/':
 			if currentToken != "" {
@@ -220,7 +228,12 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RParenToken, string(char), currentLine))
-
+		case '%':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(ModuloToken, string(char), currentLine))
 		default:
 			currentToken += string(char)
 		}
