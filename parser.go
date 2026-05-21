@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // TODO: make boolean assertion possible b = true; if b == true: ...
 type Parser struct {
 	tokens []Token
@@ -75,10 +77,12 @@ func (p *Parser) expect(expectedType TokenType) Token {
 	if p.isAtEnd() {
 		panic("Unexpected end of input")
 	}
-	if p.peek().Type == expectedType {
+	currentToken := p.peek()
+	if currentToken.Type == expectedType {
 		return p.advance()
 	}
-	panic("Unexpected token: " + p.peek().Value)
+	panic(fmt.Sprintf("Syntax Error on Line %d: Expected token type '%s' but found '%s' with value '%s'",
+		currentToken.Line, expectedType, currentToken.Type, currentToken.Value))
 }
 
 // parse statement
@@ -112,7 +116,7 @@ func (p *Parser) parseStatement() Stmt {
 	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == EqualsToken {
 		return p.parseAssignment()
 	}
-	panic("Unexpected token: " + p.peek().Value)
+	panic(fmt.Sprintf("Syntax Error on Line %d: Unexpected token: %s", p.peek().Line, p.peek().Value))
 }
 
 // for var i = 1; i <= 3; i = i + 1 {
