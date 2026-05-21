@@ -105,6 +105,16 @@ func Eval(node Stmt, env *Environment) any {
 			return left <= right
 		case ">=":
 			return left >= right
+		case "&":
+			return left & right
+		case "|":
+			return left | right
+		case "<<":
+			return left << right
+		case ">>":
+			return left >> right
+		case "^":
+			return left ^ right
 
 		default:
 			panic("Unknown operator: " + n.Operator)
@@ -127,6 +137,12 @@ func Eval(node Stmt, env *Environment) any {
 				panic("Operand of 'not' must be boolean")
 			}
 			return !rightBool
+		case "~":
+			rightInt, ok := rightVal.(int)
+			if !ok {
+				panic("Operand of '~' must be an integer")
+			}
+			return ^rightInt
 		default:
 			panic("Unknown unary operator: " + n.Operator)
 		}

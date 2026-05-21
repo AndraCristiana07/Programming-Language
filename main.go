@@ -158,6 +158,18 @@ func main() {
 		} else {
 			print "Still need food"
 		}
+
+		var mask = 4     
+		var flag = 5      
+
+		print flag & mask 
+		print flag | 2    
+		print flag ^ mask 
+
+		var bit = 1
+		print bit << 3  
+		
+		print ~5
 	`
 	tokens := Lex(input)
 

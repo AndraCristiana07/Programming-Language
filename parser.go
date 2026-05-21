@@ -392,12 +392,53 @@ func (p *Parser) parseAnd() Expr {
 	return left
 }
 
+// bitwise operators
+func (p *Parser) parseBitwiseOr() Expr {
+	left := p.parseBitwiseXor()
+	for p.match(BitwiseOrToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseXor()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseXor() Expr {
+	left := p.parseBitwiseAnd()
+	for p.match(BitwiseXorToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseAnd()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseAnd() Expr {
+	left := p.parseBitwiseShift()
+	for p.match(BitwiseAndToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseShift()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseShift() Expr {
+	left := p.parseAddition()
+	for p.match(BitwiseLeftShiftToken) || p.match(BitwiseRightShiftToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseAddition()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
 func (p *Parser) parseComparison() Expr {
-	left := p.parseAddition() // math first
+	left := p.parseBitwiseOr()
 
 	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) || p.match(LessEqualToken) || p.match(GreaterEqualToken) {
 		operator := p.tokens[p.pos-1].Value
-		right := p.parseAddition()
+		right := p.parseBitwiseOr()
 
 		left = &BinaryExpr{
 			Type:     BinaryExprNode,
@@ -532,6 +573,13 @@ func (p *Parser) parsePrimary() Expr {
 			Value: false,
 		}
 	} else if p.match(NotToken) {
+		operand := p.tokens[p.pos-1].Value
+		return &UnaryExpr{
+			Type:     UnaryExprNode,
+			Operator: operand,
+			Right:    p.parsePrimary(),
+		}
+	} else if p.match(BitwiseNotToken) {
 		operand := p.tokens[p.pos-1].Value
 		return &UnaryExpr{
 			Type:     UnaryExprNode,
