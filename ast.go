@@ -19,6 +19,7 @@ const (
 	WhileStmtNode      NodeType = "WhileStmt"
 	FuncDeclNode       NodeType = "FuncDecl"
 	CallExprNode       NodeType = "CallExpr"
+	RreturnStmtNode    NodeType = "ReturnStmt"
 )
 
 type Stmt interface {
@@ -143,6 +144,13 @@ type CallExpr struct {
 func (c *CallExpr) GetType() NodeType { return c.Type }
 func (c *CallExpr) expressionNode()   {}
 
+type ReturnStmt struct {
+	Type  NodeType
+	Value Expr
+}
+
+func (r *ReturnStmt) GetType() NodeType { return r.Type }
+
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
@@ -202,6 +210,9 @@ func printAST(node Stmt, indent string) {
 		for _, arg := range n.Arguments {
 			printAST(arg, indent+"  ")
 		}
+	case *ReturnStmt:
+		fmt.Printf("%sReturnStmt\n", indent)
+		printAST(n.Value, indent+"  ")
 
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)

@@ -1,10 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type RuntimeFunction struct {
 	Declaration *FuncDecl
 	Env         *Environment
+}
+
+type ReturnValueSignal struct {
+	Value any
 }
 
 func Eval(node Stmt, env *Environment) any {
@@ -131,6 +137,13 @@ func Eval(node Stmt, env *Environment) any {
 			Eval(n.Body, env)
 		}
 		return nil
+	case *ReturnStmt:
+		var value any = nil
+		if n.Value != nil {
+			value = Eval(n.Value, env)
+		}
+		panic(ReturnValueSignal{Value: value})
+
 	case *FuncDecl:
 		// store the function decl and its env in a runtime func struct
 		runtimeFunc := &RuntimeFunction{
@@ -166,8 +179,26 @@ func Eval(node Stmt, env *Environment) any {
 			funcEnv.Define(paramName, argVal)
 		}
 
-		// execute the function body in the new env
-		return Eval(runtimeFunc.Declaration.Body, funcEnv)
+		// return stmt
+		var returnedVal any = nil
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					// check if it's a return signal and extract the value
+					if returnSignal, ok := r.(ReturnValueSignal); ok {
+						returnedVal = returnSignal.Value
+					} else {
+						// if it's not a return signal, re-panic
+						panic(r)
+					}
+				}
+			}()
+
+			// execute the function body in the new env
+			Eval(runtimeFunc.Declaration.Body, funcEnv)
+		}()
+
+		return returnedVal
 
 	default:
 		panic("Unknown node type: " + n.GetType())

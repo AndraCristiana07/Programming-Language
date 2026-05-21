@@ -101,6 +101,9 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(FuncToken) {
 		return p.parseFunctionDeclaration()
 	}
+	if p.match(ReturnToken) {
+		return p.parseReturnStatement()
+	}
 	// check for function invocations
 	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == LParenToken {
 		return p.parseExpression()
@@ -188,6 +191,18 @@ func (p *Parser) parseFunctionDeclaration() *FuncDecl {
 		Name:       nameToken.Value,
 		Parameters: params,
 		Body:       body,
+	}
+}
+
+func (p *Parser) parseReturnStatement() *ReturnStmt {
+	var value Expr = nil
+	// if next token is not closing brce or end of block -> parse the return expr
+	if p.peek().Type != RBraceToken {
+		value = p.parseExpression()
+	}
+	return &ReturnStmt{
+		Type:  RreturnStmtNode,
+		Value: value,
 	}
 }
 

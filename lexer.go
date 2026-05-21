@@ -35,18 +35,20 @@ const (
 	CommaToken        TokenType = "COMMA"
 	LParenToken       TokenType = "LPAREN"
 	RParenToken       TokenType = "RPAREN"
+	ReturnToken       TokenType = "RETURN"
 )
 
 var keywords = map[string]TokenType{
-	"var":   VarToken,
-	"print": PrintToken,
-	"true":  TrueToken,
-	"false": FalseToken,
-	"if":    IfToken,
-	"else":  ElseToken,
-	"while": WhileToken,
-	"for":   ForToken,
-	"func":  FuncToken,
+	"var":    VarToken,
+	"print":  PrintToken,
+	"true":   TrueToken,
+	"false":  FalseToken,
+	"if":     IfToken,
+	"else":   ElseToken,
+	"while":  WhileToken,
+	"for":    ForToken,
+	"func":   FuncToken,
+	"return": ReturnToken,
 }
 
 type Token struct {
