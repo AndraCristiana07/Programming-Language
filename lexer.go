@@ -55,6 +55,8 @@ const (
 	BitwiseLeftShiftToken  TokenType = "BITWISELEFTSHIFT"
 	BitwiseRightShiftToken TokenType = "BITWISERIGHTSHIFT"
 	BitwiseNotToken        TokenType = "BITWISENOT"
+	LBracketToken          TokenType = "LBRACKET"
+	RBracketToken          TokenType = "RBRACKET"
 )
 
 var keywords = map[string]TokenType{
@@ -144,6 +146,7 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
 			}
+
 		case '-':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -208,6 +211,7 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(EqualsToken, string(char), currentLine))
 			}
+
 		case '!':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -254,30 +258,35 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(GreaterToken, string(char), currentLine))
 			}
+
 		case '{':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(LBraceToken, string(char), currentLine))
+
 		case '}':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RBraceToken, string(char), currentLine))
+
 		case ';':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(SemiColonToken, string(char), currentLine))
+
 		case ',':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(CommaToken, string(char), currentLine))
+
 		case '(':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -291,6 +300,21 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RParenToken, string(char), currentLine))
+
+		case '[':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(LBracketToken, "[", currentLine))
+
+		case ']':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(RBracketToken, "]", currentLine))
+
 		case '%':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -303,6 +327,7 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(ModuloToken, string(char), currentLine))
 			}
+
 		// bitwise ops
 		case '&':
 			if currentToken != "" {
@@ -310,24 +335,28 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(BitwiseAndToken, string(char), currentLine))
+
 		case '|':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(BitwiseOrToken, string(char), currentLine))
+
 		case '^':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(BitwiseXorToken, string(char), currentLine))
+
 		case '~':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(BitwiseNotToken, string(char), currentLine))
+
 		default:
 			currentToken += string(char)
 		}

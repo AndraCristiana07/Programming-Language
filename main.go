@@ -170,6 +170,16 @@ func main() {
 		print bit << 3  
 		
 		print ~5
+
+		var numbers = [10, 20, 30]
+		print numbers[0] 
+
+		var doubleIndexTest = [[1, 2], [3, 4]]
+		print doubleIndexTest[1][0] 
+
+		var score = numbers[1] + numbers[2]
+		print score 
+
 	`
 	tokens := Lex(input)
 

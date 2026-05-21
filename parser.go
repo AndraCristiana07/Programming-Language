@@ -510,12 +510,56 @@ func (p *Parser) parseMultiplication() Expr {
 	return left
 }
 
+// parse call array
+func (p *Parser) parseCall() Expr {
+	expr := p.parsePrimary()
+
+	for {
+		if p.match(LParenToken) {
+			var args []Expr
+			if p.peek().Type != RParenToken {
+				for {
+					args = append(args, p.parseExpression())
+					if !p.match(CommaToken) {
+						break
+					}
+				}
+			}
+			p.expect(RParenToken)
+
+			ident, ok := expr.(*Identifier)
+			if !ok {
+				panic("Syntax Error: Can only call standalone functions right now")
+			}
+
+			expr = &CallExpr{
+				Type:      CallExprNode,
+				Callee:    ident.Symbol,
+				Arguments: args,
+			}
+		} else if p.match(LBracketToken) {
+			index := p.parseExpression()
+			p.expect(RBracketToken)
+
+			expr = &IndexExpr{
+				Type:  IndexExprNode,
+				Left:  expr,
+				Index: index,
+			}
+		} else {
+			break
+		}
+	}
+
+	return expr
+}
+
 // parse exponenwnt
 func (p *Parser) parseExponent() Expr {
-	left := p.parsePrimary()
+	left := p.parseCall()
 	for p.match(ExponentialToken) {
 		operator := p.tokens[p.pos-1].Value
-		right := p.parsePrimary()
+		right := p.parseCall()
 		left = &BinaryExpr{
 			Type:     BinaryExprNode,
 			Operator: operator,
@@ -530,28 +574,11 @@ func (p *Parser) parseExponent() Expr {
 func (p *Parser) parsePrimary() Expr {
 	if p.match(IdentifierToken) {
 		name := p.tokens[p.pos-1].Value
-
-		// check if the identifier is followed by a '('
-		if p.match(LParenToken) {
-			var args []Expr
-			if p.peek().Type != RParenToken {
-				for {
-					args = append(args, p.parseExpression())
-					if !p.match(CommaToken) {
-						break
-					}
-				}
-			}
-			p.expect(RParenToken)
-
-			return &CallExpr{
-				Type:      CallExprNode,
-				Callee:    name,
-				Arguments: args,
-			}
+		return &Identifier{
+			Type:   IdentifierNode,
+			Symbol: name,
 		}
 
-		return &Identifier{Type: IdentifierNode, Symbol: name}
 	} else if p.match(NumberToken) {
 		return &NumericLiteral{
 			Type:  NumericLiteralNode,
@@ -585,6 +612,21 @@ func (p *Parser) parsePrimary() Expr {
 			Type:     UnaryExprNode,
 			Operator: operand,
 			Right:    p.parsePrimary(),
+		}
+	} else if p.match(LBracketToken) {
+		var elements []Expr
+		if p.peek().Type != RBracketToken {
+			for {
+				elements = append(elements, p.parseExpression())
+				if !p.match(CommaToken) {
+					break
+				}
+			}
+		}
+		p.expect(RBracketToken)
+		return &ArrayLiteral{
+			Type:     ArrayLiteralNode,
+			Elements: elements,
 		}
 	} else {
 		panic("Unexpected token: " + p.peek().Value)

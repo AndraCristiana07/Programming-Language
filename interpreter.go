@@ -259,6 +259,36 @@ func Eval(node Stmt, env *Environment) any {
 
 		return returnedVal
 
+	case *ArrayLiteral:
+		var evaluatedElements []any
+		for _, expr := range n.Elements {
+			evaluatedElements = append(evaluatedElements, Eval(expr, env))
+		}
+		return evaluatedElements
+
+	case *IndexExpr:
+		leftVal := Eval(n.Left, env)
+		indexVal := Eval(n.Index, env)
+
+		// left target -array slice
+		array, ok := leftVal.([]any)
+		if !ok {
+			panic("Indexing operator [] can only be used on arrays")
+		}
+
+		// index evaluated int
+		idx, ok := indexVal.(int)
+		if !ok {
+			panic("Array index subscript must be an integer")
+		}
+
+		// boundary check
+		if idx < 0 || idx >= len(array) {
+			panic(fmt.Sprintf("Index out of bounds. Array length is %d, got index %d", len(array), idx))
+		}
+
+		return array[idx]
+
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}
