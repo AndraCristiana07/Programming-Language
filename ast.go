@@ -17,6 +17,9 @@ const (
 	IfStmtNode         NodeType = "IfStmt"
 	BlockStmtNode      NodeType = "BlockStmt"
 	WhileStmtNode      NodeType = "WhileStmt"
+	FuncDeclNode       NodeType = "FuncDecl"
+	CallExprNode       NodeType = "CallExpr"
+	RreturnStmtNode    NodeType = "ReturnStmt"
 )
 
 type Stmt interface {
@@ -123,6 +126,31 @@ type WhileStmt struct {
 
 func (w *WhileStmt) GetType() NodeType { return w.Type }
 
+type FuncDecl struct {
+	Type       NodeType
+	Name       string
+	Parameters []string
+	Body       *BlockStmt
+}
+
+func (f *FuncDecl) GetType() NodeType { return f.Type }
+
+type CallExpr struct {
+	Type      NodeType
+	Callee    string // function name being called
+	Arguments []Expr
+}
+
+func (c *CallExpr) GetType() NodeType { return c.Type }
+func (c *CallExpr) expressionNode()   {}
+
+type ReturnStmt struct {
+	Type  NodeType
+	Value Expr
+}
+
+func (r *ReturnStmt) GetType() NodeType { return r.Type }
+
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {
 	case *Program:
@@ -172,6 +200,20 @@ func printAST(node Stmt, indent string) {
 		printAST(n.Condition, indent+"    ")
 		fmt.Println(indent + "  Body:")
 		printAST(n.Body, indent+"    ")
+
+	case *FuncDecl:
+		fmt.Printf("%sFuncDecl: %s(%v)\n", indent, n.Name, n.Parameters)
+		printAST(n.Body, indent+"  ")
+
+	case *CallExpr:
+		fmt.Printf("%sCallExpr: %s\n", indent, n.Callee)
+		for _, arg := range n.Arguments {
+			printAST(arg, indent+"  ")
+		}
+	case *ReturnStmt:
+		fmt.Printf("%sReturnStmt\n", indent)
+		printAST(n.Value, indent+"  ")
+
 	default:
 		fmt.Printf("%sUnknown node type: %T\n", indent, n)
 	}

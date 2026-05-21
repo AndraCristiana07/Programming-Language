@@ -1,6 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type RuntimeFunction struct {
+	Declaration *FuncDecl
+	Env         *Environment
+}
+
+type ReturnValueSignal struct {
+	Value any
+}
 
 func Eval(node Stmt, env *Environment) any {
 	switch n := node.(type) {
@@ -126,6 +137,69 @@ func Eval(node Stmt, env *Environment) any {
 			Eval(n.Body, env)
 		}
 		return nil
+	case *ReturnStmt:
+		var value any = nil
+		if n.Value != nil {
+			value = Eval(n.Value, env)
+		}
+		panic(ReturnValueSignal{Value: value})
+
+	case *FuncDecl:
+		// store the function decl and its env in a runtime func struct
+		runtimeFunc := &RuntimeFunction{
+			Declaration: n,
+			Env:         env,
+		}
+		env.Define(n.Name, runtimeFunc)
+		return nil
+	case *CallExpr:
+		// look up the function by name
+		funcVal, ok := env.Lookup(n.Callee)
+		if !ok {
+			panic("Undefined function: " + n.Callee)
+		}
+
+		runtimeFunc, ok := funcVal.(*RuntimeFunction)
+		if !ok {
+			panic("Attempting to call a non-function value: " + n.Callee)
+		}
+
+		// check argument count
+		if len(n.Arguments) != len(runtimeFunc.Declaration.Parameters) {
+			panic(fmt.Sprintf("Expected %d arguments but got %d", len(runtimeFunc.Declaration.Parameters), len(n.Arguments)))
+		}
+
+		// create new env for the func call with the declaration env as parent
+		funcEnv := NewScope(runtimeFunc.Env)
+
+		// evaluate arguments and bind to parameter names in the new env
+		for i, argExpr := range n.Arguments {
+			argVal := Eval(argExpr, env)
+			paramName := runtimeFunc.Declaration.Parameters[i]
+			funcEnv.Define(paramName, argVal)
+		}
+
+		// return stmt
+		var returnedVal any = nil
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					// check if it's a return signal and extract the value
+					if returnSignal, ok := r.(ReturnValueSignal); ok {
+						returnedVal = returnSignal.Value
+					} else {
+						// if it's not a return signal, re-panic
+						panic(r)
+					}
+				}
+			}()
+
+			// execute the function body in the new env
+			Eval(runtimeFunc.Declaration.Body, funcEnv)
+		}()
+
+		return returnedVal
+
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}
