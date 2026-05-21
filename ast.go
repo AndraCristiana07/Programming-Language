@@ -20,6 +20,9 @@ const (
 	FuncDeclNode       NodeType = "FuncDecl"
 	CallExprNode       NodeType = "CallExpr"
 	RreturnStmtNode    NodeType = "ReturnStmt"
+	UnaryExprNode      NodeType = "UnaryExpr"
+	ArrayLiteralNode   NodeType = "ArrayLiteral"
+	IndexExprNode      NodeType = "IndexExpr"
 )
 
 type Stmt interface {
@@ -53,6 +56,15 @@ type BinaryExpr struct {
 
 func (b *BinaryExpr) GetType() NodeType { return b.Type }
 func (b *BinaryExpr) expressionNode()   {}
+
+type UnaryExpr struct {
+	Type     NodeType
+	Operator string // "not"
+	Right    Expr
+}
+
+func (u *UnaryExpr) GetType() NodeType { return u.Type }
+func (u *UnaryExpr) expressionNode()   {}
 
 type Identifier struct {
 	Type   NodeType
@@ -150,6 +162,24 @@ type ReturnStmt struct {
 }
 
 func (r *ReturnStmt) GetType() NodeType { return r.Type }
+
+// a literal array initialization like [1, 2, 3]
+type ArrayLiteral struct {
+	Type     NodeType
+	Elements []Expr
+}
+
+// for sreading an index item like items[0]
+type IndexExpr struct {
+	Type  NodeType
+	Left  Expr // array object
+	Index Expr // index value expression inside the brackets
+}
+
+func (a *ArrayLiteral) GetType() NodeType { return a.Type }
+func (a *ArrayLiteral) expressionNode()   {}
+func (i *IndexExpr) GetType() NodeType    { return i.Type }
+func (i *IndexExpr) expressionNode()      {}
 
 func printAST(node Stmt, indent string) {
 	switch n := node.(type) {

@@ -6,36 +6,57 @@ package main
 type TokenType string
 
 const (
-	VarToken          TokenType = "VAR"
-	IdentifierToken   TokenType = "IDENTIFIER"
-	EqualsToken       TokenType = "EQUALS"
-	NumberToken       TokenType = "NUMBER"
-	PlusToken         TokenType = "PLUS"
-	MinusToken        TokenType = "MINUS"
-	StarToken         TokenType = "STAR"
-	SlashToken        TokenType = "SLASH"
-	PrintToken        TokenType = "PRINT"
-	StringToken       TokenType = "STRING"
-	LessToken         TokenType = "LESS"
-	GreaterToken      TokenType = "GREATER"
-	EqualEqualToken   TokenType = "EQUALEQUAL"
-	BangEqualToken    TokenType = "BANGEQUAL"
-	TrueToken         TokenType = "TRUE"
-	FalseToken        TokenType = "FALSE"
-	LessEqualToken    TokenType = "LESSEQUAL"
-	GreaterEqualToken TokenType = "GREATEREQUAL"
-	IfToken           TokenType = "IF"
-	ElseToken         TokenType = "ELSE"
-	LBraceToken       TokenType = "LBRACE"
-	RBraceToken       TokenType = "RBRACE"
-	WhileToken        TokenType = "WHILE"
-	ForToken          TokenType = "FOR"
-	SemiColonToken    TokenType = "SEMICOLON"
-	FuncToken         TokenType = "FUNC"
-	CommaToken        TokenType = "COMMA"
-	LParenToken       TokenType = "LPAREN"
-	RParenToken       TokenType = "RPAREN"
-	ReturnToken       TokenType = "RETURN"
+	VarToken               TokenType = "VAR"
+	IdentifierToken        TokenType = "IDENTIFIER"
+	EqualsToken            TokenType = "EQUALS"
+	NumberToken            TokenType = "NUMBER"
+	PlusToken              TokenType = "PLUS"
+	MinusToken             TokenType = "MINUS"
+	StarToken              TokenType = "STAR"
+	SlashToken             TokenType = "SLASH"
+	PrintToken             TokenType = "PRINT"
+	StringToken            TokenType = "STRING"
+	LessToken              TokenType = "LESS"
+	GreaterToken           TokenType = "GREATER"
+	EqualEqualToken        TokenType = "EQUALEQUAL"
+	BangEqualToken         TokenType = "BANGEQUAL"
+	TrueToken              TokenType = "TRUE"
+	FalseToken             TokenType = "FALSE"
+	LessEqualToken         TokenType = "LESSEQUAL"
+	GreaterEqualToken      TokenType = "GREATEREQUAL"
+	IfToken                TokenType = "IF"
+	ElseToken              TokenType = "ELSE"
+	LBraceToken            TokenType = "LBRACE"
+	RBraceToken            TokenType = "RBRACE"
+	WhileToken             TokenType = "WHILE"
+	ForToken               TokenType = "FOR"
+	SemiColonToken         TokenType = "SEMICOLON"
+	FuncToken              TokenType = "FUNC"
+	CommaToken             TokenType = "COMMA"
+	LParenToken            TokenType = "LPAREN"
+	RParenToken            TokenType = "RPAREN"
+	ReturnToken            TokenType = "RETURN"
+	ModuloToken            TokenType = "MODULO"
+	ExponentialToken       TokenType = "EXPONENTIAL"
+	IncToken               TokenType = "INC"
+	DecToken               TokenType = "DEC"
+	PlusEqualToken         TokenType = "PLUSEQUAL"
+	MinusEqualToken        TokenType = "MINUSEQUAL"
+	StarEqualToken         TokenType = "STAREQUAL"
+	SlashEqualToken        TokenType = "SLASHEQUAL"
+	ModuloEqualToken       TokenType = "MODULOEQUAL"
+	ExponentialEqualToken  TokenType = "EXPONENTIALEQUAL"
+	AndToken               TokenType = "AND"
+	OrToken                TokenType = "OR"
+	NotToken               TokenType = "NOT"
+	BitwiseAndToken        TokenType = "BITWISEAND"
+	BitwiseOrToken         TokenType = "BITWISEOR"
+	BitwiseXorToken        TokenType = "BITWISEXOR"
+	BitwiseLeftShiftToken  TokenType = "BITWISELEFTSHIFT"
+	BitwiseRightShiftToken TokenType = "BITWISERIGHTSHIFT"
+	BitwiseNotToken        TokenType = "BITWISENOT"
+	LBracketToken          TokenType = "LBRACKET"
+	RBracketToken          TokenType = "RBRACKET"
 )
 
 var keywords = map[string]TokenType{
@@ -49,6 +70,9 @@ var keywords = map[string]TokenType{
 	"for":    ForToken,
 	"func":   FuncToken,
 	"return": ReturnToken,
+	"and":    AndToken,
+	"or":     OrToken,
+	"not":    NotToken,
 }
 
 type Token struct {
@@ -110,28 +134,70 @@ func Lex(input string) []Token {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
+			// look ahead to check if it's "++"
+			if i+1 < len(input) && input[i+1] == '+' {
+				tokens = append(tokens, NewToken(IncToken, "++", currentLine))
+				i++ // skip the next '+'
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "+="
+				tokens = append(tokens, NewToken(PlusEqualToken, "+=", currentLine))
+				i++ // skip the next '='
+
+			} else {
+				tokens = append(tokens, NewToken(PlusToken, string(char), currentLine))
+			}
 
 		case '-':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(MinusToken, string(char), currentLine))
+			// look ahead to check if it's "--"
+			if i+1 < len(input) && input[i+1] == '-' {
+				tokens = append(tokens, NewToken(DecToken, "--", currentLine))
+				i++ // skip the next '-'
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "-="
+				tokens = append(tokens, NewToken(MinusEqualToken, "-=", currentLine))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(MinusToken, string(char), currentLine))
+			}
 
 		case '*':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(StarToken, string(char), currentLine))
+			// look ahead to check if it's "**" or **=
+			if i+1 < len(input) && input[i+1] == '*' {
+				if i+2 < len(input) && input[i+2] == '=' {
+					tokens = append(tokens, NewToken(ExponentialEqualToken, "**=", currentLine))
+					i += 2 // skip the next '*' and '='
+				} else {
+					tokens = append(tokens, NewToken(ExponentialToken, "**", currentLine))
+					i++ // skip the next '*'
+				}
+			} else if i+1 < len(input) && input[i+1] == '=' {
+				// look ahead to check if it's "*="
+				tokens = append(tokens, NewToken(StarEqualToken, "*=", currentLine))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(StarToken, string(char), currentLine))
+			}
 
 		case '/':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
-			tokens = append(tokens, NewToken(SlashToken, string(char), currentLine))
+			// look ahead to check if it's "/="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(SlashEqualToken, "/=", currentLine))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(SlashToken, string(char), currentLine))
+			}
 
 		case '=':
 			if currentToken != "" {
@@ -145,6 +211,7 @@ func Lex(input string) []Token {
 			} else {
 				tokens = append(tokens, NewToken(EqualsToken, string(char), currentLine))
 			}
+
 		case '!':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -167,6 +234,10 @@ func Lex(input string) []Token {
 			if i+1 < len(input) && input[i+1] == '=' {
 				tokens = append(tokens, NewToken(LessEqualToken, "<=", currentLine))
 				i++ // skip the next '='
+				// check if "<<" shift
+			} else if i+1 < len(input) && input[i+1] == '<' {
+				tokens = append(tokens, NewToken(BitwiseLeftShiftToken, "<<", currentLine))
+				i++ // skip the next '<'
 			} else {
 				tokens = append(tokens, NewToken(LessToken, string(char), currentLine))
 			}
@@ -180,33 +251,42 @@ func Lex(input string) []Token {
 			if i+1 < len(input) && input[i+1] == '=' {
 				tokens = append(tokens, NewToken(GreaterEqualToken, ">=", currentLine))
 				i++ // skip the next '='
+				// check if ">>" shift
+			} else if i+1 < len(input) && input[i+1] == '>' {
+				tokens = append(tokens, NewToken(BitwiseRightShiftToken, ">>", currentLine))
+				i++ // skip the next '>'
 			} else {
 				tokens = append(tokens, NewToken(GreaterToken, string(char), currentLine))
 			}
+
 		case '{':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(LBraceToken, string(char), currentLine))
+
 		case '}':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RBraceToken, string(char), currentLine))
+
 		case ';':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(SemiColonToken, string(char), currentLine))
+
 		case ',':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(CommaToken, string(char), currentLine))
+
 		case '(':
 			if currentToken != "" {
 				tokens = append(tokens, classifyToken(currentToken, currentLine))
@@ -220,6 +300,62 @@ func Lex(input string) []Token {
 				currentToken = ""
 			}
 			tokens = append(tokens, NewToken(RParenToken, string(char), currentLine))
+
+		case '[':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(LBracketToken, "[", currentLine))
+
+		case ']':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(RBracketToken, "]", currentLine))
+
+		case '%':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			// look ahead to check if it's "%="
+			if i+1 < len(input) && input[i+1] == '=' {
+				tokens = append(tokens, NewToken(ModuloEqualToken, "%=", currentLine))
+				i++ // skip the next '='
+			} else {
+				tokens = append(tokens, NewToken(ModuloToken, string(char), currentLine))
+			}
+
+		// bitwise ops
+		case '&':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(BitwiseAndToken, string(char), currentLine))
+
+		case '|':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(BitwiseOrToken, string(char), currentLine))
+
+		case '^':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(BitwiseXorToken, string(char), currentLine))
+
+		case '~':
+			if currentToken != "" {
+				tokens = append(tokens, classifyToken(currentToken, currentLine))
+				currentToken = ""
+			}
+			tokens = append(tokens, NewToken(BitwiseNotToken, string(char), currentLine))
 
 		default:
 			currentToken += string(char)

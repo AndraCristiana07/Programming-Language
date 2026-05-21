@@ -108,6 +108,15 @@ func (p *Parser) parseStatement() Stmt {
 	if p.match(ReturnToken) {
 		return p.parseReturnStatement()
 	}
+	// check for inc/dec statements
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
+		return p.parseIncDecStatement()
+	}
+	// check for assignment statements (x += 1)
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) || p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == ModuloEqualToken || p.lookAhead(1).Type == ExponentialEqualToken) {
+		return p.parseCompAssignment()
+	}
+
 	// check for function invocations
 	if p.peek().Type == IdentifierToken && p.lookAhead(1).Type == LParenToken {
 		return p.parseExpression()
@@ -146,8 +155,15 @@ func (p *Parser) parseForStatement() Stmt {
 	condition := p.parseExpression()
 	p.expect(SemiColonToken)
 
-	// parse the step (i = i + 1)
-	increment := p.parseAssignment()
+	// parse the step (i = i + 1) or (i++)
+	var increment Stmt
+	if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == IncToken || p.lookAhead(1).Type == DecToken) {
+		increment = p.parseIncDecStatement()
+	} else if p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == PlusEqualToken || p.lookAhead(1).Type == MinusEqualToken || p.lookAhead(1).Type == StarEqualToken || p.lookAhead(1).Type == SlashEqualToken) || p.peek().Type == IdentifierToken && (p.lookAhead(1).Type == ModuloEqualToken || p.lookAhead(1).Type == ExponentialEqualToken) {
+		increment = p.parseCompAssignment()
+	} else {
+		increment = p.parseAssignment()
+	}
 
 	// parse the loop body ({print i })
 	p.expect(LBraceToken)
@@ -236,6 +252,43 @@ func (p *Parser) parseAssignment() *Assignment {
 	}
 }
 
+// parse compound assignment (x += 1)
+func (p *Parser) parseCompAssignment() *Assignment {
+	identifierToken := p.expect(IdentifierToken)
+	opToken := p.advance() // consume the compound assignment token
+
+	var operator string
+	switch opToken.Type {
+	case PlusEqualToken:
+		operator = "+="
+	case MinusEqualToken:
+		operator = "-="
+	case StarEqualToken:
+		operator = "*="
+	case SlashEqualToken:
+		operator = "/="
+	case ModuloEqualToken:
+		operator = "%="
+	case ExponentialEqualToken:
+		operator = "**="
+	default:
+		panic("Expected compound assignment operator")
+	}
+
+	value := p.parseExpression()
+
+	return &Assignment{
+		Type:       AssignmentNode,
+		Identifier: identifierToken.Value,
+		Value: &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator[:len(operator)-1], // convert "+=" to "+"
+			Left:     &Identifier{Type: IdentifierNode, Symbol: identifierToken.Value},
+			Right:    value,
+		},
+	}
+}
+
 // parse if statement
 func (p *Parser) parseIfStatement() *IfStmt {
 	condition := p.parseExpression()
@@ -300,15 +353,15 @@ func (p *Parser) parsePrintStatement() *PrintStmt {
 
 // parse expression
 func (p *Parser) parseExpression() Expr {
-	return p.parseComparison()
+	return p.parseOr()
 }
 
-func (p *Parser) parseComparison() Expr {
-	left := p.parseAddition() // math first
+func (p *Parser) parseOr() Expr {
+	left := p.parseAnd()
 
-	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) || p.match(LessEqualToken) || p.match(GreaterEqualToken) {
+	for p.match(OrToken) {
 		operator := p.tokens[p.pos-1].Value
-		right := p.parseAddition()
+		right := p.parseAnd()
 
 		left = &BinaryExpr{
 			Type:     BinaryExprNode,
@@ -319,6 +372,108 @@ func (p *Parser) parseComparison() Expr {
 	}
 
 	return left
+}
+
+func (p *Parser) parseAnd() Expr {
+	left := p.parseComparison()
+
+	for p.match(AndToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseComparison()
+
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+
+	return left
+}
+
+// bitwise operators
+func (p *Parser) parseBitwiseOr() Expr {
+	left := p.parseBitwiseXor()
+	for p.match(BitwiseOrToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseXor()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseXor() Expr {
+	left := p.parseBitwiseAnd()
+	for p.match(BitwiseXorToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseAnd()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseAnd() Expr {
+	left := p.parseBitwiseShift()
+	for p.match(BitwiseAndToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseShift()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseBitwiseShift() Expr {
+	left := p.parseAddition()
+	for p.match(BitwiseLeftShiftToken) || p.match(BitwiseRightShiftToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseAddition()
+		left = &BinaryExpr{Type: BinaryExprNode, Operator: operator, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseComparison() Expr {
+	left := p.parseBitwiseOr()
+
+	for p.match(LessToken) || p.match(GreaterToken) || p.match(EqualEqualToken) || p.match(BangEqualToken) || p.match(LessEqualToken) || p.match(GreaterEqualToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseBitwiseOr()
+
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+
+	return left
+}
+
+func (p *Parser) parseIncDecStatement() Stmt {
+	identifierToken := p.expect(IdentifierToken)
+	opToken := p.advance() // consume inc/dec token
+
+	var operator string
+	if opToken.Type == IncToken {
+		operator = "++"
+	} else if opToken.Type == DecToken {
+		operator = "--"
+	} else {
+		panic("Expected '++' or '--' after identifier")
+	}
+
+	return &Assignment{
+		Type:       AssignmentNode,
+		Identifier: identifierToken.Value,
+		Value: &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     &Identifier{Type: IdentifierNode, Symbol: identifierToken.Value},
+			Right:    &NumericLiteral{Type: NumericLiteralNode, Value: 1},
+		},
+	}
 }
 
 func (p *Parser) parseAddition() Expr {
@@ -341,10 +496,70 @@ func (p *Parser) parseAddition() Expr {
 }
 
 func (p *Parser) parseMultiplication() Expr {
-	left := p.parsePrimary()
-	for p.match(StarToken) || p.match(SlashToken) {
+	left := p.parseExponent()
+	for p.match(StarToken) || p.match(SlashToken) || p.match(ModuloToken) {
 		operator := p.tokens[p.pos-1].Value
-		right := p.parsePrimary()
+		right := p.parseExponent()
+		left = &BinaryExpr{
+			Type:     BinaryExprNode,
+			Operator: operator,
+			Left:     left,
+			Right:    right,
+		}
+	}
+	return left
+}
+
+// parse call array
+func (p *Parser) parseCall() Expr {
+	expr := p.parsePrimary()
+
+	for {
+		if p.match(LParenToken) {
+			var args []Expr
+			if p.peek().Type != RParenToken {
+				for {
+					args = append(args, p.parseExpression())
+					if !p.match(CommaToken) {
+						break
+					}
+				}
+			}
+			p.expect(RParenToken)
+
+			ident, ok := expr.(*Identifier)
+			if !ok {
+				panic("Syntax Error: Can only call standalone functions right now")
+			}
+
+			expr = &CallExpr{
+				Type:      CallExprNode,
+				Callee:    ident.Symbol,
+				Arguments: args,
+			}
+		} else if p.match(LBracketToken) {
+			index := p.parseExpression()
+			p.expect(RBracketToken)
+
+			expr = &IndexExpr{
+				Type:  IndexExprNode,
+				Left:  expr,
+				Index: index,
+			}
+		} else {
+			break
+		}
+	}
+
+	return expr
+}
+
+// parse exponenwnt
+func (p *Parser) parseExponent() Expr {
+	left := p.parseCall()
+	for p.match(ExponentialToken) {
+		operator := p.tokens[p.pos-1].Value
+		right := p.parseCall()
 		left = &BinaryExpr{
 			Type:     BinaryExprNode,
 			Operator: operator,
@@ -359,28 +574,11 @@ func (p *Parser) parseMultiplication() Expr {
 func (p *Parser) parsePrimary() Expr {
 	if p.match(IdentifierToken) {
 		name := p.tokens[p.pos-1].Value
-
-		// check if the identifier is followed by a '('
-		if p.match(LParenToken) {
-			var args []Expr
-			if p.peek().Type != RParenToken {
-				for {
-					args = append(args, p.parseExpression())
-					if !p.match(CommaToken) {
-						break
-					}
-				}
-			}
-			p.expect(RParenToken)
-
-			return &CallExpr{
-				Type:      CallExprNode,
-				Callee:    name,
-				Arguments: args,
-			}
+		return &Identifier{
+			Type:   IdentifierNode,
+			Symbol: name,
 		}
 
-		return &Identifier{Type: IdentifierNode, Symbol: name}
 	} else if p.match(NumberToken) {
 		return &NumericLiteral{
 			Type:  NumericLiteralNode,
@@ -400,6 +598,35 @@ func (p *Parser) parsePrimary() Expr {
 		return &BooleanLiteral{
 			Type:  BooleanLiteralNode,
 			Value: false,
+		}
+	} else if p.match(NotToken) {
+		operand := p.tokens[p.pos-1].Value
+		return &UnaryExpr{
+			Type:     UnaryExprNode,
+			Operator: operand,
+			Right:    p.parsePrimary(),
+		}
+	} else if p.match(BitwiseNotToken) {
+		operand := p.tokens[p.pos-1].Value
+		return &UnaryExpr{
+			Type:     UnaryExprNode,
+			Operator: operand,
+			Right:    p.parsePrimary(),
+		}
+	} else if p.match(LBracketToken) {
+		var elements []Expr
+		if p.peek().Type != RBracketToken {
+			for {
+				elements = append(elements, p.parseExpression())
+				if !p.match(CommaToken) {
+					break
+				}
+			}
+		}
+		p.expect(RBracketToken)
+		return &ArrayLiteral{
+			Type:     ArrayLiteralNode,
+			Elements: elements,
 		}
 	} else {
 		panic("Unexpected token: " + p.peek().Value)

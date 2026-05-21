@@ -46,6 +46,24 @@ func Eval(node Stmt, env *Environment) any {
 			}
 		}
 
+		// handle boolean logic for "and" and "or"
+		switch n.Operator {
+		case "and":
+			leftBool, ok1 := leftVal.(bool)
+			rightBool, ok2 := rightVal.(bool)
+			if !ok1 || !ok2 {
+				panic("Both operands of 'and' must be boolean")
+			}
+			return leftBool && rightBool
+		case "or":
+			leftBool, ok1 := leftVal.(bool)
+			rightBool, ok2 := rightVal.(bool)
+			if !ok1 || !ok2 {
+				panic("Both operands of 'or' must be boolean")
+			}
+			return leftBool || rightBool
+		}
+
 		// if not str, go back to int
 		left := leftVal.(int)
 		right := rightVal.(int)
@@ -63,6 +81,18 @@ func Eval(node Stmt, env *Environment) any {
 				panic("Division by zero")
 			}
 			return left / right
+		case "**":
+			return power(left, right)
+		case "%":
+			// check for division by zero
+			if right == 0 {
+				panic("Modulo by zero")
+			}
+			return left % right
+		case "++":
+			return left + 1
+		case "--":
+			return left - 1
 		case "<":
 			return left < right
 		case ">":
@@ -75,6 +105,17 @@ func Eval(node Stmt, env *Environment) any {
 			return left <= right
 		case ">=":
 			return left >= right
+		case "&":
+			return left & right
+		case "|":
+			return left | right
+		case "<<":
+			return left << right
+		case ">>":
+			return left >> right
+		case "^":
+			return left ^ right
+
 		default:
 			panic("Unknown operator: " + n.Operator)
 		}
@@ -87,6 +128,24 @@ func Eval(node Stmt, env *Environment) any {
 		return val
 	case *NumericLiteral:
 		return n.Value
+	case *UnaryExpr:
+		rightVal := Eval(n.Right, env)
+		switch n.Operator {
+		case "not":
+			rightBool, ok := rightVal.(bool)
+			if !ok {
+				panic("Operand of 'not' must be boolean")
+			}
+			return !rightBool
+		case "~":
+			rightInt, ok := rightVal.(int)
+			if !ok {
+				panic("Operand of '~' must be an integer")
+			}
+			return ^rightInt
+		default:
+			panic("Unknown unary operator: " + n.Operator)
+		}
 	case *StringLiteral:
 		return n.Value
 	case *Assignment:
@@ -200,7 +259,48 @@ func Eval(node Stmt, env *Environment) any {
 
 		return returnedVal
 
+	case *ArrayLiteral:
+		var evaluatedElements []any
+		for _, expr := range n.Elements {
+			evaluatedElements = append(evaluatedElements, Eval(expr, env))
+		}
+		return evaluatedElements
+
+	case *IndexExpr:
+		leftVal := Eval(n.Left, env)
+		indexVal := Eval(n.Index, env)
+
+		// left target -array slice
+		array, ok := leftVal.([]any)
+		if !ok {
+			panic("Indexing operator [] can only be used on arrays")
+		}
+
+		// index evaluated int
+		idx, ok := indexVal.(int)
+		if !ok {
+			panic("Array index subscript must be an integer")
+		}
+
+		// boundary check
+		if idx < 0 || idx >= len(array) {
+			panic(fmt.Sprintf("Index out of bounds. Array length is %d, got index %d", len(array), idx))
+		}
+
+		return array[idx]
+
 	default:
 		panic("Unknown node type: " + n.GetType())
 	}
+}
+
+func power(base, exp int) int {
+	if exp < 0 {
+		panic("Negative exponent not supported")
+	}
+	result := 1
+	for range exp {
+		result *= base
+	}
+	return result
 }

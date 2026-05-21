@@ -114,6 +114,72 @@ func main() {
 		}
 		print printsmth(count)
 
+		print 10 % 3
+		print 2 ** 3
+
+
+		var counter = 10
+		counter--
+		print "Counter down to: " + counter 
+
+		for var i = 1; i <= 3; i++ {
+			print "Looping: " + i
+		}
+
+		var score = 10
+		score += 5
+		print "Score after += is: " + score 
+
+		score *= 2
+		print "Score after *= is: " + score 
+
+		for var i = 0; i <= 6; i += 2 {
+			print "Step: " + i
+		}
+
+		var exp = 2
+		exp **= 3
+		print "Exp after **= is: " + exp 
+
+		var mod = 10
+		mod %= 3
+		print "Mod after %= is: " + mod 
+
+		var treats = 5
+		var hungry = true
+
+		if hungry and treats > 0 {
+			print "Time for snacks"
+		}
+
+		var tired = false
+		if tired or not hungry {
+			print "No snacks "
+		} else {
+			print "Still need food"
+		}
+
+		var mask = 4     
+		var flag = 5      
+
+		print flag & mask 
+		print flag | 2    
+		print flag ^ mask 
+
+		var bit = 1
+		print bit << 3  
+		
+		print ~5
+
+		var numbers = [10, 20, 30]
+		print numbers[0] 
+
+		var doubleIndexTest = [[1, 2], [3, 4]]
+		print doubleIndexTest[1][0] 
+
+		var score = numbers[1] + numbers[2]
+		print score 
+
 	`
 	tokens := Lex(input)
 
