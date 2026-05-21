@@ -144,6 +144,20 @@ func main() {
 		var mod = 10
 		mod %= 3
 		print "Mod after %= is: " + mod 
+
+		var treats = 5
+		var hungry = true
+
+		if hungry and treats > 0 {
+			print "Time for snacks"
+		}
+
+		var tired = false
+		if tired or not hungry {
+			print "No snacks "
+		} else {
+			print "Still need food"
+		}
 	`
 	tokens := Lex(input)
 

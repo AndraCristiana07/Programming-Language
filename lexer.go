@@ -46,6 +46,9 @@ const (
 	SlashEqualToken       TokenType = "SLASHEQUAL"
 	ModuloEqualToken      TokenType = "MODULOEQUAL"
 	ExponentialEqualToken TokenType = "EXPONENTIALEQUAL"
+	AndToken              TokenType = "AND"
+	OrToken               TokenType = "OR"
+	NotToken              TokenType = "NOT"
 )
 
 var keywords = map[string]TokenType{
@@ -59,6 +62,9 @@ var keywords = map[string]TokenType{
 	"for":    ForToken,
 	"func":   FuncToken,
 	"return": ReturnToken,
+	"and":    AndToken,
+	"or":     OrToken,
+	"not":    NotToken,
 }
 
 type Token struct {

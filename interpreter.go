@@ -46,6 +46,24 @@ func Eval(node Stmt, env *Environment) any {
 			}
 		}
 
+		// handle boolean logic for "and" and "or"
+		switch n.Operator {
+		case "and":
+			leftBool, ok1 := leftVal.(bool)
+			rightBool, ok2 := rightVal.(bool)
+			if !ok1 || !ok2 {
+				panic("Both operands of 'and' must be boolean")
+			}
+			return leftBool && rightBool
+		case "or":
+			leftBool, ok1 := leftVal.(bool)
+			rightBool, ok2 := rightVal.(bool)
+			if !ok1 || !ok2 {
+				panic("Both operands of 'or' must be boolean")
+			}
+			return leftBool || rightBool
+		}
+
 		// if not str, go back to int
 		left := leftVal.(int)
 		right := rightVal.(int)
@@ -100,6 +118,18 @@ func Eval(node Stmt, env *Environment) any {
 		return val
 	case *NumericLiteral:
 		return n.Value
+	case *UnaryExpr:
+		rightVal := Eval(n.Right, env)
+		switch n.Operator {
+		case "not":
+			rightBool, ok := rightVal.(bool)
+			if !ok {
+				panic("Operand of 'not' must be boolean")
+			}
+			return !rightBool
+		default:
+			panic("Unknown unary operator: " + n.Operator)
+		}
 	case *StringLiteral:
 		return n.Value
 	case *Assignment:

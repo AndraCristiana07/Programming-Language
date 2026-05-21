@@ -20,6 +20,7 @@ const (
 	FuncDeclNode       NodeType = "FuncDecl"
 	CallExprNode       NodeType = "CallExpr"
 	RreturnStmtNode    NodeType = "ReturnStmt"
+	UnaryExprNode      NodeType = "UnaryExpr"
 )
 
 type Stmt interface {
@@ -53,6 +54,15 @@ type BinaryExpr struct {
 
 func (b *BinaryExpr) GetType() NodeType { return b.Type }
 func (b *BinaryExpr) expressionNode()   {}
+
+type UnaryExpr struct {
+	Type     NodeType
+	Operator string // "not"
+	Right    Expr
+}
+
+func (u *UnaryExpr) GetType() NodeType { return u.Type }
+func (u *UnaryExpr) expressionNode()   {}
 
 type Identifier struct {
 	Type   NodeType
