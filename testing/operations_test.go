@@ -390,3 +390,49 @@ func TestBitwise(t *testing.T) {
 		})
 	}
 }
+
+func TestLogical(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Logical and",
+			input:    "var testResult = true and false",
+			expected: false,
+		},
+		{
+			name:     "Logical or",
+			input:    "var testResult = true or false",
+			expected: true,
+		},
+		{
+			name:     "Logical not",
+			input:    "var testResult = not true",
+			expected: false,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tokens := my_language.Lex(tc.input)
+			parser := my_language.NewParser(tokens)
+			program := parser.Parse()
+
+			env := my_language.NewEnvironment()
+
+			my_language.Eval(program, env)
+
+			// check the saved result
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("'testResult' variable was not created by the engine")
+			}
+
+			if result != tc.expected {
+				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
+					tc.input, tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
