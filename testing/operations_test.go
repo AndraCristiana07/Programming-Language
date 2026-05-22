@@ -334,3 +334,59 @@ func TestIncDec(t *testing.T) {
 		})
 	}
 }
+
+func TestBitwise(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Bitwise and",
+			input:    "var testResult = 5 & 3",
+			expected: 1,
+		},
+		{
+			name:     "Bitwise or",
+			input:    "var testResult = 5 | 3",
+			expected: 7,
+		},
+		{
+			name:     "Bitwise xor",
+			input:    "var testResult = 5 ^ 3",
+			expected: 6,
+		},
+		{
+			name:     "Bitwise left shift",
+			input:    "var testResult = 5 << 1",
+			expected: 10,
+		},
+		{
+			name:     "Bitwise right shift",
+			input:    "var testResult = 5 >> 1",
+			expected: 2,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tokens := my_language.Lex(tc.input)
+			parser := my_language.NewParser(tokens)
+			program := parser.Parse()
+
+			env := my_language.NewEnvironment()
+
+			my_language.Eval(program, env)
+
+			// check the saved result
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("'testResult' variable was not created by the engine")
+			}
+
+			if result != tc.expected {
+				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
+					tc.input, tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
