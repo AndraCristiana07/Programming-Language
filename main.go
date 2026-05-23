@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"my_language/my_language"
+)
 
 func main() {
 	input := `
@@ -181,17 +184,17 @@ func main() {
 		print score 
 
 	`
-	tokens := Lex(input)
+	tokens := my_language.Lex(input)
 
 	for _, t := range tokens {
 		fmt.Printf("{Type: %-12s Value: %q}\n", t.Type, t.Value)
 	}
 
-	parser := NewParser(tokens)
+	parser := my_language.NewParser(tokens)
 	ast := parser.Parse()
-	printAST(ast, "")
+	my_language.PrintAST(ast, "")
 
-	env := NewEnvironment()
-	Eval(ast, env)
+	env := my_language.NewEnvironment()
+	my_language.Eval(ast, env)
 
 }
