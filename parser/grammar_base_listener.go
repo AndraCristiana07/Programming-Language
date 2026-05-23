@@ -1,0 +1,76 @@
+// Code generated from Grammar.g4 by ANTLR 4.13.2. DO NOT EDIT.
+
+package parser // Grammar
+
+import "github.com/antlr4-go/antlr/v4"
+
+// BaseGrammarListener is a complete listener for a parse tree produced by GrammarParser.
+type BaseGrammarListener struct{}
+
+var _ GrammarListener = &BaseGrammarListener{}
+
+// VisitTerminal is called when a terminal node is visited.
+func (s *BaseGrammarListener) VisitTerminal(node antlr.TerminalNode) {}
+
+// VisitErrorNode is called when an error node is visited.
+func (s *BaseGrammarListener) VisitErrorNode(node antlr.ErrorNode) {}
+
+// EnterEveryRule is called when any rule is entered.
+func (s *BaseGrammarListener) EnterEveryRule(ctx antlr.ParserRuleContext) {}
+
+// ExitEveryRule is called when any rule is exited.
+func (s *BaseGrammarListener) ExitEveryRule(ctx antlr.ParserRuleContext) {}
+
+// EnterProgram is called when production program is entered.
+func (s *BaseGrammarListener) EnterProgram(ctx *ProgramContext) {}
+
+// ExitProgram is called when production program is exited.
+func (s *BaseGrammarListener) ExitProgram(ctx *ProgramContext) {}
+
+// EnterStatement is called when production statement is entered.
+func (s *BaseGrammarListener) EnterStatement(ctx *StatementContext) {}
+
+// ExitStatement is called when production statement is exited.
+func (s *BaseGrammarListener) ExitStatement(ctx *StatementContext) {}
+
+// EnterVarDecl is called when production varDecl is entered.
+func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
+
+// ExitVarDecl is called when production varDecl is exited.
+func (s *BaseGrammarListener) ExitVarDecl(ctx *VarDeclContext) {}
+
+// EnterAssignStmt is called when production assignStmt is entered.
+func (s *BaseGrammarListener) EnterAssignStmt(ctx *AssignStmtContext) {}
+
+// ExitAssignStmt is called when production assignStmt is exited.
+func (s *BaseGrammarListener) ExitAssignStmt(ctx *AssignStmtContext) {}
+
+// EnterIdentifier is called when production Identifier is entered.
+func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
+
+// ExitIdentifier is called when production Identifier is exited.
+func (s *BaseGrammarListener) ExitIdentifier(ctx *IdentifierContext) {}
+
+// EnterNumber is called when production Number is entered.
+func (s *BaseGrammarListener) EnterNumber(ctx *NumberContext) {}
+
+// ExitNumber is called when production Number is exited.
+func (s *BaseGrammarListener) ExitNumber(ctx *NumberContext) {}
+
+// EnterMulDiv is called when production MulDiv is entered.
+func (s *BaseGrammarListener) EnterMulDiv(ctx *MulDivContext) {}
+
+// ExitMulDiv is called when production MulDiv is exited.
+func (s *BaseGrammarListener) ExitMulDiv(ctx *MulDivContext) {}
+
+// EnterAddSub is called when production AddSub is entered.
+func (s *BaseGrammarListener) EnterAddSub(ctx *AddSubContext) {}
+
+// ExitAddSub is called when production AddSub is exited.
+func (s *BaseGrammarListener) ExitAddSub(ctx *AddSubContext) {}
+
+// EnterComparison is called when production Comparison is entered.
+func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
+
+// ExitComparison is called when production Comparison is exited.
+func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
