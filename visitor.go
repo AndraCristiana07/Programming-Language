@@ -45,6 +45,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.WhileStmt().Accept(v)
 	} else if ctx.ForStmt() != nil {
 		return ctx.ForStmt().Accept(v)
+	} else if ctx.PostfixStmt() != nil {
+		return ctx.PostfixStmt().Accept(v)
 	}
 
 	return nil
@@ -55,6 +57,15 @@ func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
+	}
+	return nil
+}
+
+func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
+	if ctx.AssignStmt() != nil {
+		return ctx.AssignStmt().Accept(v)
+	} else if ctx.PostfixStmt() != nil {
+		return ctx.PostfixStmt().Accept(v)
 	}
 	return nil
 }
@@ -70,6 +81,33 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
 	v.vars[varName] = value
+	return nil
+}
+
+func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
+	varName := ctx.IDENTIFIER().GetText()
+	op := ctx.GetOp().GetText()
+
+	value, exists := v.vars[varName]
+	if !exists {
+		panic("Undefined variable: " + varName)
+	}
+
+	intValue, ok := value.(int)
+	if !ok {
+		panic("Variable is not an integer: " + varName)
+	}
+
+	switch op {
+	case "++":
+		intValue++
+	case "--":
+		intValue--
+	default:
+		panic("Unknown postfix operator: " + op)
+	}
+
+	v.vars[varName] = intValue
 	return nil
 }
 

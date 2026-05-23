@@ -38,6 +38,12 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#forInit.
 	VisitForInit(ctx *ForInitContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#forPost.
+	VisitForPost(ctx *ForPostContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#postfixStmt.
+	VisitPostfixStmt(ctx *PostfixStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
 

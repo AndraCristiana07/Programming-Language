@@ -38,6 +38,12 @@ type GrammarListener interface {
 	// EnterForInit is called when entering the forInit production.
 	EnterForInit(c *ForInitContext)
 
+	// EnterForPost is called when entering the forPost production.
+	EnterForPost(c *ForPostContext)
+
+	// EnterPostfixStmt is called when entering the postfixStmt production.
+	EnterPostfixStmt(c *PostfixStmtContext)
+
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
@@ -88,6 +94,12 @@ type GrammarListener interface {
 
 	// ExitForInit is called when exiting the forInit production.
 	ExitForInit(c *ForInitContext)
+
+	// ExitForPost is called when exiting the forPost production.
+	ExitForPost(c *ForPostContext)
+
+	// ExitPostfixStmt is called when exiting the postfixStmt production.
+	ExitPostfixStmt(c *PostfixStmtContext)
 
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)

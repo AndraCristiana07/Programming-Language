@@ -9,6 +9,7 @@ statement   : varDecl
             | whileStmt
             | forStmt
             | blockStmt 
+            | postfixStmt
             ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
@@ -16,12 +17,18 @@ assignStmt  : IDENTIFIER EQUALS expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
-forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=assignStmt RPAREN body=blockStmt ;
+forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
 blockStmt   : LBRACE statement* RBRACE ;
 
 forInit     : varDecl
             | assignStmt
             ;
+
+forPost   : assignStmt
+            | postfixStmt
+            ;
+            
+postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
 expr        : expr op=(STAR | SLASH) expr    # MulDiv
             | expr op=(PLUS | MINUS) expr    # AddSub
@@ -54,6 +61,9 @@ ELSE            : 'else' ;
 WHILE           : 'while' ;
 FOR             : 'for' ;
 SEMICOLON       : ';' ;
+INC             : '++' ;
+DEC             : '--' ;
+
 
 PRINT           : 'print' ;
 TRUE            : 'true' ;

@@ -81,6 +81,18 @@ func (s *BaseGrammarListener) EnterForInit(ctx *ForInitContext) {}
 // ExitForInit is called when production forInit is exited.
 func (s *BaseGrammarListener) ExitForInit(ctx *ForInitContext) {}
 
+// EnterForPost is called when production forPost is entered.
+func (s *BaseGrammarListener) EnterForPost(ctx *ForPostContext) {}
+
+// ExitForPost is called when production forPost is exited.
+func (s *BaseGrammarListener) ExitForPost(ctx *ForPostContext) {}
+
+// EnterPostfixStmt is called when production postfixStmt is entered.
+func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
+
+// ExitPostfixStmt is called when production postfixStmt is exited.
+func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
+
 // EnterIdentifier is called when production Identifier is entered.
 func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 

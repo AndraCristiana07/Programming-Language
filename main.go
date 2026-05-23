@@ -42,7 +42,15 @@ func main() {
 		for (var j = 0; j < 4; j = j + 1) {
 			print "I am number: " + j
 		}
-			
+
+		for (var k = 0; k < 4; k++) {
+			print "I am number: " + k
+		}
+
+		var m = 2
+		m++
+		print "m is: " + m
+
 		`
 
 	input := antlr.NewInputStream(inputCode)
