@@ -21,6 +21,14 @@ func TestAddition(t *testing.T) {
 			input:    "var testResult = 1 + 2 + 3",
 			expected: 6,
 		},
+		{
+			name: "Increment operator",
+			input: `
+				var testResult = 5
+				testResult++
+			`,
+			expected: 6,
+		},
 	}
 
 	for _, tc := range tests {
@@ -63,6 +71,14 @@ func TestSubstraction(t *testing.T) {
 			name:     "Chained substraction",
 			input:    "var testResult = 10 - 5 - 2",
 			expected: 3,
+		},
+		{
+			name: "Decrement operator",
+			input: `
+				var testResult = 10
+				testResult--
+			`,
+			expected: 9,
 		},
 	}
 
