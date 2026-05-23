@@ -10,12 +10,14 @@ import (
 func main() {
 	inputCode := `
 		var x = 10 * 5
+		print x
 		x = x + 1
 		var isGreater = 10 > 5
 		var checkEquality = isGreater == true
 		var uneqTest = 5 != 3
 		var lesseqTest = 5 <= 5
 		var greateqTest = 5 >= 4
+		print "Hello"
 		
 		`
 

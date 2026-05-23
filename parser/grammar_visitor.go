@@ -20,6 +20,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#assignStmt.
 	VisitAssignStmt(ctx *AssignStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#printStmt.
+	VisitPrintStmt(ctx *PrintStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
 
@@ -34,6 +37,9 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#String.
+	VisitString(ctx *StringContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}

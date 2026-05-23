@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"my_language/parser"
 	"strconv"
 
@@ -34,6 +35,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
+	} else if ctx.PrintStmt() != nil {
+		return ctx.PrintStmt().Accept(v)
 	}
 	return nil
 }
@@ -61,6 +64,12 @@ func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	return v.vars[varName]
+}
+
+func (v *Visitor) VisitString(ctx *parser.StringContext) any {
+	str := ctx.STRING().GetText()
+	// remove the surrounding quotes
+	return str[1 : len(str)-1]
 }
 
 func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
@@ -150,4 +159,10 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 	default:
 		panic("Unknown operator: " + op)
 	}
+}
+
+func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
+	value := ctx.Expr().Accept(v)
+	fmt.Println(value)
+	return nil
 }

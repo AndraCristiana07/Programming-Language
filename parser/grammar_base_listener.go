@@ -45,6 +45,12 @@ func (s *BaseGrammarListener) EnterAssignStmt(ctx *AssignStmtContext) {}
 // ExitAssignStmt is called when production assignStmt is exited.
 func (s *BaseGrammarListener) ExitAssignStmt(ctx *AssignStmtContext) {}
 
+// EnterPrintStmt is called when production printStmt is entered.
+func (s *BaseGrammarListener) EnterPrintStmt(ctx *PrintStmtContext) {}
+
+// ExitPrintStmt is called when production printStmt is exited.
+func (s *BaseGrammarListener) ExitPrintStmt(ctx *PrintStmtContext) {}
+
 // EnterIdentifier is called when production Identifier is entered.
 func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 
@@ -74,6 +80,12 @@ func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
 
 // ExitComparison is called when production Comparison is exited.
 func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
+
+// EnterString is called when production String is entered.
+func (s *BaseGrammarListener) EnterString(ctx *StringContext) {}
+
+// ExitString is called when production String is exited.
+func (s *BaseGrammarListener) ExitString(ctx *StringContext) {}
 
 // EnterBoolean is called when production Boolean is entered.
 func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}

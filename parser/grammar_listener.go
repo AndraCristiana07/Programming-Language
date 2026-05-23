@@ -20,6 +20,9 @@ type GrammarListener interface {
 	// EnterAssignStmt is called when entering the assignStmt production.
 	EnterAssignStmt(c *AssignStmtContext)
 
+	// EnterPrintStmt is called when entering the printStmt production.
+	EnterPrintStmt(c *PrintStmtContext)
+
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
@@ -34,6 +37,9 @@ type GrammarListener interface {
 
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
+
+	// EnterString is called when entering the String production.
+	EnterString(c *StringContext)
 
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
@@ -50,6 +56,9 @@ type GrammarListener interface {
 	// ExitAssignStmt is called when exiting the assignStmt production.
 	ExitAssignStmt(c *AssignStmtContext)
 
+	// ExitPrintStmt is called when exiting the printStmt production.
+	ExitPrintStmt(c *PrintStmtContext)
+
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)
 
@@ -64,6 +73,9 @@ type GrammarListener interface {
 
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
+
+	// ExitString is called when exiting the String production.
+	ExitString(c *StringContext)
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)

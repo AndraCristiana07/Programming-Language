@@ -24,6 +24,10 @@ func (v *BaseGrammarVisitor) VisitAssignStmt(ctx *AssignStmtContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitPrintStmt(ctx *PrintStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitIdentifier(ctx *IdentifierContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -41,6 +45,10 @@ func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
 }
 
 func (v *BaseGrammarVisitor) VisitComparison(ctx *ComparisonContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
