@@ -133,7 +133,20 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 			return lVal > rVal
 		}
 		panic("Comparison operator '>' requires integer operands")
-
+	case "<=":
+		lVal, lOk := left.(int)
+		rVal, rOk := right.(int)
+		if lOk && rOk {
+			return lVal <= rVal
+		}
+		panic("Comparison operator '<=' requires integer operands")
+	case ">=":
+		lVal, lOk := left.(int)
+		rVal, rOk := right.(int)
+		if lOk && rOk {
+			return lVal >= rVal
+		}
+		panic("Comparison operator '>=' requires integer operands")
 	default:
 		panic("Unknown operator: " + op)
 	}

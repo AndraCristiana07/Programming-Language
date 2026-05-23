@@ -11,7 +11,7 @@ assignStmt : IDENTIFIER EQUALS expr ;
 
 expr       : expr op=(STAR | SLASH) expr    # MulDiv
            | expr op=(PLUS | MINUS) expr    # AddSub
-           | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL) expr  # Comparison
+           | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
            | IDENTIFIER                     # Identifier          
            | NUMBER                         # Number     
            | val=(TRUE | FALSE)                 # Boolean
@@ -28,6 +28,8 @@ LESS        : '<' ;
 GREATER     : '>' ;
 EQUALEQUAL  : '==' ;
 BANGEQUAL   : '!=' ;
+LESSEQUAL    : '<=' ;
+GREATEREQUAL : '>=' ;
 
 TRUE        : 'true' ;
 FALSE       : 'false' ;

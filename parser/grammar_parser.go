@@ -34,33 +34,33 @@ func grammarParserInit() {
 	staticData := &GrammarParserStaticData
 	staticData.LiteralNames = []string{
 		"", "'var'", "'='", "'+'", "'-'", "'*'", "'/'", "'<'", "'>'", "'=='",
-		"'!='", "'true'", "'false'",
+		"'!='", "'<='", "'>='", "'true'", "'false'",
 	}
 	staticData.SymbolicNames = []string{
 		"", "VAR", "EQUALS", "PLUS", "MINUS", "STAR", "SLASH", "LESS", "GREATER",
-		"EQUALEQUAL", "BANGEQUAL", "TRUE", "FALSE", "IDENTIFIER", "NUMBER",
-		"WS",
+		"EQUALEQUAL", "BANGEQUAL", "LESSEQUAL", "GREATEREQUAL", "TRUE", "FALSE",
+		"IDENTIFIER", "NUMBER", "WS",
 	}
 	staticData.RuleNames = []string{
 		"program", "statement", "varDecl", "assignStmt", "expr",
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 15, 52, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 17, 52, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 1, 0, 5, 0, 12, 8, 0, 10, 0, 12, 0, 15, 9, 0, 1, 0, 1, 0, 1, 1, 1, 1,
 		3, 1, 21, 8, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1,
 		4, 1, 4, 1, 4, 1, 4, 3, 4, 36, 8, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4,
 		1, 4, 1, 4, 1, 4, 5, 4, 47, 8, 4, 10, 4, 12, 4, 50, 9, 4, 1, 4, 0, 1, 8,
-		5, 0, 2, 4, 6, 8, 0, 4, 1, 0, 11, 12, 1, 0, 5, 6, 1, 0, 3, 4, 1, 0, 7,
-		10, 53, 0, 13, 1, 0, 0, 0, 2, 20, 1, 0, 0, 0, 4, 22, 1, 0, 0, 0, 6, 27,
+		5, 0, 2, 4, 6, 8, 0, 4, 1, 0, 13, 14, 1, 0, 5, 6, 1, 0, 3, 4, 1, 0, 7,
+		12, 53, 0, 13, 1, 0, 0, 0, 2, 20, 1, 0, 0, 0, 4, 22, 1, 0, 0, 0, 6, 27,
 		1, 0, 0, 0, 8, 35, 1, 0, 0, 0, 10, 12, 3, 2, 1, 0, 11, 10, 1, 0, 0, 0,
 		12, 15, 1, 0, 0, 0, 13, 11, 1, 0, 0, 0, 13, 14, 1, 0, 0, 0, 14, 16, 1,
 		0, 0, 0, 15, 13, 1, 0, 0, 0, 16, 17, 5, 0, 0, 1, 17, 1, 1, 0, 0, 0, 18,
 		21, 3, 4, 2, 0, 19, 21, 3, 6, 3, 0, 20, 18, 1, 0, 0, 0, 20, 19, 1, 0, 0,
-		0, 21, 3, 1, 0, 0, 0, 22, 23, 5, 1, 0, 0, 23, 24, 5, 13, 0, 0, 24, 25,
-		5, 2, 0, 0, 25, 26, 3, 8, 4, 0, 26, 5, 1, 0, 0, 0, 27, 28, 5, 13, 0, 0,
+		0, 21, 3, 1, 0, 0, 0, 22, 23, 5, 1, 0, 0, 23, 24, 5, 15, 0, 0, 24, 25,
+		5, 2, 0, 0, 25, 26, 3, 8, 4, 0, 26, 5, 1, 0, 0, 0, 27, 28, 5, 15, 0, 0,
 		28, 29, 5, 2, 0, 0, 29, 30, 3, 8, 4, 0, 30, 7, 1, 0, 0, 0, 31, 32, 6, 4,
-		-1, 0, 32, 36, 5, 13, 0, 0, 33, 36, 5, 14, 0, 0, 34, 36, 7, 0, 0, 0, 35,
+		-1, 0, 32, 36, 5, 15, 0, 0, 33, 36, 5, 16, 0, 0, 34, 36, 7, 0, 0, 0, 35,
 		31, 1, 0, 0, 0, 35, 33, 1, 0, 0, 0, 35, 34, 1, 0, 0, 0, 36, 48, 1, 0, 0,
 		0, 37, 38, 10, 6, 0, 0, 38, 39, 7, 1, 0, 0, 39, 47, 3, 8, 4, 7, 40, 41,
 		10, 5, 0, 0, 41, 42, 7, 2, 0, 0, 42, 47, 3, 8, 4, 6, 43, 44, 10, 4, 0,
@@ -105,22 +105,24 @@ func NewGrammarParser(input antlr.TokenStream) *GrammarParser {
 
 // GrammarParser tokens.
 const (
-	GrammarParserEOF        = antlr.TokenEOF
-	GrammarParserVAR        = 1
-	GrammarParserEQUALS     = 2
-	GrammarParserPLUS       = 3
-	GrammarParserMINUS      = 4
-	GrammarParserSTAR       = 5
-	GrammarParserSLASH      = 6
-	GrammarParserLESS       = 7
-	GrammarParserGREATER    = 8
-	GrammarParserEQUALEQUAL = 9
-	GrammarParserBANGEQUAL  = 10
-	GrammarParserTRUE       = 11
-	GrammarParserFALSE      = 12
-	GrammarParserIDENTIFIER = 13
-	GrammarParserNUMBER     = 14
-	GrammarParserWS         = 15
+	GrammarParserEOF          = antlr.TokenEOF
+	GrammarParserVAR          = 1
+	GrammarParserEQUALS       = 2
+	GrammarParserPLUS         = 3
+	GrammarParserMINUS        = 4
+	GrammarParserSTAR         = 5
+	GrammarParserSLASH        = 6
+	GrammarParserLESS         = 7
+	GrammarParserGREATER      = 8
+	GrammarParserEQUALEQUAL   = 9
+	GrammarParserBANGEQUAL    = 10
+	GrammarParserLESSEQUAL    = 11
+	GrammarParserGREATEREQUAL = 12
+	GrammarParserTRUE         = 13
+	GrammarParserFALSE        = 14
+	GrammarParserIDENTIFIER   = 15
+	GrammarParserNUMBER       = 16
+	GrammarParserWS           = 17
 )
 
 // GrammarParser rules.
@@ -1157,6 +1159,14 @@ func (s *ComparisonContext) BANGEQUAL() antlr.TerminalNode {
 	return s.GetToken(GrammarParserBANGEQUAL, 0)
 }
 
+func (s *ComparisonContext) LESSEQUAL() antlr.TerminalNode {
+	return s.GetToken(GrammarParserLESSEQUAL, 0)
+}
+
+func (s *ComparisonContext) GREATEREQUAL() antlr.TerminalNode {
+	return s.GetToken(GrammarParserGREATEREQUAL, 0)
+}
+
 func (s *ComparisonContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(GrammarListener); ok {
 		listenerT.EnterComparison(s)
@@ -1416,7 +1426,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 					_la = p.GetTokenStream().LA(1)
 
-					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1920) != 0) {
+					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&8064) != 0) {
 						var _ri = p.GetErrorHandler().RecoverInline(p)
 
 						localctx.(*ComparisonContext).op = _ri
