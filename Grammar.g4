@@ -30,7 +30,8 @@ forPost   : assignStmt
             
 postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
-expr        : expr op=(STAR | SLASH) expr    # MulDiv
+expr        : expr op=EXPONENTIAL expr  # Exponential
+            | expr op=(STAR | SLASH | MODULO) expr    # MulDivMod
             | expr op=(PLUS | MINUS) expr    # AddSub
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
             | IDENTIFIER                     # Identifier          
@@ -63,6 +64,8 @@ FOR             : 'for' ;
 SEMICOLON       : ';' ;
 INC             : '++' ;
 DEC             : '--' ;
+MODULO          : '%' ;
+EXPONENTIAL     : '**' ;
 
 
 PRINT           : 'print' ;

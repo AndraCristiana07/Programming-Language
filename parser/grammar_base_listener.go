@@ -93,6 +93,12 @@ func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
 // ExitPostfixStmt is called when production postfixStmt is exited.
 func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
 
+// EnterMulDivMod is called when production MulDivMod is entered.
+func (s *BaseGrammarListener) EnterMulDivMod(ctx *MulDivModContext) {}
+
+// ExitMulDivMod is called when production MulDivMod is exited.
+func (s *BaseGrammarListener) ExitMulDivMod(ctx *MulDivModContext) {}
+
 // EnterIdentifier is called when production Identifier is entered.
 func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 
@@ -105,12 +111,6 @@ func (s *BaseGrammarListener) EnterNumber(ctx *NumberContext) {}
 // ExitNumber is called when production Number is exited.
 func (s *BaseGrammarListener) ExitNumber(ctx *NumberContext) {}
 
-// EnterMulDiv is called when production MulDiv is entered.
-func (s *BaseGrammarListener) EnterMulDiv(ctx *MulDivContext) {}
-
-// ExitMulDiv is called when production MulDiv is exited.
-func (s *BaseGrammarListener) ExitMulDiv(ctx *MulDivContext) {}
-
 // EnterAddSub is called when production AddSub is entered.
 func (s *BaseGrammarListener) EnterAddSub(ctx *AddSubContext) {}
 
@@ -122,6 +122,12 @@ func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
 
 // ExitComparison is called when production Comparison is exited.
 func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
+
+// EnterExponential is called when production Exponential is entered.
+func (s *BaseGrammarListener) EnterExponential(ctx *ExponentialContext) {}
+
+// ExitExponential is called when production Exponential is exited.
+func (s *BaseGrammarListener) ExitExponential(ctx *ExponentialContext) {}
 
 // EnterString is called when production String is entered.
 func (s *BaseGrammarListener) EnterString(ctx *StringContext) {}

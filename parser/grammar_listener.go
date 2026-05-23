@@ -44,20 +44,23 @@ type GrammarListener interface {
 	// EnterPostfixStmt is called when entering the postfixStmt production.
 	EnterPostfixStmt(c *PostfixStmtContext)
 
+	// EnterMulDivMod is called when entering the MulDivMod production.
+	EnterMulDivMod(c *MulDivModContext)
+
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
 	// EnterNumber is called when entering the Number production.
 	EnterNumber(c *NumberContext)
 
-	// EnterMulDiv is called when entering the MulDiv production.
-	EnterMulDiv(c *MulDivContext)
-
 	// EnterAddSub is called when entering the AddSub production.
 	EnterAddSub(c *AddSubContext)
 
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
+
+	// EnterExponential is called when entering the Exponential production.
+	EnterExponential(c *ExponentialContext)
 
 	// EnterString is called when entering the String production.
 	EnterString(c *StringContext)
@@ -101,20 +104,23 @@ type GrammarListener interface {
 	// ExitPostfixStmt is called when exiting the postfixStmt production.
 	ExitPostfixStmt(c *PostfixStmtContext)
 
+	// ExitMulDivMod is called when exiting the MulDivMod production.
+	ExitMulDivMod(c *MulDivModContext)
+
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)
 
 	// ExitNumber is called when exiting the Number production.
 	ExitNumber(c *NumberContext)
 
-	// ExitMulDiv is called when exiting the MulDiv production.
-	ExitMulDiv(c *MulDivContext)
-
 	// ExitAddSub is called when exiting the AddSub production.
 	ExitAddSub(c *AddSubContext)
 
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
+
+	// ExitExponential is called when exiting the Exponential production.
+	ExitExponential(c *ExponentialContext)
 
 	// ExitString is called when exiting the String production.
 	ExitString(c *StringContext)

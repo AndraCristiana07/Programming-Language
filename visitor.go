@@ -160,7 +160,7 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	}
 }
 
-func (v *Visitor) VisitMulDiv(ctx *parser.MulDivContext) any {
+func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
@@ -173,10 +173,31 @@ func (v *Visitor) VisitMulDiv(ctx *parser.MulDivContext) any {
 	case "*":
 		return left.(int) * right.(int)
 	case "/":
+		if right.(int) == 0 {
+			panic("Division by zero")
+		}
 		return left.(int) / right.(int)
+	case "%":
+		if right.(int) == 0 {
+			panic("Modulo by zero")
+		}
+		return left.(int) % right.(int)
 	default:
 		panic("Unknown operator: " + op)
 	}
+}
+
+func (v *Visitor) VisitExponential(ctx *parser.ExponentialContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for operator: **")
+	}
+
+	return power(lVal, rVal)
 }
 
 func (v *Visitor) VisitBoolean(ctx *parser.BooleanContext) any {
@@ -301,4 +322,15 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 	}
 
 	return nil
+}
+
+func power(base, exp int) int {
+	if exp < 0 {
+		panic("Negative exponent not supported")
+	}
+	result := 1
+	for i := 0; i < exp; i++ {
+		result *= base
+	}
+	return result
 }

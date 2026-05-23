@@ -51,6 +51,12 @@ func main() {
 		m++
 		print "m is: " + m
 
+		var n = 5 ** 2
+		print "n is: " + n
+
+		var o = 10 % 3
+		print "o is: " + o
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

@@ -44,20 +44,23 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#postfixStmt.
 	VisitPostfixStmt(ctx *PostfixStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#MulDivMod.
+	VisitMulDivMod(ctx *MulDivModContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Number.
 	VisitNumber(ctx *NumberContext) interface{}
 
-	// Visit a parse tree produced by GrammarParser#MulDiv.
-	VisitMulDiv(ctx *MulDivContext) interface{}
-
 	// Visit a parse tree produced by GrammarParser#AddSub.
 	VisitAddSub(ctx *AddSubContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#Exponential.
+	VisitExponential(ctx *ExponentialContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#String.
 	VisitString(ctx *StringContext) interface{}
