@@ -37,6 +37,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.AssignStmt().Accept(v)
 	} else if ctx.PrintStmt() != nil {
 		return ctx.PrintStmt().Accept(v)
+	} else if ctx.BlockStmt() != nil {
+		return ctx.BlockStmt().Accept(v)
+	} else if ctx.IfStmt() != nil {
+		return ctx.IfStmt().Accept(v)
 	}
 	return nil
 }
@@ -177,5 +181,28 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	value := ctx.Expr().Accept(v)
 	fmt.Println(value)
+	return nil
+}
+
+func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
+	for _, stmt := range ctx.AllStatement() {
+		stmt.Accept(v)
+	}
+	return nil
+}
+
+func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
+	condition := ctx.Expr().Accept(v)
+	conditionBool, ok := condition.(bool)
+	if !ok {
+		panic("Condition in if statement must be boolean")
+	}
+
+	if conditionBool {
+		ctx.GetThenBranch().Accept(v)
+	} else if ctx.GetElseBranch() != nil {
+		ctx.GetElseBranch().Accept(v)
+	}
+
 	return nil
 }

@@ -4,19 +4,23 @@ program    : statement* EOF ;
 
 statement   : varDecl      
             | assignStmt   
-            | printStmt     
+            | printStmt   
+            | ifStmt 
+            | blockStmt 
             ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
 printStmt   : PRINT expr ;
+ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
+blockStmt   : LBRACE statement* RBRACE ;
 
 expr        : expr op=(STAR | SLASH) expr    # MulDiv
             | expr op=(PLUS | MINUS) expr    # AddSub
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
             | IDENTIFIER                     # Identifier          
             | NUMBER                         # Number     
-            | val=(TRUE | FALSE)                 # Boolean
+            | val=(TRUE | FALSE)             # Boolean
             | STRING                         # String
             ;
 
@@ -33,6 +37,12 @@ EQUALEQUAL      : '==' ;
 BANGEQUAL       : '!=' ;
 LESSEQUAL       : '<=' ;
 GREATEREQUAL    : '>=' ;
+LBRACE          : '{' ;
+LPAREN          : '(' ;
+RPAREN          : ')' ;
+RBRACE          : '}' ;
+IF              : 'if' ;
+ELSE            : 'else' ;
 
 PRINT           : 'print' ;
 TRUE            : 'true' ;

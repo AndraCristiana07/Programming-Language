@@ -23,6 +23,12 @@ type GrammarListener interface {
 	// EnterPrintStmt is called when entering the printStmt production.
 	EnterPrintStmt(c *PrintStmtContext)
 
+	// EnterIfStmt is called when entering the ifStmt production.
+	EnterIfStmt(c *IfStmtContext)
+
+	// EnterBlockStmt is called when entering the blockStmt production.
+	EnterBlockStmt(c *BlockStmtContext)
+
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
@@ -58,6 +64,12 @@ type GrammarListener interface {
 
 	// ExitPrintStmt is called when exiting the printStmt production.
 	ExitPrintStmt(c *PrintStmtContext)
+
+	// ExitIfStmt is called when exiting the ifStmt production.
+	ExitIfStmt(c *IfStmtContext)
+
+	// ExitBlockStmt is called when exiting the blockStmt production.
+	ExitBlockStmt(c *BlockStmtContext)
 
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)

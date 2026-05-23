@@ -23,6 +23,14 @@ func main() {
 		var uneqTest = 5 != 3
 		var lesseqTest = 5 <= 5
 		var greateqTest = 5 >= 4
+
+		var isPassed = false
+		if (score >= 50) {
+			isPassed = true
+		} else {
+			isPassed = false
+		}
+		print "Passed: " + isPassed
 		
 		`
 

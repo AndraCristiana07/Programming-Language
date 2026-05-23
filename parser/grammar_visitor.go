@@ -23,6 +23,12 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#printStmt.
 	VisitPrintStmt(ctx *PrintStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#ifStmt.
+	VisitIfStmt(ctx *IfStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#blockStmt.
+	VisitBlockStmt(ctx *BlockStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
 

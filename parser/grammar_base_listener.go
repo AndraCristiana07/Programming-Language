@@ -51,6 +51,18 @@ func (s *BaseGrammarListener) EnterPrintStmt(ctx *PrintStmtContext) {}
 // ExitPrintStmt is called when production printStmt is exited.
 func (s *BaseGrammarListener) ExitPrintStmt(ctx *PrintStmtContext) {}
 
+// EnterIfStmt is called when production ifStmt is entered.
+func (s *BaseGrammarListener) EnterIfStmt(ctx *IfStmtContext) {}
+
+// ExitIfStmt is called when production ifStmt is exited.
+func (s *BaseGrammarListener) ExitIfStmt(ctx *IfStmtContext) {}
+
+// EnterBlockStmt is called when production blockStmt is entered.
+func (s *BaseGrammarListener) EnterBlockStmt(ctx *BlockStmtContext) {}
+
+// ExitBlockStmt is called when production blockStmt is exited.
+func (s *BaseGrammarListener) ExitBlockStmt(ctx *BlockStmtContext) {}
+
 // EnterIdentifier is called when production Identifier is entered.
 func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 
