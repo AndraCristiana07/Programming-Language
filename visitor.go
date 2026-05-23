@@ -77,15 +77,28 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	right := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
 
-	if left == nil || right == nil {
-		panic("Undefined variable used in expression")
+	_, leftIsString := left.(string)
+	_, rightIsString := right.(string)
+
+	if leftIsString || rightIsString {
+		if op == "+" {
+			return fmt.Sprintf("%v%v", left, right)
+		} else {
+			panic("Unsupported operator for strings: " + op)
+		}
+	}
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for operator: " + op)
 	}
 
 	switch op {
 	case "+":
-		return left.(int) + right.(int)
+		return lVal + rVal
 	case "-":
-		return left.(int) - right.(int)
+		return lVal - rVal
 	default:
 		panic("Unknown operator: " + op)
 	}
