@@ -11,9 +11,10 @@ assignStmt : IDENTIFIER EQUALS expr ;
 
 expr       : expr op=(STAR | SLASH) expr    # MulDiv
            | expr op=(PLUS | MINUS) expr    # AddSub
-           | expr op=(LESS | GREATER) expr  # Comparison
+           | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL) expr  # Comparison
            | IDENTIFIER                     # Identifier          
-           | NUMBER                         # Number       
+           | NUMBER                         # Number     
+           | val=(TRUE | FALSE)                 # Boolean
            ;
 
 
@@ -25,6 +26,11 @@ STAR        : '*' ;
 SLASH       : '/' ;
 LESS        : '<' ;
 GREATER     : '>' ;
+EQUALEQUAL  : '==' ;
+BANGEQUAL   : '!=' ;
+
+TRUE        : 'true' ;
+FALSE       : 'false' ;
 
 IDENTIFIER  : [a-zA-Z_][a-zA-Z0-9_]* ;
 NUMBER      : [0-9]+ ;

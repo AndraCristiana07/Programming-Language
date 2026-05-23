@@ -33,38 +33,41 @@ var GrammarParserStaticData struct {
 func grammarParserInit() {
 	staticData := &GrammarParserStaticData
 	staticData.LiteralNames = []string{
-		"", "'var'", "'='", "'+'", "'-'", "'*'", "'/'", "'<'", "'>'",
+		"", "'var'", "'='", "'+'", "'-'", "'*'", "'/'", "'<'", "'>'", "'=='",
+		"'!='", "'true'", "'false'",
 	}
 	staticData.SymbolicNames = []string{
 		"", "VAR", "EQUALS", "PLUS", "MINUS", "STAR", "SLASH", "LESS", "GREATER",
-		"IDENTIFIER", "NUMBER", "WS",
+		"EQUALEQUAL", "BANGEQUAL", "TRUE", "FALSE", "IDENTIFIER", "NUMBER",
+		"WS",
 	}
 	staticData.RuleNames = []string{
 		"program", "statement", "varDecl", "assignStmt", "expr",
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 11, 51, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 15, 52, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 1, 0, 5, 0, 12, 8, 0, 10, 0, 12, 0, 15, 9, 0, 1, 0, 1, 0, 1, 1, 1, 1,
 		3, 1, 21, 8, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 1, 3, 1, 3, 1, 3, 1,
-		4, 1, 4, 1, 4, 3, 4, 35, 8, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4,
-		1, 4, 1, 4, 5, 4, 46, 8, 4, 10, 4, 12, 4, 49, 9, 4, 1, 4, 0, 1, 8, 5, 0,
-		2, 4, 6, 8, 0, 3, 1, 0, 5, 6, 1, 0, 3, 4, 1, 0, 7, 8, 51, 0, 13, 1, 0,
-		0, 0, 2, 20, 1, 0, 0, 0, 4, 22, 1, 0, 0, 0, 6, 27, 1, 0, 0, 0, 8, 34, 1,
-		0, 0, 0, 10, 12, 3, 2, 1, 0, 11, 10, 1, 0, 0, 0, 12, 15, 1, 0, 0, 0, 13,
-		11, 1, 0, 0, 0, 13, 14, 1, 0, 0, 0, 14, 16, 1, 0, 0, 0, 15, 13, 1, 0, 0,
-		0, 16, 17, 5, 0, 0, 1, 17, 1, 1, 0, 0, 0, 18, 21, 3, 4, 2, 0, 19, 21, 3,
-		6, 3, 0, 20, 18, 1, 0, 0, 0, 20, 19, 1, 0, 0, 0, 21, 3, 1, 0, 0, 0, 22,
-		23, 5, 1, 0, 0, 23, 24, 5, 9, 0, 0, 24, 25, 5, 2, 0, 0, 25, 26, 3, 8, 4,
-		0, 26, 5, 1, 0, 0, 0, 27, 28, 5, 9, 0, 0, 28, 29, 5, 2, 0, 0, 29, 30, 3,
-		8, 4, 0, 30, 7, 1, 0, 0, 0, 31, 32, 6, 4, -1, 0, 32, 35, 5, 9, 0, 0, 33,
-		35, 5, 10, 0, 0, 34, 31, 1, 0, 0, 0, 34, 33, 1, 0, 0, 0, 35, 47, 1, 0,
-		0, 0, 36, 37, 10, 5, 0, 0, 37, 38, 7, 0, 0, 0, 38, 46, 3, 8, 4, 6, 39,
-		40, 10, 4, 0, 0, 40, 41, 7, 1, 0, 0, 41, 46, 3, 8, 4, 5, 42, 43, 10, 3,
-		0, 0, 43, 44, 7, 2, 0, 0, 44, 46, 3, 8, 4, 4, 45, 36, 1, 0, 0, 0, 45, 39,
-		1, 0, 0, 0, 45, 42, 1, 0, 0, 0, 46, 49, 1, 0, 0, 0, 47, 45, 1, 0, 0, 0,
-		47, 48, 1, 0, 0, 0, 48, 9, 1, 0, 0, 0, 49, 47, 1, 0, 0, 0, 5, 13, 20, 34,
-		45, 47,
+		4, 1, 4, 1, 4, 1, 4, 3, 4, 36, 8, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4,
+		1, 4, 1, 4, 1, 4, 5, 4, 47, 8, 4, 10, 4, 12, 4, 50, 9, 4, 1, 4, 0, 1, 8,
+		5, 0, 2, 4, 6, 8, 0, 4, 1, 0, 11, 12, 1, 0, 5, 6, 1, 0, 3, 4, 1, 0, 7,
+		10, 53, 0, 13, 1, 0, 0, 0, 2, 20, 1, 0, 0, 0, 4, 22, 1, 0, 0, 0, 6, 27,
+		1, 0, 0, 0, 8, 35, 1, 0, 0, 0, 10, 12, 3, 2, 1, 0, 11, 10, 1, 0, 0, 0,
+		12, 15, 1, 0, 0, 0, 13, 11, 1, 0, 0, 0, 13, 14, 1, 0, 0, 0, 14, 16, 1,
+		0, 0, 0, 15, 13, 1, 0, 0, 0, 16, 17, 5, 0, 0, 1, 17, 1, 1, 0, 0, 0, 18,
+		21, 3, 4, 2, 0, 19, 21, 3, 6, 3, 0, 20, 18, 1, 0, 0, 0, 20, 19, 1, 0, 0,
+		0, 21, 3, 1, 0, 0, 0, 22, 23, 5, 1, 0, 0, 23, 24, 5, 13, 0, 0, 24, 25,
+		5, 2, 0, 0, 25, 26, 3, 8, 4, 0, 26, 5, 1, 0, 0, 0, 27, 28, 5, 13, 0, 0,
+		28, 29, 5, 2, 0, 0, 29, 30, 3, 8, 4, 0, 30, 7, 1, 0, 0, 0, 31, 32, 6, 4,
+		-1, 0, 32, 36, 5, 13, 0, 0, 33, 36, 5, 14, 0, 0, 34, 36, 7, 0, 0, 0, 35,
+		31, 1, 0, 0, 0, 35, 33, 1, 0, 0, 0, 35, 34, 1, 0, 0, 0, 36, 48, 1, 0, 0,
+		0, 37, 38, 10, 6, 0, 0, 38, 39, 7, 1, 0, 0, 39, 47, 3, 8, 4, 7, 40, 41,
+		10, 5, 0, 0, 41, 42, 7, 2, 0, 0, 42, 47, 3, 8, 4, 6, 43, 44, 10, 4, 0,
+		0, 44, 45, 7, 3, 0, 0, 45, 47, 3, 8, 4, 5, 46, 37, 1, 0, 0, 0, 46, 40,
+		1, 0, 0, 0, 46, 43, 1, 0, 0, 0, 47, 50, 1, 0, 0, 0, 48, 46, 1, 0, 0, 0,
+		48, 49, 1, 0, 0, 0, 49, 9, 1, 0, 0, 0, 50, 48, 1, 0, 0, 0, 5, 13, 20, 35,
+		46, 48,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -111,9 +114,13 @@ const (
 	GrammarParserSLASH      = 6
 	GrammarParserLESS       = 7
 	GrammarParserGREATER    = 8
-	GrammarParserIDENTIFIER = 9
-	GrammarParserNUMBER     = 10
-	GrammarParserWS         = 11
+	GrammarParserEQUALEQUAL = 9
+	GrammarParserBANGEQUAL  = 10
+	GrammarParserTRUE       = 11
+	GrammarParserFALSE      = 12
+	GrammarParserIDENTIFIER = 13
+	GrammarParserNUMBER     = 14
+	GrammarParserWS         = 15
 )
 
 // GrammarParser rules.
@@ -1142,6 +1149,14 @@ func (s *ComparisonContext) GREATER() antlr.TerminalNode {
 	return s.GetToken(GrammarParserGREATER, 0)
 }
 
+func (s *ComparisonContext) EQUALEQUAL() antlr.TerminalNode {
+	return s.GetToken(GrammarParserEQUALEQUAL, 0)
+}
+
+func (s *ComparisonContext) BANGEQUAL() antlr.TerminalNode {
+	return s.GetToken(GrammarParserBANGEQUAL, 0)
+}
+
 func (s *ComparisonContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(GrammarListener); ok {
 		listenerT.EnterComparison(s)
@@ -1158,6 +1173,59 @@ func (s *ComparisonContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	switch t := visitor.(type) {
 	case GrammarVisitor:
 		return t.VisitComparison(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type BooleanContext struct {
+	ExprContext
+	val antlr.Token
+}
+
+func NewBooleanContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *BooleanContext {
+	var p = new(BooleanContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *BooleanContext) GetVal() antlr.Token { return s.val }
+
+func (s *BooleanContext) SetVal(v antlr.Token) { s.val = v }
+
+func (s *BooleanContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *BooleanContext) TRUE() antlr.TerminalNode {
+	return s.GetToken(GrammarParserTRUE, 0)
+}
+
+func (s *BooleanContext) FALSE() antlr.TerminalNode {
+	return s.GetToken(GrammarParserFALSE, 0)
+}
+
+func (s *BooleanContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(GrammarListener); ok {
+		listenerT.EnterBoolean(s)
+	}
+}
+
+func (s *BooleanContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(GrammarListener); ok {
+		listenerT.ExitBoolean(s)
+	}
+}
+
+func (s *BooleanContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case GrammarVisitor:
+		return t.VisitBoolean(s)
 
 	default:
 		return t.VisitChildren(s)
@@ -1182,7 +1250,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(34)
+	p.SetState(35)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1216,12 +1284,35 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 
+	case GrammarParserTRUE, GrammarParserFALSE:
+		localctx = NewBooleanContext(p, localctx)
+		p.SetParserRuleContext(localctx)
+		_prevctx = localctx
+		{
+			p.SetState(34)
+
+			var _lt = p.GetTokenStream().LT(1)
+
+			localctx.(*BooleanContext).val = _lt
+
+			_la = p.GetTokenStream().LA(1)
+
+			if !(_la == GrammarParserTRUE || _la == GrammarParserFALSE) {
+				var _ri = p.GetErrorHandler().RecoverInline(p)
+
+				localctx.(*BooleanContext).val = _ri
+			} else {
+				p.GetErrorHandler().ReportMatch(p)
+				p.Consume()
+			}
+		}
+
 	default:
 		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
 		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
-	p.SetState(47)
+	p.SetState(48)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1236,7 +1327,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				p.TriggerExitRuleEvent()
 			}
 			_prevctx = localctx
-			p.SetState(45)
+			p.SetState(46)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -1246,14 +1337,14 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 			case 1:
 				localctx = NewMulDivContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, GrammarParserRULE_expr)
-				p.SetState(36)
+				p.SetState(37)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 5)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 6)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 6)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(37)
+					p.SetState(38)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -1271,21 +1362,21 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(38)
-					p.expr(6)
+					p.SetState(39)
+					p.expr(7)
 				}
 
 			case 2:
 				localctx = NewAddSubContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, GrammarParserRULE_expr)
-				p.SetState(39)
+				p.SetState(40)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 4)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 4)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 5)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(40)
+					p.SetState(41)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -1303,21 +1394,21 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(41)
-					p.expr(5)
+					p.SetState(42)
+					p.expr(6)
 				}
 
 			case 3:
 				localctx = NewComparisonContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, GrammarParserRULE_expr)
-				p.SetState(42)
+				p.SetState(43)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 3)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 3)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 4)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 4)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(43)
+					p.SetState(44)
 
 					var _lt = p.GetTokenStream().LT(1)
 
@@ -1325,7 +1416,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 					_la = p.GetTokenStream().LA(1)
 
-					if !(_la == GrammarParserLESS || _la == GrammarParserGREATER) {
+					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1920) != 0) {
 						var _ri = p.GetErrorHandler().RecoverInline(p)
 
 						localctx.(*ComparisonContext).op = _ri
@@ -1335,8 +1426,8 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(44)
-					p.expr(4)
+					p.SetState(45)
+					p.expr(5)
 				}
 
 			case antlr.ATNInvalidAltNumber:
@@ -1344,7 +1435,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 			}
 
 		}
-		p.SetState(49)
+		p.SetState(50)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1385,13 +1476,13 @@ func (p *GrammarParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex
 func (p *GrammarParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) bool {
 	switch predIndex {
 	case 0:
-		return p.Precpred(p.GetParserRuleContext(), 5)
+		return p.Precpred(p.GetParserRuleContext(), 6)
 
 	case 1:
-		return p.Precpred(p.GetParserRuleContext(), 4)
+		return p.Precpred(p.GetParserRuleContext(), 5)
 
 	case 2:
-		return p.Precpred(p.GetParserRuleContext(), 3)
+		return p.Precpred(p.GetParserRuleContext(), 4)
 
 	default:
 		panic("No predicate with index: " + fmt.Sprint(predIndex))

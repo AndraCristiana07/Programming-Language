@@ -35,6 +35,9 @@ type GrammarListener interface {
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
 
+	// EnterBoolean is called when entering the Boolean production.
+	EnterBoolean(c *BooleanContext)
+
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
 
@@ -61,4 +64,7 @@ type GrammarListener interface {
 
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
+
+	// ExitBoolean is called when exiting the Boolean production.
+	ExitBoolean(c *BooleanContext)
 }

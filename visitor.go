@@ -100,3 +100,41 @@ func (v *Visitor) VisitMulDiv(ctx *parser.MulDivContext) any {
 		panic("Unknown operator: " + op)
 	}
 }
+
+func (v *Visitor) VisitBoolean(ctx *parser.BooleanContext) any {
+	val := ctx.GetVal().GetText()
+	if val == "true" {
+		return true
+	}
+	return false
+}
+
+func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+	op := ctx.GetOp().GetText()
+
+	switch op {
+	case "==":
+		return left == right
+	case "!=":
+		return left != right
+	case "<":
+		lVal, lOk := left.(int)
+		rVal, rOk := right.(int)
+		if lOk && rOk {
+			return lVal < rVal
+		}
+		panic("Comparison operator '<' requires integer operands")
+	case ">":
+		lVal, lOk := left.(int)
+		rVal, rOk := right.(int)
+		if lOk && rOk {
+			return lVal > rVal
+		}
+		panic("Comparison operator '>' requires integer operands")
+
+	default:
+		panic("Unknown operator: " + op)
+	}
+}

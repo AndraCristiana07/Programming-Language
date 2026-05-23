@@ -10,7 +10,11 @@ import (
 func main() {
 	inputCode := `
 		var x = 10 * 5
-		x = x + 1`
+		x = x + 1
+		var isGreater = 10 > 5
+		var checkEquality = isGreater == true
+		var uneqTest = 5 != 3
+		`
 
 	input := antlr.NewInputStream(inputCode)
 

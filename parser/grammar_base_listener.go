@@ -74,3 +74,9 @@ func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
 
 // ExitComparison is called when production Comparison is exited.
 func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
+
+// EnterBoolean is called when production Boolean is entered.
+func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}
+
+// ExitBoolean is called when production Boolean is exited.
+func (s *BaseGrammarListener) ExitBoolean(ctx *BooleanContext) {}

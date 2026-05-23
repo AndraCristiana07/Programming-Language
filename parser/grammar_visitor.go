@@ -34,4 +34,7 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#Boolean.
+	VisitBoolean(ctx *BooleanContext) interface{}
 }

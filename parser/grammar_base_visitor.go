@@ -43,3 +43,7 @@ func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
 func (v *BaseGrammarVisitor) VisitComparison(ctx *ComparisonContext) interface{} {
 	return v.VisitChildren(ctx)
 }
+
+func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
