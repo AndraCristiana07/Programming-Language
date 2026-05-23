@@ -41,6 +41,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.BlockStmt().Accept(v)
 	} else if ctx.IfStmt() != nil {
 		return ctx.IfStmt().Accept(v)
+	} else if ctx.WhileStmt() != nil {
+		return ctx.WhileStmt().Accept(v)
 	}
 	return nil
 }
@@ -204,5 +206,21 @@ func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
 		ctx.GetElseBranch().Accept(v)
 	}
 
+	return nil
+}
+
+func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
+	for {
+		condition := ctx.Expr().Accept(v)
+		conditionBool, ok := condition.(bool)
+		if !ok {
+			panic("Condition in while statement must be boolean")
+		}
+
+		if !conditionBool {
+			break
+		}
+		ctx.GetBody().Accept(v)
+	}
 	return nil
 }

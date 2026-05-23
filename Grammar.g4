@@ -6,6 +6,7 @@ statement   : varDecl
             | assignStmt   
             | printStmt   
             | ifStmt 
+            | whileStmt
             | blockStmt 
             ;
 
@@ -13,6 +14,7 @@ varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
+whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
 blockStmt   : LBRACE statement* RBRACE ;
 
 expr        : expr op=(STAR | SLASH) expr    # MulDiv
@@ -43,6 +45,7 @@ RPAREN          : ')' ;
 RBRACE          : '}' ;
 IF              : 'if' ;
 ELSE            : 'else' ;
+WHILE           : 'while' ;
 
 PRINT           : 'print' ;
 TRUE            : 'true' ;

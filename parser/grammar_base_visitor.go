@@ -32,6 +32,10 @@ func (v *BaseGrammarVisitor) VisitIfStmt(ctx *IfStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitWhileStmt(ctx *WhileStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitBlockStmt(ctx *BlockStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }

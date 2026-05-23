@@ -26,6 +26,9 @@ type GrammarListener interface {
 	// EnterIfStmt is called when entering the ifStmt production.
 	EnterIfStmt(c *IfStmtContext)
 
+	// EnterWhileStmt is called when entering the whileStmt production.
+	EnterWhileStmt(c *WhileStmtContext)
+
 	// EnterBlockStmt is called when entering the blockStmt production.
 	EnterBlockStmt(c *BlockStmtContext)
 
@@ -67,6 +70,9 @@ type GrammarListener interface {
 
 	// ExitIfStmt is called when exiting the ifStmt production.
 	ExitIfStmt(c *IfStmtContext)
+
+	// ExitWhileStmt is called when exiting the whileStmt production.
+	ExitWhileStmt(c *WhileStmtContext)
 
 	// ExitBlockStmt is called when exiting the blockStmt production.
 	ExitBlockStmt(c *BlockStmtContext)
