@@ -7,6 +7,7 @@ statement   : varDecl
             | printStmt   
             | ifStmt 
             | whileStmt
+            | forStmt
             | blockStmt 
             ;
 
@@ -15,7 +16,12 @@ assignStmt  : IDENTIFIER EQUALS expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
+forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=assignStmt RPAREN body=blockStmt ;
 blockStmt   : LBRACE statement* RBRACE ;
+
+forInit     : varDecl
+            | assignStmt
+            ;
 
 expr        : expr op=(STAR | SLASH) expr    # MulDiv
             | expr op=(PLUS | MINUS) expr    # AddSub
@@ -46,6 +52,8 @@ RBRACE          : '}' ;
 IF              : 'if' ;
 ELSE            : 'else' ;
 WHILE           : 'while' ;
+FOR             : 'for' ;
+SEMICOLON       : ';' ;
 
 PRINT           : 'print' ;
 TRUE            : 'true' ;

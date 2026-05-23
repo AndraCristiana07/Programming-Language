@@ -63,11 +63,23 @@ func (s *BaseGrammarListener) EnterWhileStmt(ctx *WhileStmtContext) {}
 // ExitWhileStmt is called when production whileStmt is exited.
 func (s *BaseGrammarListener) ExitWhileStmt(ctx *WhileStmtContext) {}
 
+// EnterForStmt is called when production forStmt is entered.
+func (s *BaseGrammarListener) EnterForStmt(ctx *ForStmtContext) {}
+
+// ExitForStmt is called when production forStmt is exited.
+func (s *BaseGrammarListener) ExitForStmt(ctx *ForStmtContext) {}
+
 // EnterBlockStmt is called when production blockStmt is entered.
 func (s *BaseGrammarListener) EnterBlockStmt(ctx *BlockStmtContext) {}
 
 // ExitBlockStmt is called when production blockStmt is exited.
 func (s *BaseGrammarListener) ExitBlockStmt(ctx *BlockStmtContext) {}
+
+// EnterForInit is called when production forInit is entered.
+func (s *BaseGrammarListener) EnterForInit(ctx *ForInitContext) {}
+
+// ExitForInit is called when production forInit is exited.
+func (s *BaseGrammarListener) ExitForInit(ctx *ForInitContext) {}
 
 // EnterIdentifier is called when production Identifier is entered.
 func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}

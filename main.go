@@ -38,6 +38,11 @@ func main() {
 			i = i + 1
 		}
 		print "i is: " + i
+
+		for (var j = 0; j < 4; j = j + 1) {
+			print "I am number: " + j
+		}
+			
 		`
 
 	input := antlr.NewInputStream(inputCode)

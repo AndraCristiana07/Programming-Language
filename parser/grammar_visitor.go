@@ -29,8 +29,14 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#whileStmt.
 	VisitWhileStmt(ctx *WhileStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#forStmt.
+	VisitForStmt(ctx *ForStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#blockStmt.
 	VisitBlockStmt(ctx *BlockStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#forInit.
+	VisitForInit(ctx *ForInitContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}

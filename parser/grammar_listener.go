@@ -29,8 +29,14 @@ type GrammarListener interface {
 	// EnterWhileStmt is called when entering the whileStmt production.
 	EnterWhileStmt(c *WhileStmtContext)
 
+	// EnterForStmt is called when entering the forStmt production.
+	EnterForStmt(c *ForStmtContext)
+
 	// EnterBlockStmt is called when entering the blockStmt production.
 	EnterBlockStmt(c *BlockStmtContext)
+
+	// EnterForInit is called when entering the forInit production.
+	EnterForInit(c *ForInitContext)
 
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
@@ -74,8 +80,14 @@ type GrammarListener interface {
 	// ExitWhileStmt is called when exiting the whileStmt production.
 	ExitWhileStmt(c *WhileStmtContext)
 
+	// ExitForStmt is called when exiting the forStmt production.
+	ExitForStmt(c *ForStmtContext)
+
 	// ExitBlockStmt is called when exiting the blockStmt production.
 	ExitBlockStmt(c *BlockStmtContext)
+
+	// ExitForInit is called when exiting the forInit production.
+	ExitForInit(c *ForInitContext)
 
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)

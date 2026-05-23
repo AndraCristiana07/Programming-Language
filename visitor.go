@@ -43,6 +43,18 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.IfStmt().Accept(v)
 	} else if ctx.WhileStmt() != nil {
 		return ctx.WhileStmt().Accept(v)
+	} else if ctx.ForStmt() != nil {
+		return ctx.ForStmt().Accept(v)
+	}
+
+	return nil
+}
+
+func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {
+	if ctx.VarDecl() != nil {
+		return ctx.VarDecl().Accept(v)
+	} else if ctx.AssignStmt() != nil {
+		return ctx.AssignStmt().Accept(v)
 	}
 	return nil
 }
@@ -222,5 +234,33 @@ func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
 		}
 		ctx.GetBody().Accept(v)
 	}
+	return nil
+}
+
+func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
+	if ctx.GetInit() != nil {
+		ctx.GetInit().Accept(v)
+	}
+
+	for {
+		if ctx.GetCond() != nil {
+			condition := ctx.GetCond().Accept(v)
+			conditionBool, ok := condition.(bool)
+			if !ok {
+				panic("For loop condition must evaluate to a boolean expression")
+			}
+			if !conditionBool {
+				break
+			}
+		}
+		if ctx.GetBody() != nil {
+			ctx.GetBody().Accept(v)
+		}
+
+		if ctx.GetPost() != nil {
+			ctx.GetPost().Accept(v)
+		}
+	}
+
 	return nil
 }
