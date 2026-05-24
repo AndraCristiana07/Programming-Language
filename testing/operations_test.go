@@ -371,6 +371,11 @@ func TestBitwise(t *testing.T) {
 			`,
 			expected: 2,
 		},
+		{
+			name:     "Bitwise not",
+			input:    "var testResult = ~5",
+			expected: -6,
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
