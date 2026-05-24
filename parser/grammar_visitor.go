@@ -20,6 +20,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#assignStmt.
 	VisitAssignStmt(ctx *AssignStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#arrayAssignStmt.
+	VisitArrayAssignStmt(ctx *ArrayAssignStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#compoundAssignStmt.
 	VisitCompoundAssignStmt(ctx *CompoundAssignStmtContext) interface{}
 
@@ -64,6 +67,12 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#String.
 	VisitString(ctx *StringContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#ArrayLiteral.
+	VisitArrayLiteral(ctx *ArrayLiteralContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#ArrayIndex.
+	VisitArrayIndex(ctx *ArrayIndexContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Unary.
 	VisitUnary(ctx *UnaryContext) interface{}

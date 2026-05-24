@@ -20,6 +20,9 @@ type GrammarListener interface {
 	// EnterAssignStmt is called when entering the assignStmt production.
 	EnterAssignStmt(c *AssignStmtContext)
 
+	// EnterArrayAssignStmt is called when entering the arrayAssignStmt production.
+	EnterArrayAssignStmt(c *ArrayAssignStmtContext)
+
 	// EnterCompoundAssignStmt is called when entering the compoundAssignStmt production.
 	EnterCompoundAssignStmt(c *CompoundAssignStmtContext)
 
@@ -65,6 +68,12 @@ type GrammarListener interface {
 	// EnterString is called when entering the String production.
 	EnterString(c *StringContext)
 
+	// EnterArrayLiteral is called when entering the ArrayLiteral production.
+	EnterArrayLiteral(c *ArrayLiteralContext)
+
+	// EnterArrayIndex is called when entering the ArrayIndex production.
+	EnterArrayIndex(c *ArrayIndexContext)
+
 	// EnterUnary is called when entering the Unary production.
 	EnterUnary(c *UnaryContext)
 
@@ -106,6 +115,9 @@ type GrammarListener interface {
 
 	// ExitAssignStmt is called when exiting the assignStmt production.
 	ExitAssignStmt(c *AssignStmtContext)
+
+	// ExitArrayAssignStmt is called when exiting the arrayAssignStmt production.
+	ExitArrayAssignStmt(c *ArrayAssignStmtContext)
 
 	// ExitCompoundAssignStmt is called when exiting the compoundAssignStmt production.
 	ExitCompoundAssignStmt(c *CompoundAssignStmtContext)
@@ -151,6 +163,12 @@ type GrammarListener interface {
 
 	// ExitString is called when exiting the String production.
 	ExitString(c *StringContext)
+
+	// ExitArrayLiteral is called when exiting the ArrayLiteral production.
+	ExitArrayLiteral(c *ArrayLiteralContext)
+
+	// ExitArrayIndex is called when exiting the ArrayIndex production.
+	ExitArrayIndex(c *ArrayIndexContext)
 
 	// ExitUnary is called when exiting the Unary production.
 	ExitUnary(c *UnaryContext)

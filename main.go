@@ -116,6 +116,12 @@ func main() {
 		var bitnot = ~5
 		print "~5 is: " + bitnot
 	  
+		var arr = [1, 2, 3]
+		print "Array: " + arr
+
+		print "Array element at index 1: " + arr[1]
+		arr[0] = 10
+		print "Modified Array: " + arr
 	
 		`
 

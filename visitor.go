@@ -35,6 +35,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
+	} else if ctx.ArrayAssignStmt() != nil {
+		return ctx.ArrayAssignStmt().Accept(v)
 	} else if ctx.CompoundAssignStmt() != nil {
 		return ctx.CompoundAssignStmt().Accept(v)
 	} else if ctx.PrintStmt() != nil {
@@ -486,6 +488,58 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 		panic("Operands of 'or' must be boolean")
 	}
 	return leftBool || rightBool
+}
+
+func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
+	array := ctx.Expr(0).Accept(v)
+	index := ctx.Expr(1).Accept(v)
+
+	arr, ok := array.([]any)
+	if !ok {
+		panic("Attempting to index a non-array value")
+	}
+
+	idx, ok := index.(int)
+	if !ok {
+		panic("Array index must be an integer")
+	}
+
+	if idx < 0 || idx >= len(arr) {
+		panic("Array index out of bounds")
+	}
+
+	return arr[idx]
+}
+
+func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
+	var elements []any
+	for _, expr := range ctx.AllExpr() {
+		elements = append(elements, expr.Accept(v))
+	}
+	return elements
+}
+
+func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
+	varName := ctx.IDENTIFIER().GetText()
+	index := ctx.Expr(0).Accept(v)
+	value := ctx.Expr(1).Accept(v)
+
+	arr, ok := v.vars[varName].([]any)
+	if !ok {
+		panic("Attempting to index a non-array variable: " + varName)
+	}
+
+	idx, ok := index.(int)
+	if !ok {
+		panic("Array index must be an integer")
+	}
+
+	if idx < 0 || idx >= len(arr) {
+		panic("Array index out of bounds")
+	}
+
+	arr[idx] = value
+	return nil
 }
 
 func power(base, exp int) int {

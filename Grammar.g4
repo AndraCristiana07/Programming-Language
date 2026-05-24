@@ -4,6 +4,7 @@ program    : statement* EOF ;
 
 statement   : varDecl      
             | assignStmt   
+            | arrayAssignStmt
             | compoundAssignStmt
             | printStmt   
             | ifStmt 
@@ -15,6 +16,7 @@ statement   : varDecl
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
+arrayAssignStmt : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt : IDENTIFIER op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL) expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
@@ -32,22 +34,24 @@ forPost   : assignStmt
             
 postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
-expr        : (op=NOT | op=BITNOT) expr  # Unary
-            | expr op=EXPONENTIAL expr  # Exponential
-            | expr op=(STAR | SLASH | MODULO) expr    # MulDivMod
-            | expr op=(PLUS | MINUS) expr    # AddSub
-            | expr op=(BITLSHIFT | BITRSHIFT) expr  # BitShift
-            | expr op=BITAND expr          # BitAnd
-            | expr op=BITXOR expr          # BitXor
-            | expr op=BITOR expr           # BitOr
+expr        : expr LBRACKET expr RBRACKET               # ArrayIndex
+            | (op=NOT | op=BITNOT) expr                 # Unary
+            | expr op=EXPONENTIAL expr                  # Exponential
+            | expr op=(STAR | SLASH | MODULO) expr      # MulDivMod
+            | expr op=(PLUS | MINUS) expr               # AddSub
+            | expr op=(BITLSHIFT | BITRSHIFT) expr      # BitShift
+            | expr op=BITAND expr                       # BitAnd
+            | expr op=BITXOR expr                       # BitXor
+            | expr op=BITOR expr                        # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
-            | expr op=AND expr               # And
-            | expr op=OR expr                # Or
-            | IDENTIFIER                     # Identifier          
-            | NUMBER                         # Number     
-            | val=(TRUE | FALSE)             # Boolean
-            | STRING                         # String
-            | LPAREN expr RPAREN             # Parentheses
+            | expr op=AND expr                          # And
+            | expr op=OR expr                           # Or
+            | LBRACKET (expr (COMMA expr)*)? RBRACKET   # ArrayLiteral
+            | IDENTIFIER                                # Identifier          
+            | NUMBER                                    # Number     
+            | val=(TRUE | FALSE)                        # Boolean
+            | STRING                                    # String
+            | LPAREN expr RPAREN                        # Parentheses
             ;
 
 
@@ -63,15 +67,22 @@ EQUALEQUAL      : '==' ;
 BANGEQUAL       : '!=' ;
 LESSEQUAL       : '<=' ;
 GREATEREQUAL    : '>=' ;
+
 LBRACE          : '{' ;
 LPAREN          : '(' ;
 RPAREN          : ')' ;
 RBRACE          : '}' ;
+LBRACKET        : '[' ;
+RBRACKET        : ']' ;
+
 IF              : 'if' ;
 ELSE            : 'else' ;
 WHILE           : 'while' ;
 FOR             : 'for' ;
+
 SEMICOLON       : ';' ;
+COMMA           : ',' ;
+
 INC             : '++' ;
 DEC             : '--' ;
 MODULO          : '%' ;

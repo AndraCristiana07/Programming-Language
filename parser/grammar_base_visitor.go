@@ -24,6 +24,10 @@ func (v *BaseGrammarVisitor) VisitAssignStmt(ctx *AssignStmtContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitArrayAssignStmt(ctx *ArrayAssignStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitCompoundAssignStmt(ctx *CompoundAssignStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -81,6 +85,14 @@ func (v *BaseGrammarVisitor) VisitExponential(ctx *ExponentialContext) interface
 }
 
 func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitArrayLiteral(ctx *ArrayLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitArrayIndex(ctx *ArrayIndexContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

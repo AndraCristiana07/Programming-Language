@@ -45,6 +45,12 @@ func (s *BaseGrammarListener) EnterAssignStmt(ctx *AssignStmtContext) {}
 // ExitAssignStmt is called when production assignStmt is exited.
 func (s *BaseGrammarListener) ExitAssignStmt(ctx *AssignStmtContext) {}
 
+// EnterArrayAssignStmt is called when production arrayAssignStmt is entered.
+func (s *BaseGrammarListener) EnterArrayAssignStmt(ctx *ArrayAssignStmtContext) {}
+
+// ExitArrayAssignStmt is called when production arrayAssignStmt is exited.
+func (s *BaseGrammarListener) ExitArrayAssignStmt(ctx *ArrayAssignStmtContext) {}
+
 // EnterCompoundAssignStmt is called when production compoundAssignStmt is entered.
 func (s *BaseGrammarListener) EnterCompoundAssignStmt(ctx *CompoundAssignStmtContext) {}
 
@@ -134,6 +140,18 @@ func (s *BaseGrammarListener) EnterString(ctx *StringContext) {}
 
 // ExitString is called when production String is exited.
 func (s *BaseGrammarListener) ExitString(ctx *StringContext) {}
+
+// EnterArrayLiteral is called when production ArrayLiteral is entered.
+func (s *BaseGrammarListener) EnterArrayLiteral(ctx *ArrayLiteralContext) {}
+
+// ExitArrayLiteral is called when production ArrayLiteral is exited.
+func (s *BaseGrammarListener) ExitArrayLiteral(ctx *ArrayLiteralContext) {}
+
+// EnterArrayIndex is called when production ArrayIndex is entered.
+func (s *BaseGrammarListener) EnterArrayIndex(ctx *ArrayIndexContext) {}
+
+// ExitArrayIndex is called when production ArrayIndex is exited.
+func (s *BaseGrammarListener) ExitArrayIndex(ctx *ArrayIndexContext) {}
 
 // EnterUnary is called when production Unary is entered.
 func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
