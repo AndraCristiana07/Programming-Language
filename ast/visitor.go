@@ -418,6 +418,16 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		result = intCurrentValue % intValue
 	case "**=":
 		result = power(intCurrentValue, intValue)
+	case "&=":
+		result = intCurrentValue & intValue
+	case "|=":
+		result = intCurrentValue | intValue
+	case "^=":
+		result = intCurrentValue ^ intValue
+	case "<<=":
+		result = intCurrentValue << intValue
+	case ">>=":
+		result = intCurrentValue >> intValue
 	default:
 		panic("Unknown compound assignment operator: " + op)
 	}

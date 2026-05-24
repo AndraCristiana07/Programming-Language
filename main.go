@@ -140,6 +140,10 @@ func main() {
 		var fact5 = factorial(5)
 		print "Factorial of 5: " + fact5
 		print "Factorial of 0: " + factorial(0)
+
+		var bitcomp = 5
+		bitcomp &= 5
+		print bitcomp
 		`
 
 	input := antlr.NewInputStream(inputCode)
