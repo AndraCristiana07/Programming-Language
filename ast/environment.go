@@ -1,4 +1,4 @@
-package my_language
+package ast
 
 type Environment struct {
 	vars   map[string]any

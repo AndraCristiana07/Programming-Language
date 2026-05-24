@@ -33,6 +33,24 @@ func (s *BaseGrammarListener) EnterStatement(ctx *StatementContext) {}
 // ExitStatement is called when production statement is exited.
 func (s *BaseGrammarListener) ExitStatement(ctx *StatementContext) {}
 
+// EnterReturnStmt is called when production returnStmt is entered.
+func (s *BaseGrammarListener) EnterReturnStmt(ctx *ReturnStmtContext) {}
+
+// ExitReturnStmt is called when production returnStmt is exited.
+func (s *BaseGrammarListener) ExitReturnStmt(ctx *ReturnStmtContext) {}
+
+// EnterTerminator is called when production terminator is entered.
+func (s *BaseGrammarListener) EnterTerminator(ctx *TerminatorContext) {}
+
+// ExitTerminator is called when production terminator is exited.
+func (s *BaseGrammarListener) ExitTerminator(ctx *TerminatorContext) {}
+
+// EnterFuncStmt is called when production funcStmt is entered.
+func (s *BaseGrammarListener) EnterFuncStmt(ctx *FuncStmtContext) {}
+
+// ExitFuncStmt is called when production funcStmt is exited.
+func (s *BaseGrammarListener) ExitFuncStmt(ctx *FuncStmtContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 
@@ -200,6 +218,12 @@ func (s *BaseGrammarListener) EnterBitAnd(ctx *BitAndContext) {}
 
 // ExitBitAnd is called when production BitAnd is exited.
 func (s *BaseGrammarListener) ExitBitAnd(ctx *BitAndContext) {}
+
+// EnterFunctionCall is called when production FunctionCall is entered.
+func (s *BaseGrammarListener) EnterFunctionCall(ctx *FunctionCallContext) {}
+
+// ExitFunctionCall is called when production FunctionCall is exited.
+func (s *BaseGrammarListener) ExitFunctionCall(ctx *FunctionCallContext) {}
 
 // EnterBoolean is called when production Boolean is entered.
 func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}

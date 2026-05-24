@@ -14,6 +14,15 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#statement.
 	VisitStatement(ctx *StatementContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#returnStmt.
+	VisitReturnStmt(ctx *ReturnStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#terminator.
+	VisitTerminator(ctx *TerminatorContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#funcStmt.
+	VisitFuncStmt(ctx *FuncStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 
@@ -97,6 +106,9 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#BitAnd.
 	VisitBitAnd(ctx *BitAndContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#FunctionCall.
+	VisitFunctionCall(ctx *FunctionCallContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}

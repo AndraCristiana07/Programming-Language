@@ -1,4 +1,4 @@
-package main
+package ast
 
 import (
 	"fmt"
@@ -10,12 +10,24 @@ import (
 
 type Visitor struct {
 	parser.BaseGrammarVisitor
-	vars map[string]any
+	// vars map[string]any
+	// also add env
+	currEnv *Environment
+}
+
+type ReturnValueSignal struct {
+	Value any
+}
+
+type RuntimeFunction struct {
+	Parameters []string
+	Body       *parser.BlockStmtContext
 }
 
 func NewVisitor() *Visitor {
 	return &Visitor{
-		vars: make(map[string]any),
+		// vars:    make(map[string]any),
+		currEnv: NewEnvironment(),
 	}
 }
 
@@ -23,9 +35,14 @@ func (v *Visitor) Visit(tree antlr.ParseTree) any {
 	return tree.Accept(v)
 }
 
+func (v *Visitor) GetEnvironment() *Environment { return v.currEnv }
+
 func (v *Visitor) VisitProgram(ctx *parser.ProgramContext) any {
-	for _, stmt := range ctx.AllStatement() {
-		stmt.Accept(v)
+	//loop over statements and function declarations
+	for _, child := range ctx.GetChildren() {
+		if parseTree, ok := child.(antlr.ParseTree); ok {
+			parseTree.Accept(v)
+		}
 	}
 	return nil
 }
@@ -51,6 +68,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ForStmt().Accept(v)
 	} else if ctx.PostfixStmt() != nil {
 		return ctx.PostfixStmt().Accept(v)
+	} else if ctx.ReturnStmt() != nil {
+		return ctx.ReturnStmt().Accept(v)
 	}
 
 	return nil
@@ -77,14 +96,18 @@ func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
 func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
-	v.vars[varName] = value
+	// v.vars[varName] = value
+	v.currEnv.Define(varName, value)
 	return nil
 }
 
 func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
-	v.vars[varName] = value
+	// v.vars[varName] = value
+	if !v.currEnv.Assign(varName, value) {
+		panic("Undefined variable: " + varName)
+	}
 	return nil
 }
 
@@ -92,7 +115,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	op := ctx.GetOp().GetText()
 
-	value, exists := v.vars[varName]
+	value, exists := v.currEnv.Lookup(varName)
 	if !exists {
 		panic("Undefined variable: " + varName)
 	}
@@ -111,7 +134,10 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 		panic("Unknown postfix operator: " + op)
 	}
 
-	v.vars[varName] = intValue
+	if !v.currEnv.Assign(varName, intValue) {
+		panic("Failed to assign value to variable: " + varName)
+	}
+
 	return nil
 }
 
@@ -123,7 +149,12 @@ func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
 
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 	varName := ctx.IDENTIFIER().GetText()
-	return v.vars[varName]
+	// return v.vars[varName]
+	val, exists := v.currEnv.Lookup(varName)
+	if !exists {
+		panic("Undefined variable: " + varName)
+	}
+	return val
 }
 
 func (v *Visitor) VisitString(ctx *parser.StringContext) any {
@@ -262,8 +293,12 @@ func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 }
 
 func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
-	for _, stmt := range ctx.AllStatement() {
-		stmt.Accept(v)
+	for _, child := range ctx.GetChildren() {
+		if stmt, ok := child.(*parser.StatementContext); ok {
+			if stmt != nil {
+				stmt.Accept(v)
+			}
+		}
 	}
 	return nil
 }
@@ -333,7 +368,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	op := ctx.GetOp().GetText()
 	value := ctx.Expr().Accept(v)
 
-	currentValue, exists := v.vars[varName]
+	currentValue, exists := v.currEnv.Lookup(varName)
 	if !exists {
 		panic("Undefined variable: " + varName)
 	}
@@ -341,7 +376,10 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	// handle string concatenation for +=
 	if op == "+=" {
 		if strVal, ok := currentValue.(string); ok {
-			v.vars[varName] = strVal + fmt.Sprintf("%v", value)
+			if !v.currEnv.Assign(varName, strVal+fmt.Sprintf("%v", value)) {
+				panic("Failed to assign value to variable: " + varName)
+			}
+
 			return nil
 		}
 	}
@@ -356,29 +394,32 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		panic("Right-hand side of compound assignment must be an integer")
 	}
 
+	var result int
 	switch op {
 	case "+=":
-		v.vars[varName] = intCurrentValue + intValue
+		result = intCurrentValue + intValue
 	case "-=":
-		v.vars[varName] = intCurrentValue - intValue
+		result = intCurrentValue - intValue
 	case "*=":
-		v.vars[varName] = intCurrentValue * intValue
+		result = intCurrentValue * intValue
 	case "/=":
 		if intValue == 0 {
 			panic("Division by zero in compound assignment")
 		}
-		v.vars[varName] = intCurrentValue / intValue
+		result = intCurrentValue / intValue
 	case "%=":
 		if intValue == 0 {
 			panic("Modulo by zero in compound assignment")
 		}
-		v.vars[varName] = intCurrentValue % intValue
+		result = intCurrentValue % intValue
 	case "**=":
-		v.vars[varName] = power(intCurrentValue, intValue)
+		result = power(intCurrentValue, intValue)
 	default:
 		panic("Unknown compound assignment operator: " + op)
 	}
-
+	if !v.currEnv.Assign(varName, result) {
+		panic("Failed to assign value to variable: " + varName)
+	}
 	return nil
 }
 
@@ -524,7 +565,12 @@ func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 	index := ctx.Expr(0).Accept(v)
 	value := ctx.Expr(1).Accept(v)
 
-	arr, ok := v.vars[varName].([]any)
+	target, ok := v.currEnv.Lookup(varName)
+	if !ok {
+		panic("Undefined variable: " + varName)
+	}
+
+	arr, ok := target.([]any)
 	if !ok {
 		panic("Attempting to index a non-array variable: " + varName)
 	}
@@ -540,6 +586,92 @@ func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 
 	arr[idx] = value
 	return nil
+}
+
+func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
+	funcName := ctx.IDENTIFIER(0).GetText()
+
+	var params []string
+	i := 1
+	for {
+		paramNode := ctx.IDENTIFIER(i)
+		if paramNode == nil {
+			break
+		}
+		params = append(params, paramNode.GetText())
+		i++
+	}
+
+	v.currEnv.Define(funcName, &RuntimeFunction{
+		Parameters: params,
+		Body:       ctx.BlockStmt().(*parser.BlockStmtContext),
+	})
+
+	return nil
+}
+
+func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
+	funcName := ctx.IDENTIFIER().GetText()
+
+	fn, exists := v.currEnv.Lookup(funcName)
+	if !exists {
+		panic("Undefined function: " + funcName)
+	}
+
+	runtimeFunc, ok := fn.(*RuntimeFunction)
+	if !ok {
+		panic(funcName + " is not a function")
+	}
+
+	if len(ctx.AllExpr()) != len(runtimeFunc.Parameters) {
+		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, len(runtimeFunc.Parameters), len(ctx.AllExpr())))
+	}
+
+	// evaluate arguments on the curr execution scope level
+	var argValues []any
+	for _, argExpr := range ctx.AllExpr() {
+		argValues = append(argValues, argExpr.Accept(v))
+	}
+
+	// 🔍 create nested scope referencing the current active environment
+	funcEnv := NewScope(v.currEnv)
+
+	// bind argument values to parameter keys
+	for i, paramName := range runtimeFunc.Parameters {
+		funcEnv.Define(paramName, argValues[i])
+	}
+
+	// keep track of our old env
+	previousEnv := v.currEnv
+	v.currEnv = funcEnv
+
+	var returnedVal any = nil
+	func() {
+		// safe recovery context to capture execution returns cleanly
+		defer func() {
+			if r := recover(); r != nil {
+				if returnSignal, ok := r.(ReturnValueSignal); ok {
+					returnedVal = returnSignal.Value
+				} else {
+					panic(r)
+				}
+			}
+		}()
+
+		runtimeFunc.Body.Accept(v)
+	}()
+
+	// restore the caller's environment right after the function finishes!
+	v.currEnv = previousEnv
+
+	return returnedVal
+}
+func (v *Visitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) any {
+	var returnValue any = nil
+	if ctx.Expr() != nil {
+		returnValue = ctx.Expr().Accept(v)
+	}
+	panic(ReturnValueSignal{Value: returnValue})
 }
 
 func power(base, exp int) int {

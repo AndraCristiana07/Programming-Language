@@ -14,6 +14,15 @@ type GrammarListener interface {
 	// EnterStatement is called when entering the statement production.
 	EnterStatement(c *StatementContext)
 
+	// EnterReturnStmt is called when entering the returnStmt production.
+	EnterReturnStmt(c *ReturnStmtContext)
+
+	// EnterTerminator is called when entering the terminator production.
+	EnterTerminator(c *TerminatorContext)
+
+	// EnterFuncStmt is called when entering the funcStmt production.
+	EnterFuncStmt(c *FuncStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -98,6 +107,9 @@ type GrammarListener interface {
 	// EnterBitAnd is called when entering the BitAnd production.
 	EnterBitAnd(c *BitAndContext)
 
+	// EnterFunctionCall is called when entering the FunctionCall production.
+	EnterFunctionCall(c *FunctionCallContext)
+
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
 
@@ -109,6 +121,15 @@ type GrammarListener interface {
 
 	// ExitStatement is called when exiting the statement production.
 	ExitStatement(c *StatementContext)
+
+	// ExitReturnStmt is called when exiting the returnStmt production.
+	ExitReturnStmt(c *ReturnStmtContext)
+
+	// ExitTerminator is called when exiting the terminator production.
+	ExitTerminator(c *TerminatorContext)
+
+	// ExitFuncStmt is called when exiting the funcStmt production.
+	ExitFuncStmt(c *FuncStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)
@@ -193,6 +214,9 @@ type GrammarListener interface {
 
 	// ExitBitAnd is called when exiting the BitAnd production.
 	ExitBitAnd(c *BitAndContext)
+
+	// ExitFunctionCall is called when exiting the FunctionCall production.
+	ExitFunctionCall(c *FunctionCallContext)
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)

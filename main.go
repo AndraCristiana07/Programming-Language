@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"my_language/ast"
 	"my_language/parser"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -122,7 +123,23 @@ func main() {
 		print "Array element at index 1: " + arr[1]
 		arr[0] = 10
 		print "Modified Array: " + arr
-	
+
+		func add(a, b) {
+			return a + b
+		}
+		var sum = add(5, 7)
+		print "Sum: " + sum
+
+		func factorial(n) {
+			if (n == 0) {
+				return 1
+			} else {
+				return n * factorial(n - 1)
+			}
+		}
+		var fact5 = factorial(5)
+		print "Factorial of 5: " + fact5
+		print "Factorial of 0: " + factorial(0)
 		`
 
 	input := antlr.NewInputStream(inputCode)
@@ -137,11 +154,11 @@ func main() {
 	fmt.Println("--- Parse Tree ---")
 	fmt.Println(tree.ToStringTree(nil, p))
 
-	eval := NewVisitor()
+	eval := ast.NewVisitor()
 	tree.Accept(eval)
 
-	fmt.Println("Final variable states:")
-	for k, v := range eval.vars {
-		fmt.Printf("%s = %v\n", k, v)
-	}
+	// fmt.Println("Final variable states:")
+	// for k, v := range eval.vars {
+	// 	fmt.Printf("%s = %v\n", k, v)
+	// }
 }

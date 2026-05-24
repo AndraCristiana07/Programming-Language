@@ -1,8 +1,8 @@
 grammar Grammar;
 
-program    : statement* EOF ;
+program    : (statement | funcStmt | terminator)* EOF ;
 
-statement   : varDecl      
+statement   : (varDecl      
             | assignStmt   
             | arrayAssignStmt
             | compoundAssignStmt
@@ -12,7 +12,12 @@ statement   : varDecl
             | forStmt
             | blockStmt 
             | postfixStmt
+            | returnStmt) terminator?
             ;
+
+returnStmt  : RETURN expr? ;
+terminator   : SEMICOLON | NL ;
+funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
@@ -22,7 +27,7 @@ printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
-blockStmt   : LBRACE statement* RBRACE ;
+blockStmt   : LBRACE (statement | terminator)* RBRACE ;
 
 forInit     : varDecl
             | assignStmt
@@ -34,24 +39,25 @@ forPost   : assignStmt
             
 postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
-expr        : expr LBRACKET expr RBRACKET               # ArrayIndex
-            | (op=NOT | op=BITNOT) expr                 # Unary
-            | expr op=EXPONENTIAL expr                  # Exponential
-            | expr op=(STAR | SLASH | MODULO) expr      # MulDivMod
-            | expr op=(PLUS | MINUS) expr               # AddSub
-            | expr op=(BITLSHIFT | BITRSHIFT) expr      # BitShift
-            | expr op=BITAND expr                       # BitAnd
-            | expr op=BITXOR expr                       # BitXor
-            | expr op=BITOR expr                        # BitOr
+expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
+            | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
+            | (op=NOT | op=BITNOT) expr                         # Unary
+            | expr op=EXPONENTIAL expr                          # Exponential
+            | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
+            | expr op=(PLUS | MINUS) expr                       # AddSub
+            | expr op=(BITLSHIFT | BITRSHIFT) expr              # BitShift
+            | expr op=BITAND expr                               # BitAnd
+            | expr op=BITXOR expr                               # BitXor
+            | expr op=BITOR expr                                # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
-            | expr op=AND expr                          # And
-            | expr op=OR expr                           # Or
-            | LBRACKET (expr (COMMA expr)*)? RBRACKET   # ArrayLiteral
-            | IDENTIFIER                                # Identifier          
-            | NUMBER                                    # Number     
-            | val=(TRUE | FALSE)                        # Boolean
-            | STRING                                    # String
-            | LPAREN expr RPAREN                        # Parentheses
+            | expr op=AND expr                                  # And
+            | expr op=OR expr                                   # Or
+            | LBRACKET (expr (COMMA expr)*)? RBRACKET           # ArrayLiteral
+            | IDENTIFIER                                        # Identifier          
+            | NUMBER                                            # Number     
+            | val=(TRUE | FALSE)                                # Boolean
+            | STRING                                            # String
+            | LPAREN expr RPAREN                                # Parentheses
             ;
 
 
@@ -102,7 +108,8 @@ BITLSHIFT       : '<<' ;
 BITRSHIFT       : '>>' ;
 BITNOT          : '~' ;
 
-
+FUNC            : 'func' ;
+RETURN          : 'return' ;
 PRINT           : 'print' ;
 TRUE            : 'true' ;
 FALSE           : 'false' ;
@@ -114,4 +121,5 @@ NOT             : 'not' ;
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
 NUMBER          : [0-9]+ ;
 STRING          : '"' (~["] | '""')* '"' ;
-WS              : [ \t\r\n]+ -> skip ;
+NL              : [\r\n]+ ;
+WS              : [ \t]+ -> skip ;
