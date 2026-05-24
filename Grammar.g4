@@ -27,7 +27,7 @@ printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
-blockStmt   : LBRACE (statement | terminator)* RBRACE ;
+blockStmt   : LBRACE (statement | funcStmt | terminator)* RBRACE ;
 
 forInit     : varDecl
             | assignStmt

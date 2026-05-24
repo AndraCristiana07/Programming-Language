@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"my_language/my_language"
 	"testing"
 )
 
@@ -51,12 +50,7 @@ func TestFunction(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -64,7 +58,7 @@ func TestFunction(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})

@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"my_language/my_language"
 	"testing"
 )
 
@@ -33,24 +32,16 @@ func TestAddition(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
-
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -84,23 +75,16 @@ func TestSubstraction(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -126,23 +110,16 @@ func TestMultiplication(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -168,23 +145,16 @@ func TestDivision(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -240,23 +210,16 @@ func TestMultipleOperations(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -282,23 +245,16 @@ func TestModulo(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -329,23 +285,16 @@ func TestIncDec(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -385,23 +334,16 @@ func TestBitwise(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}
@@ -431,23 +373,16 @@ func TestLogical(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
+			env := runInterpreter(tc.input)
 
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
-
-			// check the saved result
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("'testResult' variable was not created by the engine")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
 			if result != tc.expected {
-				t.Errorf("For %q: expected %v (%T), but got %v (%T)",
-					tc.input, tc.expected, tc.expected, result, result)
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}

@@ -3,7 +3,6 @@ package testing
 import (
 	"bytes"
 	"io"
-	"my_language/my_language"
 	"os"
 	"strings"
 	"testing"
@@ -61,12 +60,7 @@ func TestPrint(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-			env := my_language.NewEnvironment()
-
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			w.Close()
 			os.Stdout = oldStdout

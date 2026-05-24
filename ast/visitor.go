@@ -298,6 +298,10 @@ func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
 			if stmt != nil {
 				stmt.Accept(v)
 			}
+		} else if fn, ok := child.(*parser.FuncStmtContext); ok {
+			if fn != nil {
+				fn.Accept(v)
+			}
 		}
 	}
 	return nil
