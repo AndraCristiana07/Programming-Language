@@ -99,6 +99,12 @@ func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
 // ExitPostfixStmt is called when production postfixStmt is exited.
 func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
 
+// EnterNot is called when production Not is entered.
+func (s *BaseGrammarListener) EnterNot(ctx *NotContext) {}
+
+// ExitNot is called when production Not is exited.
+func (s *BaseGrammarListener) ExitNot(ctx *NotContext) {}
+
 // EnterMulDivMod is called when production MulDivMod is entered.
 func (s *BaseGrammarListener) EnterMulDivMod(ctx *MulDivModContext) {}
 
@@ -110,6 +116,12 @@ func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 
 // ExitIdentifier is called when production Identifier is exited.
 func (s *BaseGrammarListener) ExitIdentifier(ctx *IdentifierContext) {}
+
+// EnterOr is called when production Or is entered.
+func (s *BaseGrammarListener) EnterOr(ctx *OrContext) {}
+
+// ExitOr is called when production Or is exited.
+func (s *BaseGrammarListener) ExitOr(ctx *OrContext) {}
 
 // EnterNumber is called when production Number is entered.
 func (s *BaseGrammarListener) EnterNumber(ctx *NumberContext) {}
@@ -129,6 +141,12 @@ func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
 // ExitComparison is called when production Comparison is exited.
 func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
 
+// EnterAnd is called when production And is entered.
+func (s *BaseGrammarListener) EnterAnd(ctx *AndContext) {}
+
+// ExitAnd is called when production And is exited.
+func (s *BaseGrammarListener) ExitAnd(ctx *AndContext) {}
+
 // EnterExponential is called when production Exponential is entered.
 func (s *BaseGrammarListener) EnterExponential(ctx *ExponentialContext) {}
 
@@ -146,3 +164,9 @@ func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}
 
 // ExitBoolean is called when production Boolean is exited.
 func (s *BaseGrammarListener) ExitBoolean(ctx *BooleanContext) {}
+
+// EnterParentheses is called when production Parentheses is entered.
+func (s *BaseGrammarListener) EnterParentheses(ctx *ParenthesesContext) {}
+
+// ExitParentheses is called when production Parentheses is exited.
+func (s *BaseGrammarListener) ExitParentheses(ctx *ParenthesesContext) {}

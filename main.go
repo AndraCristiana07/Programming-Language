@@ -79,6 +79,25 @@ func main() {
 		var str1 = "Hello"
 		str1 += " World"
 		print "String 1: " + str1
+
+		if (5 > 3 and 2 < 4) {
+			print "Both conditions are true"
+		}
+
+		if (5 > 3 or 2 > 4) {
+			print "At least one condition is true"
+		}
+
+		if (not (5 < 3)) {
+			print "5 is not less than 3"
+		}
+		
+		if ((true or false) and false) {
+			print "This won't print"
+		} else {
+			print "This will print"
+		}
+	
 		`
 
 	input := antlr.NewInputStream(inputCode)

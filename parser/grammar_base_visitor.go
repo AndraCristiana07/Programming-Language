@@ -60,11 +60,19 @@ func (v *BaseGrammarVisitor) VisitPostfixStmt(ctx *PostfixStmtContext) interface
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitNot(ctx *NotContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitMulDivMod(ctx *MulDivModContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseGrammarVisitor) VisitIdentifier(ctx *IdentifierContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitOr(ctx *OrContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -80,6 +88,10 @@ func (v *BaseGrammarVisitor) VisitComparison(ctx *ComparisonContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitAnd(ctx *AndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitExponential(ctx *ExponentialContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -89,5 +101,9 @@ func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
 }
 
 func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -47,11 +47,17 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#postfixStmt.
 	VisitPostfixStmt(ctx *PostfixStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#Not.
+	VisitNot(ctx *NotContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#MulDivMod.
 	VisitMulDivMod(ctx *MulDivModContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Identifier.
 	VisitIdentifier(ctx *IdentifierContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#Or.
+	VisitOr(ctx *OrContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Number.
 	VisitNumber(ctx *NumberContext) interface{}
@@ -62,6 +68,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#And.
+	VisitAnd(ctx *AndContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Exponential.
 	VisitExponential(ctx *ExponentialContext) interface{}
 
@@ -70,4 +79,7 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#Parentheses.
+	VisitParentheses(ctx *ParenthesesContext) interface{}
 }

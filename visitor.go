@@ -380,6 +380,41 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	return nil
 }
 
+func (v *Visitor) VisitParentheses(ctx *parser.ParenthesesContext) any {
+	return ctx.Expr().Accept(v)
+}
+
+func (v *Visitor) VisitNot(ctx *parser.NotContext) any {
+	value := ctx.Expr().Accept(v)
+	boolValue, ok := value.(bool)
+	if !ok {
+		panic("Operand of 'not' must be boolean")
+	}
+	return !boolValue
+}
+
+func (v *Visitor) VisitAnd(ctx *parser.AndContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+	leftBool, leftOk := left.(bool)
+	rightBool, rightOk := right.(bool)
+	if !leftOk || !rightOk {
+		panic("Operands of 'and' must be boolean")
+	}
+	return leftBool && rightBool
+}
+
+func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+	leftBool, leftOk := left.(bool)
+	rightBool, rightOk := right.(bool)
+	if !leftOk || !rightOk {
+		panic("Operands of 'or' must be boolean")
+	}
+	return leftBool || rightBool
+}
+
 func power(base, exp int) int {
 	if exp < 0 {
 		panic("Negative exponent not supported")

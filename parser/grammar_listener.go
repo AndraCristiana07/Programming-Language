@@ -47,11 +47,17 @@ type GrammarListener interface {
 	// EnterPostfixStmt is called when entering the postfixStmt production.
 	EnterPostfixStmt(c *PostfixStmtContext)
 
+	// EnterNot is called when entering the Not production.
+	EnterNot(c *NotContext)
+
 	// EnterMulDivMod is called when entering the MulDivMod production.
 	EnterMulDivMod(c *MulDivModContext)
 
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
+
+	// EnterOr is called when entering the Or production.
+	EnterOr(c *OrContext)
 
 	// EnterNumber is called when entering the Number production.
 	EnterNumber(c *NumberContext)
@@ -62,6 +68,9 @@ type GrammarListener interface {
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
 
+	// EnterAnd is called when entering the And production.
+	EnterAnd(c *AndContext)
+
 	// EnterExponential is called when entering the Exponential production.
 	EnterExponential(c *ExponentialContext)
 
@@ -70,6 +79,9 @@ type GrammarListener interface {
 
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
+
+	// EnterParentheses is called when entering the Parentheses production.
+	EnterParentheses(c *ParenthesesContext)
 
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
@@ -110,11 +122,17 @@ type GrammarListener interface {
 	// ExitPostfixStmt is called when exiting the postfixStmt production.
 	ExitPostfixStmt(c *PostfixStmtContext)
 
+	// ExitNot is called when exiting the Not production.
+	ExitNot(c *NotContext)
+
 	// ExitMulDivMod is called when exiting the MulDivMod production.
 	ExitMulDivMod(c *MulDivModContext)
 
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)
+
+	// ExitOr is called when exiting the Or production.
+	ExitOr(c *OrContext)
 
 	// ExitNumber is called when exiting the Number production.
 	ExitNumber(c *NumberContext)
@@ -125,6 +143,9 @@ type GrammarListener interface {
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
 
+	// ExitAnd is called when exiting the And production.
+	ExitAnd(c *AndContext)
+
 	// ExitExponential is called when exiting the Exponential production.
 	ExitExponential(c *ExponentialContext)
 
@@ -133,4 +154,7 @@ type GrammarListener interface {
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)
+
+	// ExitParentheses is called when exiting the Parentheses production.
+	ExitParentheses(c *ParenthesesContext)
 }

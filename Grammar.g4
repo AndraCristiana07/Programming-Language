@@ -32,14 +32,18 @@ forPost   : assignStmt
             
 postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
-expr        : expr op=EXPONENTIAL expr  # Exponential
+expr        : op=NOT expr  # Not
+            | expr op=EXPONENTIAL expr  # Exponential
             | expr op=(STAR | SLASH | MODULO) expr    # MulDivMod
             | expr op=(PLUS | MINUS) expr    # AddSub
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
+            | expr op=AND expr               # And
+            | expr op=OR expr                # Or
             | IDENTIFIER                     # Identifier          
             | NUMBER                         # Number     
             | val=(TRUE | FALSE)             # Boolean
             | STRING                         # String
+            | LPAREN expr RPAREN             # Parentheses
             ;
 
 
@@ -80,6 +84,10 @@ EXPONENTIALEQUAL : '**=' ;
 PRINT           : 'print' ;
 TRUE            : 'true' ;
 FALSE           : 'false' ;
+
+AND             : 'and' ;
+OR              : 'or' ;
+NOT             : 'not' ;
 
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
 NUMBER          : [0-9]+ ;
