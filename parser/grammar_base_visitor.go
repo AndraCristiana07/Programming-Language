@@ -24,6 +24,10 @@ func (v *BaseGrammarVisitor) VisitAssignStmt(ctx *AssignStmtContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitCompoundAssignStmt(ctx *CompoundAssignStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitPrintStmt(ctx *PrintStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -20,6 +20,9 @@ type GrammarListener interface {
 	// EnterAssignStmt is called when entering the assignStmt production.
 	EnterAssignStmt(c *AssignStmtContext)
 
+	// EnterCompoundAssignStmt is called when entering the compoundAssignStmt production.
+	EnterCompoundAssignStmt(c *CompoundAssignStmtContext)
+
 	// EnterPrintStmt is called when entering the printStmt production.
 	EnterPrintStmt(c *PrintStmtContext)
 
@@ -79,6 +82,9 @@ type GrammarListener interface {
 
 	// ExitAssignStmt is called when exiting the assignStmt production.
 	ExitAssignStmt(c *AssignStmtContext)
+
+	// ExitCompoundAssignStmt is called when exiting the compoundAssignStmt production.
+	ExitCompoundAssignStmt(c *CompoundAssignStmtContext)
 
 	// ExitPrintStmt is called when exiting the printStmt production.
 	ExitPrintStmt(c *PrintStmtContext)

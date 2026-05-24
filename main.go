@@ -57,6 +57,28 @@ func main() {
 		var o = 10 % 3
 		print "o is: " + o
 
+		var p = 3
+		p **= 3
+		print "p is: " + p
+	    
+		p += 2
+		print "p after += 2 is: " + p
+		
+		p *= 2
+		print "p after *= 2 is: " + p
+
+		p /= 2
+		print "p after /= 2 is: " + p
+
+		p -= 1
+		print "p after -= 1 is: " + p
+
+		p %= 3
+		print "p after %= 3 is: " + p
+	
+		var str1 = "Hello"
+		str1 += " World"
+		print "String 1: " + str1
 		`
 
 	input := antlr.NewInputStream(inputCode)

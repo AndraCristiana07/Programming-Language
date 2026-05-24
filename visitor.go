@@ -35,6 +35,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
+	} else if ctx.CompoundAssignStmt() != nil {
+		return ctx.CompoundAssignStmt().Accept(v)
 	} else if ctx.PrintStmt() != nil {
 		return ctx.PrintStmt().Accept(v)
 	} else if ctx.BlockStmt() != nil {
@@ -319,6 +321,60 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 		if ctx.GetPost() != nil {
 			ctx.GetPost().Accept(v)
 		}
+	}
+
+	return nil
+}
+
+func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext) any {
+	varName := ctx.IDENTIFIER().GetText()
+	op := ctx.GetOp().GetText()
+	value := ctx.Expr().Accept(v)
+
+	currentValue, exists := v.vars[varName]
+	if !exists {
+		panic("Undefined variable: " + varName)
+	}
+
+	// handle string concatenation for +=
+	if op == "+=" {
+		if strVal, ok := currentValue.(string); ok {
+			v.vars[varName] = strVal + fmt.Sprintf("%v", value)
+			return nil
+		}
+	}
+
+	intCurrentValue, ok := currentValue.(int)
+	if !ok {
+		panic("Variable is not an integer: " + varName)
+	}
+
+	intValue, ok := value.(int)
+	if !ok {
+		panic("Right-hand side of compound assignment must be an integer")
+	}
+
+	switch op {
+	case "+=":
+		v.vars[varName] = intCurrentValue + intValue
+	case "-=":
+		v.vars[varName] = intCurrentValue - intValue
+	case "*=":
+		v.vars[varName] = intCurrentValue * intValue
+	case "/=":
+		if intValue == 0 {
+			panic("Division by zero in compound assignment")
+		}
+		v.vars[varName] = intCurrentValue / intValue
+	case "%=":
+		if intValue == 0 {
+			panic("Modulo by zero in compound assignment")
+		}
+		v.vars[varName] = intCurrentValue % intValue
+	case "**=":
+		v.vars[varName] = power(intCurrentValue, intValue)
+	default:
+		panic("Unknown compound assignment operator: " + op)
 	}
 
 	return nil

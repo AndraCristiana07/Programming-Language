@@ -4,6 +4,7 @@ program    : statement* EOF ;
 
 statement   : varDecl      
             | assignStmt   
+            | compoundAssignStmt
             | printStmt   
             | ifStmt 
             | whileStmt
@@ -14,6 +15,7 @@ statement   : varDecl
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
+compoundAssignStmt : IDENTIFIER op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL) expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
@@ -66,6 +68,13 @@ INC             : '++' ;
 DEC             : '--' ;
 MODULO          : '%' ;
 EXPONENTIAL     : '**' ;
+
+PLUSEQUAL       : '+=' ;
+MINUSEQUAL      : '-=' ;
+STAREQUAL       : '*=' ;
+SLASHEQUAL      : '/=' ;
+MODEQUAL        : '%=' ;
+EXPONENTIALEQUAL : '**=' ;
 
 
 PRINT           : 'print' ;

@@ -45,6 +45,12 @@ func (s *BaseGrammarListener) EnterAssignStmt(ctx *AssignStmtContext) {}
 // ExitAssignStmt is called when production assignStmt is exited.
 func (s *BaseGrammarListener) ExitAssignStmt(ctx *AssignStmtContext) {}
 
+// EnterCompoundAssignStmt is called when production compoundAssignStmt is entered.
+func (s *BaseGrammarListener) EnterCompoundAssignStmt(ctx *CompoundAssignStmtContext) {}
+
+// ExitCompoundAssignStmt is called when production compoundAssignStmt is exited.
+func (s *BaseGrammarListener) ExitCompoundAssignStmt(ctx *CompoundAssignStmtContext) {}
+
 // EnterPrintStmt is called when production printStmt is entered.
 func (s *BaseGrammarListener) EnterPrintStmt(ctx *PrintStmtContext) {}
 
