@@ -22,7 +22,7 @@ funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN bl
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
 arrayAssignStmt : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
-compoundAssignStmt : IDENTIFIER op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL) expr ;
+compoundAssignStmt : IDENTIFIER op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
@@ -107,6 +107,11 @@ BITXOR           : '^' ;
 BITLSHIFT       : '<<' ;
 BITRSHIFT       : '>>' ;
 BITNOT          : '~' ;
+BITANDEQUAL     : '&=' ;
+BITOREQUAL      : '|=' ;
+BITXOREQAUL     : '^=' ;
+BITLSHIFTEQUAL  : '<<=' ;
+BITRSHIFTEQUAL  : '>>=' ;
 
 FUNC            : 'func' ;
 RETURN          : 'return' ;

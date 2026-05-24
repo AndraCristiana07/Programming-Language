@@ -331,6 +331,46 @@ func TestBitwise(t *testing.T) {
 			input:    "var testResult = 5 >> 1",
 			expected: 2,
 		},
+		{
+			name: "Bitwise and comp",
+			input: `
+				var testResult = 5   
+        		testResult &= 3      
+			`,
+			expected: 1,
+		},
+		{
+			name: "Bitwise or comp",
+			input: `
+				var testResult = 4 
+        		testResult |= 2     
+			`,
+			expected: 6,
+		},
+		{
+			name: "Bitwise xor comp",
+			input: `
+				var testResult = 4 
+        		testResult ^= 2     
+			`,
+			expected: 6,
+		},
+		{
+			name: "Bitwise left shift comp",
+			input: `
+				var testResult = 2 
+        		testResult <<= 2     
+			`,
+			expected: 8,
+		},
+		{
+			name: "Bitwise right shift comp",
+			input: `
+				var testResult = 8 
+        		testResult >>= 2     
+			`,
+			expected: 2,
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
