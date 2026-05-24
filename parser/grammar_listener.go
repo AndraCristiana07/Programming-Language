@@ -47,8 +47,26 @@ type GrammarListener interface {
 	// EnterPostfixStmt is called when entering the postfixStmt production.
 	EnterPostfixStmt(c *PostfixStmtContext)
 
-	// EnterNot is called when entering the Not production.
-	EnterNot(c *NotContext)
+	// EnterBitOr is called when entering the BitOr production.
+	EnterBitOr(c *BitOrContext)
+
+	// EnterOr is called when entering the Or production.
+	EnterOr(c *OrContext)
+
+	// EnterAddSub is called when entering the AddSub production.
+	EnterAddSub(c *AddSubContext)
+
+	// EnterBitShift is called when entering the BitShift production.
+	EnterBitShift(c *BitShiftContext)
+
+	// EnterExponential is called when entering the Exponential production.
+	EnterExponential(c *ExponentialContext)
+
+	// EnterString is called when entering the String production.
+	EnterString(c *StringContext)
+
+	// EnterUnary is called when entering the Unary production.
+	EnterUnary(c *UnaryContext)
 
 	// EnterMulDivMod is called when entering the MulDivMod production.
 	EnterMulDivMod(c *MulDivModContext)
@@ -56,14 +74,11 @@ type GrammarListener interface {
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
-	// EnterOr is called when entering the Or production.
-	EnterOr(c *OrContext)
+	// EnterBitXor is called when entering the BitXor production.
+	EnterBitXor(c *BitXorContext)
 
 	// EnterNumber is called when entering the Number production.
 	EnterNumber(c *NumberContext)
-
-	// EnterAddSub is called when entering the AddSub production.
-	EnterAddSub(c *AddSubContext)
 
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
@@ -71,11 +86,8 @@ type GrammarListener interface {
 	// EnterAnd is called when entering the And production.
 	EnterAnd(c *AndContext)
 
-	// EnterExponential is called when entering the Exponential production.
-	EnterExponential(c *ExponentialContext)
-
-	// EnterString is called when entering the String production.
-	EnterString(c *StringContext)
+	// EnterBitAnd is called when entering the BitAnd production.
+	EnterBitAnd(c *BitAndContext)
 
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
@@ -122,8 +134,26 @@ type GrammarListener interface {
 	// ExitPostfixStmt is called when exiting the postfixStmt production.
 	ExitPostfixStmt(c *PostfixStmtContext)
 
-	// ExitNot is called when exiting the Not production.
-	ExitNot(c *NotContext)
+	// ExitBitOr is called when exiting the BitOr production.
+	ExitBitOr(c *BitOrContext)
+
+	// ExitOr is called when exiting the Or production.
+	ExitOr(c *OrContext)
+
+	// ExitAddSub is called when exiting the AddSub production.
+	ExitAddSub(c *AddSubContext)
+
+	// ExitBitShift is called when exiting the BitShift production.
+	ExitBitShift(c *BitShiftContext)
+
+	// ExitExponential is called when exiting the Exponential production.
+	ExitExponential(c *ExponentialContext)
+
+	// ExitString is called when exiting the String production.
+	ExitString(c *StringContext)
+
+	// ExitUnary is called when exiting the Unary production.
+	ExitUnary(c *UnaryContext)
 
 	// ExitMulDivMod is called when exiting the MulDivMod production.
 	ExitMulDivMod(c *MulDivModContext)
@@ -131,14 +161,11 @@ type GrammarListener interface {
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)
 
-	// ExitOr is called when exiting the Or production.
-	ExitOr(c *OrContext)
+	// ExitBitXor is called when exiting the BitXor production.
+	ExitBitXor(c *BitXorContext)
 
 	// ExitNumber is called when exiting the Number production.
 	ExitNumber(c *NumberContext)
-
-	// ExitAddSub is called when exiting the AddSub production.
-	ExitAddSub(c *AddSubContext)
 
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
@@ -146,11 +173,8 @@ type GrammarListener interface {
 	// ExitAnd is called when exiting the And production.
 	ExitAnd(c *AndContext)
 
-	// ExitExponential is called when exiting the Exponential production.
-	ExitExponential(c *ExponentialContext)
-
-	// ExitString is called when exiting the String production.
-	ExitString(c *StringContext)
+	// ExitBitAnd is called when exiting the BitAnd production.
+	ExitBitAnd(c *BitAndContext)
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)

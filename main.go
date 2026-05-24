@@ -97,6 +97,25 @@ func main() {
 		} else {
 			print "This will print"
 		}
+
+		var bitand = 5 & 3
+		print "5 & 3 is: " + bitand
+
+		var bitor = 5 | 3
+		print "5 | 3 is: " + bitor
+
+		var bitxor = 5 ^ 3
+		print "5 ^ 3 is: " + bitxor
+
+		var bitlshift = 2 << 2
+		print "2 << 2 is: " + bitlshift
+
+		var bitrshift = 8 >> 2
+		print "8 >> 2 is: " + bitrshift
+
+		var bitnot = ~5
+		print "~5 is: " + bitnot
+	  
 	
 		`
 

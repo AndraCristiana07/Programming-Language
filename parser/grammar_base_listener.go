@@ -99,11 +99,47 @@ func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
 // ExitPostfixStmt is called when production postfixStmt is exited.
 func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
 
-// EnterNot is called when production Not is entered.
-func (s *BaseGrammarListener) EnterNot(ctx *NotContext) {}
+// EnterBitOr is called when production BitOr is entered.
+func (s *BaseGrammarListener) EnterBitOr(ctx *BitOrContext) {}
 
-// ExitNot is called when production Not is exited.
-func (s *BaseGrammarListener) ExitNot(ctx *NotContext) {}
+// ExitBitOr is called when production BitOr is exited.
+func (s *BaseGrammarListener) ExitBitOr(ctx *BitOrContext) {}
+
+// EnterOr is called when production Or is entered.
+func (s *BaseGrammarListener) EnterOr(ctx *OrContext) {}
+
+// ExitOr is called when production Or is exited.
+func (s *BaseGrammarListener) ExitOr(ctx *OrContext) {}
+
+// EnterAddSub is called when production AddSub is entered.
+func (s *BaseGrammarListener) EnterAddSub(ctx *AddSubContext) {}
+
+// ExitAddSub is called when production AddSub is exited.
+func (s *BaseGrammarListener) ExitAddSub(ctx *AddSubContext) {}
+
+// EnterBitShift is called when production BitShift is entered.
+func (s *BaseGrammarListener) EnterBitShift(ctx *BitShiftContext) {}
+
+// ExitBitShift is called when production BitShift is exited.
+func (s *BaseGrammarListener) ExitBitShift(ctx *BitShiftContext) {}
+
+// EnterExponential is called when production Exponential is entered.
+func (s *BaseGrammarListener) EnterExponential(ctx *ExponentialContext) {}
+
+// ExitExponential is called when production Exponential is exited.
+func (s *BaseGrammarListener) ExitExponential(ctx *ExponentialContext) {}
+
+// EnterString is called when production String is entered.
+func (s *BaseGrammarListener) EnterString(ctx *StringContext) {}
+
+// ExitString is called when production String is exited.
+func (s *BaseGrammarListener) ExitString(ctx *StringContext) {}
+
+// EnterUnary is called when production Unary is entered.
+func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
+
+// ExitUnary is called when production Unary is exited.
+func (s *BaseGrammarListener) ExitUnary(ctx *UnaryContext) {}
 
 // EnterMulDivMod is called when production MulDivMod is entered.
 func (s *BaseGrammarListener) EnterMulDivMod(ctx *MulDivModContext) {}
@@ -117,23 +153,17 @@ func (s *BaseGrammarListener) EnterIdentifier(ctx *IdentifierContext) {}
 // ExitIdentifier is called when production Identifier is exited.
 func (s *BaseGrammarListener) ExitIdentifier(ctx *IdentifierContext) {}
 
-// EnterOr is called when production Or is entered.
-func (s *BaseGrammarListener) EnterOr(ctx *OrContext) {}
+// EnterBitXor is called when production BitXor is entered.
+func (s *BaseGrammarListener) EnterBitXor(ctx *BitXorContext) {}
 
-// ExitOr is called when production Or is exited.
-func (s *BaseGrammarListener) ExitOr(ctx *OrContext) {}
+// ExitBitXor is called when production BitXor is exited.
+func (s *BaseGrammarListener) ExitBitXor(ctx *BitXorContext) {}
 
 // EnterNumber is called when production Number is entered.
 func (s *BaseGrammarListener) EnterNumber(ctx *NumberContext) {}
 
 // ExitNumber is called when production Number is exited.
 func (s *BaseGrammarListener) ExitNumber(ctx *NumberContext) {}
-
-// EnterAddSub is called when production AddSub is entered.
-func (s *BaseGrammarListener) EnterAddSub(ctx *AddSubContext) {}
-
-// ExitAddSub is called when production AddSub is exited.
-func (s *BaseGrammarListener) ExitAddSub(ctx *AddSubContext) {}
 
 // EnterComparison is called when production Comparison is entered.
 func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
@@ -147,17 +177,11 @@ func (s *BaseGrammarListener) EnterAnd(ctx *AndContext) {}
 // ExitAnd is called when production And is exited.
 func (s *BaseGrammarListener) ExitAnd(ctx *AndContext) {}
 
-// EnterExponential is called when production Exponential is entered.
-func (s *BaseGrammarListener) EnterExponential(ctx *ExponentialContext) {}
+// EnterBitAnd is called when production BitAnd is entered.
+func (s *BaseGrammarListener) EnterBitAnd(ctx *BitAndContext) {}
 
-// ExitExponential is called when production Exponential is exited.
-func (s *BaseGrammarListener) ExitExponential(ctx *ExponentialContext) {}
-
-// EnterString is called when production String is entered.
-func (s *BaseGrammarListener) EnterString(ctx *StringContext) {}
-
-// ExitString is called when production String is exited.
-func (s *BaseGrammarListener) ExitString(ctx *StringContext) {}
+// ExitBitAnd is called when production BitAnd is exited.
+func (s *BaseGrammarListener) ExitBitAnd(ctx *BitAndContext) {}
 
 // EnterBoolean is called when production Boolean is entered.
 func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}

@@ -384,13 +384,86 @@ func (v *Visitor) VisitParentheses(ctx *parser.ParenthesesContext) any {
 	return ctx.Expr().Accept(v)
 }
 
-func (v *Visitor) VisitNot(ctx *parser.NotContext) any {
+func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
+	op := ctx.GetOp().GetText()
 	value := ctx.Expr().Accept(v)
-	boolValue, ok := value.(bool)
-	if !ok {
-		panic("Operand of 'not' must be boolean")
+
+	switch op {
+	case "not":
+		boolVal, ok := value.(bool)
+		if !ok {
+			panic("Operand of 'not' must be boolean")
+		}
+		return !boolVal
+	case "~":
+		intVal, ok := value.(int)
+		if !ok {
+			panic("Operand of '~' must be an integer")
+		}
+		return ^intVal
+	default:
+		panic("Unknown unary operator: " + op)
 	}
-	return !boolValue
+}
+
+func (v *Visitor) VisitBitShift(ctx *parser.BitShiftContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+	op := ctx.GetOp().GetText()
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for bit shift operators")
+	}
+
+	switch op {
+	case "<<":
+		return lVal << rVal
+	case ">>":
+		return lVal >> rVal
+	default:
+		panic("Unknown bit shift operator: " + op)
+	}
+}
+
+func (v *Visitor) VisitBitAnd(ctx *parser.BitAndContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for bitwise AND operator")
+	}
+
+	return lVal & rVal
+}
+
+func (v *Visitor) VisitBitXor(ctx *parser.BitXorContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for bitwise XOR operator")
+	}
+
+	return lVal ^ rVal
+}
+
+func (v *Visitor) VisitBitOr(ctx *parser.BitOrContext) any {
+	left := ctx.Expr(0).Accept(v)
+	right := ctx.Expr(1).Accept(v)
+
+	lVal, lOk := left.(int)
+	rVal, rOk := right.(int)
+	if !lOk || !rOk {
+		panic("Both operands must be integers for bitwise OR operator")
+	}
+
+	return lVal | rVal
 }
 
 func (v *Visitor) VisitAnd(ctx *parser.AndContext) any {

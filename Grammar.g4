@@ -32,10 +32,14 @@ forPost   : assignStmt
             
 postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
-expr        : op=NOT expr  # Not
+expr        : (op=NOT | op=BITNOT) expr  # Unary
             | expr op=EXPONENTIAL expr  # Exponential
             | expr op=(STAR | SLASH | MODULO) expr    # MulDivMod
             | expr op=(PLUS | MINUS) expr    # AddSub
+            | expr op=(BITLSHIFT | BITRSHIFT) expr  # BitShift
+            | expr op=BITAND expr          # BitAnd
+            | expr op=BITXOR expr          # BitXor
+            | expr op=BITOR expr           # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
             | expr op=AND expr               # And
             | expr op=OR expr                # Or
@@ -79,6 +83,13 @@ STAREQUAL       : '*=' ;
 SLASHEQUAL      : '/=' ;
 MODEQUAL        : '%=' ;
 EXPONENTIALEQUAL : '**=' ;
+
+BITAND          : '&' ;
+BITOR           : '|' ;
+BITXOR           : '^' ;
+BITLSHIFT       : '<<' ;
+BITRSHIFT       : '>>' ;
+BITNOT          : '~' ;
 
 
 PRINT           : 'print' ;

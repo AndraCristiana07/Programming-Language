@@ -60,7 +60,31 @@ func (v *BaseGrammarVisitor) VisitPostfixStmt(ctx *PostfixStmtContext) interface
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitNot(ctx *NotContext) interface{} {
+func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitOr(ctx *OrContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitBitShift(ctx *BitShiftContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitExponential(ctx *ExponentialContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -72,15 +96,11 @@ func (v *BaseGrammarVisitor) VisitIdentifier(ctx *IdentifierContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitOr(ctx *OrContext) interface{} {
+func (v *BaseGrammarVisitor) VisitBitXor(ctx *BitXorContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseGrammarVisitor) VisitNumber(ctx *NumberContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -92,11 +112,7 @@ func (v *BaseGrammarVisitor) VisitAnd(ctx *AndContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitExponential(ctx *ExponentialContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
+func (v *BaseGrammarVisitor) VisitBitAnd(ctx *BitAndContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
