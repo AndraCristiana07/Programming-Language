@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"my_language/my_language"
 	"testing"
 )
 
@@ -16,7 +15,7 @@ func TestWhileLoop(t *testing.T) {
 			name: "Simple while loop",
 			input: `
                 var testResult = 0 
-                while testResult < 5 { 
+                while (testResult < 5) { 
                     testResult = testResult + 1 
                 }
             `,
@@ -26,7 +25,7 @@ func TestWhileLoop(t *testing.T) {
 			name: "While loop with multiplication",
 			input: `
                 var testResult = 1 
-                while testResult < 100 { 
+                while (testResult < 100) { 
                     testResult = testResult * 2 
                 }
             `,
@@ -36,7 +35,7 @@ func TestWhileLoop(t *testing.T) {
 			name: "While loop with division",
 			input: `
                 var testResult = 100 
-                while testResult > 25 { 
+                while (testResult > 25) { 
                     testResult = testResult / 2 
                 }
             `,
@@ -46,12 +45,7 @@ func TestWhileLoop(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -59,7 +53,7 @@ func TestWhileLoop(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})
@@ -76,7 +70,7 @@ func TestWhileLoopWithLogical(t *testing.T) {
 			name: "While loop with logical AND",
 			input: `
 				var testResult = 0 
-				while testResult < 5 and testResult != 3 { 
+				while (testResult < 5 and testResult != 3) { 
 					testResult = testResult + 1 
 				}`,
 			expected: 3,
@@ -85,7 +79,7 @@ func TestWhileLoopWithLogical(t *testing.T) {
 			name: "While loop with logical OR",
 			input: `
 				var testResult = 0 
-				while testResult < 5 or testResult == 3 { 
+				while (testResult < 5 or testResult == 3) { 
 					testResult = testResult + 1 
 				}`,
 			expected: 5,
@@ -94,12 +88,7 @@ func TestWhileLoopWithLogical(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -107,7 +96,7 @@ func TestWhileLoopWithLogical(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})
@@ -125,7 +114,7 @@ func TestForLoop(t *testing.T) {
 			name: "Simple for loop",
 			input: `
                 var testResult = 0 
-                for var i = 1; i <= 3; i = i + 1 {
+                for (var i = 1; i <= 3; i = i + 1) {
 					testResult += 1
 				}
             `,
@@ -135,7 +124,7 @@ func TestForLoop(t *testing.T) {
 			name: "For loop with multiplication",
 			input: `
                 var testResult = 1 
-                for var i = 1; i <= 3; i = i + 1 {
+                for (var i = 1; i <= 3; i = i + 1) {
                     testResult = testResult * 2 
                 }
             `,
@@ -145,12 +134,7 @@ func TestForLoop(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -158,7 +142,7 @@ func TestForLoop(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})

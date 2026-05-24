@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"my_language/my_language"
 	"testing"
 )
 
@@ -15,7 +14,7 @@ func TestIf(t *testing.T) {
 			name: "Simple if",
 			input: `
                 var testResult = 0 
-                if testResult < 5 { 
+                if (testResult < 5) { 
                     testResult = testResult + 1 
                 }
             `,
@@ -25,7 +24,7 @@ func TestIf(t *testing.T) {
 			name: "if else true",
 			input: `
                 var testResult = 0 
-                if testResult < 5 { 
+                if (testResult < 5) { 
                     testResult = testResult + 1 
                 } else {
 					testResult = testResult + 3
@@ -37,7 +36,7 @@ func TestIf(t *testing.T) {
 			name: "if else false",
 			input: `
                 var testResult = 0 
-                if testResult > 5 { 
+                if (testResult > 5) { 
                     testResult = testResult + 1 
                 } else {
 					testResult = testResult + 3
@@ -49,12 +48,7 @@ func TestIf(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -62,7 +56,7 @@ func TestIf(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})
@@ -80,8 +74,8 @@ func TestIfWithLoops(t *testing.T) {
 			input: `
                 var testResult = 2 
 				var i = 0
-				while i < 5 {
-					if testResult < 5 { 
+				while (i < 5) {
+					if (testResult < 5) { 
 						testResult = testResult + 1 
 					}
 					i++
@@ -93,12 +87,7 @@ func TestIfWithLoops(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tokens := my_language.Lex(tc.input)
-			parser := my_language.NewParser(tokens)
-			program := parser.Parse()
-
-			env := my_language.NewEnvironment()
-			my_language.Eval(program, env)
+			env := runInterpreter(tc.input)
 
 			result, ok := env.Lookup("testResult")
 			if !ok {
@@ -106,7 +95,7 @@ func TestIfWithLoops(t *testing.T) {
 			}
 
 			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T) for loop execution block",
+				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
 		})
