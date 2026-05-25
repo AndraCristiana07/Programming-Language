@@ -170,6 +170,17 @@ func main() {
 		print "min : " + min(2, 6)
 		print "max: " + max(3, 8)
 
+		var toChr = chr(67)
+		print toChr
+
+		var toOrd = ord("c")
+		print toOrd
+
+		var toBool = bool(20)
+		print "to bool: " + toBool
+		var name = input("Enter your name: ")
+		print "Hello, " + name	
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

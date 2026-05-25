@@ -114,6 +114,33 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("bool", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			val := args[0]
+			if val == nil {
+				return false
+			}
+
+			switch v := val.(type) {
+			case bool:
+				return v
+			case int:
+				// 0  false
+				return v != 0
+			case string:
+				// empty string "" is false
+				return v != ""
+			case []any:
+				// empty arra is false
+				return len(v) > 0
+			default:
+				// objects are true
+				return true
+			}
+		},
+	})
+
 	globals.Define("type", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(args []any) any {
@@ -223,6 +250,28 @@ func NewGlobalEnvironment() *Environment {
 
 			// trim newline characters from the user input
 			return strings.TrimRight(text, "\r\n")
+		},
+	})
+
+	globals.Define("ord", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok || len(str) != 1 {
+				panic("ord() expects a single-character string")
+			}
+			return int(str[0])
+		},
+	})
+
+	globals.Define("chr", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			val, ok := args[0].(int)
+			if !ok || val < 0 || val > 255 {
+				panic("chr() expects an integer ASCII code (0-255)")
+			}
+			return string(rune(val))
 		},
 	})
 

@@ -496,3 +496,77 @@ func TestChr(t *testing.T) {
 		})
 	}
 }
+
+func TestBoolCast(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Bool on non-zero int",
+			input: `
+                var testResult = bool(42)
+            `,
+			expected: true,
+		},
+		{
+			name: "Bool on 0",
+			input: `
+                var testResult = bool(0)
+            `,
+			expected: false,
+		},
+		{
+			name: "Bool on string",
+			input: `
+                var testResult = bool("hello")
+            `,
+			expected: true,
+		},
+		{
+			name: "Bool on empty string",
+			input: `
+                var testResult = bool("")
+            `,
+			expected: false,
+		},
+		{
+			name: "Bool on array",
+			input: `
+                var testResult = bool([1, 2])
+            `,
+			expected: true,
+		},
+		{
+			name: "Bool on empty array",
+			input: `
+                var testResult = bool([])
+            `,
+			expected: false,
+		},
+		{
+			name: "Bool on already boolean",
+			input: `
+                var testResult = bool(false)
+            `,
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
