@@ -391,3 +391,108 @@ func TestAbs(t *testing.T) {
 		})
 	}
 }
+
+func TestMinMax(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Minimum of 2",
+			input:    "var testResult = min(3, 7)",
+			expected: 3,
+		},
+		{
+			name:     "Maximum from 2",
+			input:    "var testResult = max(10, 100)",
+			expected: 100,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestOrd(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Ord of b",
+			input:    `var testResult = ord("b")`,
+			expected: 98,
+		},
+		{
+			name:     "Ord of B",
+			input:    `var testResult = ord("B")`,
+			expected: 66,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestChr(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Ord of 98",
+			input:    `var testResult = chr(98)`,
+			expected: "b",
+		},
+		{
+			name:     "Ord of 66",
+			input:    `var testResult = chr(66)`,
+			expected: "B",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
