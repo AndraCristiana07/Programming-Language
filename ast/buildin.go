@@ -315,5 +315,26 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("set", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arr, ok := args[0].([]any)
+			if !ok {
+				panic("TypeError: set() expects an array as an argument")
+			}
+
+			seen := make(map[any]bool)
+			uniqueArr := []any{}
+
+			for _, item := range arr {
+				if !seen[item] {
+					seen[item] = true
+					uniqueArr = append(uniqueArr, item)
+				}
+			}
+			return uniqueArr
+		},
+	})
+
 	return globals
 }

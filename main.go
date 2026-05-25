@@ -182,8 +182,8 @@ func main() {
 		print "range with 1-10: " + range(1, 10)
 
 		print "range with 9: " + range(9)
-
-
+		var arr2 = [1, 2, 2, 5, 1, 7]
+		print "set from arr: " + set(arr2)
 		`
 
 	input := antlr.NewInputStream(inputCode)
