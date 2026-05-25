@@ -488,5 +488,37 @@ func NewGlobalEnvironment() *Environment {
 			return false
 		},
 	})
+
+	globals.Define("filter", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			// validate the predicate function
+			predicate, ok := args[0].(Callable)
+			if !ok {
+				panic("TypeError: first argument to filter() must be a callable function")
+			}
+
+			// validate the target array pointer
+			arrPtr, ok := args[1].(*[]any)
+			if !ok {
+				panic("TypeError: second argument to filter() must be an array")
+			}
+
+			boolFunc, _ := globals.Lookup("bool")
+			boolCallable := boolFunc.(Callable)
+
+			filteredElements := []any{}
+
+			for _, item := range *arrPtr {
+				res := predicate.Call(nil, []any{item})
+
+				if boolCallable.Call(nil, []any{res}).(bool) {
+					filteredElements = append(filteredElements, item)
+				}
+			}
+
+			return &filteredElements
+		},
+	})
 	return globals
 }

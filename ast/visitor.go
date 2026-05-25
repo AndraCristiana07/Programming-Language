@@ -688,6 +688,11 @@ func (f *RuntimeFunction) Call(v *Visitor, args []any) any {
 		funcEnv.Define(paramName, args[i])
 	}
 
+	// if no visitor provided, create a temporary one
+	if v == nil {
+		v = &Visitor{currEnv: funcEnv}
+	}
+
 	// swap the active environment
 	previousEnv := v.currEnv
 	v.currEnv = funcEnv

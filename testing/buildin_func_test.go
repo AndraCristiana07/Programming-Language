@@ -823,3 +823,48 @@ func TestAllAny(t *testing.T) {
 		})
 	}
 }
+
+func TestFilter(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Filter even numbers",
+			input: `
+                func isEven(x) {
+                    return x % 2 == 0
+                }
+                var arr = [1, 2, 3, 4, 5, 6]
+                var testResult = filter(isEven, arr)`,
+			expected: &[]any{2, 4, 6},
+		},
+		{
+			name: "Filter words longer than 3 characters",
+			input: `
+                func isLong(s) {
+                    return len(s) > 3
+                }
+                var words = ["go", "antlr", "code"]
+                var testResult = filter(isLong, words)`,
+			expected: &[]any{"antlr", "code"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
