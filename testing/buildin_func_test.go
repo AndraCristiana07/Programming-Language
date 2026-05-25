@@ -1,0 +1,358 @@
+package testing
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestLen(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Len on simple arr",
+			input: `
+				var arr = [1, 2, 4]
+				var testResult = len(arr)
+			`,
+			expected: 3,
+		},
+		{
+			name: "Len on comp arr",
+			input: `
+				var arr = [[1,3], [3,4], [5,1]]
+				var testResult = len(arr[0])
+			`,
+			expected: 2,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestAppend(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		expected    any
+		shouldPanic bool
+	}{
+		{
+			name: "Append on simple arr",
+			input: `
+                var arr = [1, 2, 3]
+                var testResult = append(arr, 5)
+            `,
+			expected:    []any{1, 2, 3, 5},
+			shouldPanic: false,
+		},
+		{
+			name: "Append on comp arr mismatch should fail",
+			input: `
+                var arr = [[1,3], [2,6], [5,7]]
+                var testResult = append(arr, 5) 
+            `,
+			expected:    nil,
+			shouldPanic: true,
+		},
+		{
+			name: "Append on comp arr mismatch should fail",
+			input: `
+                var arr = [[1,3], [2,6], [5,7]]
+                var testResult = append(arr, [5]) 
+            `,
+			expected: []any{
+				[]any{1, 3},
+				[]any{2, 6},
+				[]any{5, 7},
+				[]any{5},
+			},
+			shouldPanic: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+
+			defer func() {
+				r := recover()
+				if tc.shouldPanic && r == nil {
+					t.Errorf("Expected code to panic with a TypeError, but it completed successfully.")
+				}
+				if !tc.shouldPanic && r != nil {
+					t.Errorf("Unexpected panic: %v", r)
+				}
+			}()
+
+			env := runInterpreter(tc.input)
+
+			if !tc.shouldPanic {
+				result, ok := env.Lookup("testResult")
+				if !ok {
+					t.Fatalf("Variable 'testResult' was missing")
+				}
+
+				if !reflect.DeepEqual(result, tc.expected) {
+					t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
+				}
+			}
+		})
+	}
+}
+
+func TestIntCast(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		expected    any
+		shouldPanic bool
+	}{
+		{
+			name: "Int cast on str",
+			input: `
+                var testResult = "6"
+				testResult = int(testResult)
+            `,
+			expected:    6,
+			shouldPanic: false,
+		},
+		{
+			name: "Int cast on str that's not nr",
+			input: `
+                 var testResult = "hello"
+				testResult = int(testResult)
+            `,
+			expected:    nil,
+			shouldPanic: true,
+		},
+		{
+			name: "Int cast on bool",
+			input: `
+                var testResult = false
+				testResult = int(testResult)
+            `,
+			expected:    0,
+			shouldPanic: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+
+			defer func() {
+				r := recover()
+				if tc.shouldPanic && r == nil {
+					t.Errorf("Expected code to panic with a TypeError, but it completed successfully.")
+				}
+				if !tc.shouldPanic && r != nil {
+					t.Errorf("Unexpected panic: %v", r)
+				}
+			}()
+
+			env := runInterpreter(tc.input)
+
+			if !tc.shouldPanic {
+				result, ok := env.Lookup("testResult")
+				if !ok {
+					t.Fatalf("Variable 'testResult' was missing")
+				}
+
+				if !reflect.DeepEqual(result, tc.expected) {
+					t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
+				}
+			}
+		})
+	}
+}
+
+func TestStrCast(t *testing.T) {
+	tests := []struct {
+		name        string
+		input       string
+		expected    any
+		shouldPanic bool
+	}{
+		{
+			name: "Str cast on int",
+			input: `
+                var testResult = 6
+				testResult = str(testResult)
+            `,
+			expected:    "6",
+			shouldPanic: false,
+		},
+		{
+			name: "Str cast on bool",
+			input: `
+                 var testResult = true
+				testResult = str(testResult)
+            `,
+			expected:    "true",
+			shouldPanic: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+
+			defer func() {
+				r := recover()
+				if tc.shouldPanic && r == nil {
+					t.Errorf("Expected code to panic with a TypeError, but it completed successfully.")
+				}
+				if !tc.shouldPanic && r != nil {
+					t.Errorf("Unexpected panic: %v", r)
+				}
+			}()
+
+			env := runInterpreter(tc.input)
+
+			if !tc.shouldPanic {
+				result, ok := env.Lookup("testResult")
+				if !ok {
+					t.Fatalf("Variable 'testResult' was missing")
+				}
+
+				if !reflect.DeepEqual(result, tc.expected) {
+					t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
+				}
+			}
+		})
+	}
+}
+
+func TestType(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Type on int",
+			input: `
+				var someInt = 7
+				var testResult = type(someInt)
+			`,
+			expected: "int",
+		},
+		{
+			name: "Type on str",
+			input: `
+				var someStr = "hello"
+				var testResult = type(someStr)
+			`,
+			expected: "string",
+		},
+		{
+			name: "Type on bool",
+			input: `
+				var someBool = true
+				var testResult = type(someBool)
+			`,
+			expected: "bool",
+		},
+		{
+			name: "Type on arr",
+			input: `
+				var arr = [1,5]
+				var testResult = type(arr)
+			`,
+			expected: "array",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestBin(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Simple bin",
+			input: `
+				var someInt = 1
+				var testResult = bin(someInt)
+			`,
+			expected: "0b1",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestHex(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Hex test example",
+			input:    "var testResult = hex(255)",
+			expected: "0xff",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
