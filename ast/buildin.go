@@ -1,9 +1,12 @@
 package ast
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type NativeFunction struct {
@@ -202,6 +205,24 @@ func NewGlobalEnvironment() *Environment {
 				return a
 			}
 			return b
+		},
+	})
+
+	globals.Define("input", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			prompt, ok := args[0].(string)
+			if !ok {
+				panic("input() expects a string prompt")
+			}
+
+			fmt.Print(prompt)
+
+			reader := bufio.NewReader(os.Stdin)
+			text, _ := reader.ReadString('\n')
+
+			// trim newline characters from the user input
+			return strings.TrimRight(text, "\r\n")
 		},
 	})
 

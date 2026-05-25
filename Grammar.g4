@@ -41,7 +41,7 @@ postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
-            | (op=NOT | op=BITNOT) expr                         # Unary
+            | op=(NOT | BITNOT | MINUS) expr                       # Unary
             | expr op=EXPONENTIAL expr                          # Exponential
             | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
             | expr op=(PLUS | MINUS) expr                       # AddSub

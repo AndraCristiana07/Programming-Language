@@ -356,3 +356,38 @@ func TestHex(t *testing.T) {
 		})
 	}
 }
+
+func TestAbs(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Abs with negative number",
+			input:    "var testResult = abs(-10)",
+			expected: 10,
+		},
+		{
+			name:     "Abs with positive number",
+			input:    "var testResult = abs(10)",
+			expected: 10,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

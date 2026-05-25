@@ -461,6 +461,12 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 			panic("Operand of '~' must be an integer")
 		}
 		return ^intVal
+	case "-":
+		intVal, ok := value.(int)
+		if !ok {
+			panic("TypeError: Unary minus operator can only be applied to an integer")
+		}
+		return -intVal
 	default:
 		panic("Unknown unary operator: " + op)
 	}
