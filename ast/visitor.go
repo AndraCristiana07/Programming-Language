@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"my_language/parser"
 	"strconv"
+	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -50,6 +51,10 @@ func (v *Visitor) VisitProgram(ctx *parser.ProgramContext) any {
 	return nil
 }
 
+func (v *Visitor) VisitExprStmt(ctx *parser.ExprStmtContext) any {
+	return ctx.Expr().Accept(v)
+}
+
 func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 	if ctx.VarDecl() != nil {
 		return ctx.VarDecl().Accept(v)
@@ -59,6 +64,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ArrayAssignStmt().Accept(v)
 	} else if ctx.CompoundAssignStmt() != nil {
 		return ctx.CompoundAssignStmt().Accept(v)
+	} else if ctx.ExprStmt() != nil {
+		return ctx.ExprStmt().Accept(v)
 	} else if ctx.PrintStmt() != nil {
 		return ctx.PrintStmt().Accept(v)
 	} else if ctx.BlockStmt() != nil {
@@ -176,7 +183,7 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 
 	if leftIsString || rightIsString {
 		if op == "+" {
-			return fmt.Sprintf("%v%v", left, right)
+			return cleanStringRepr(left) + cleanStringRepr(right)
 		} else {
 			panic("Unsupported operator for strings: " + op)
 		}
@@ -290,8 +297,10 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 }
 
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
-	value := ctx.Expr().Accept(v)
-	fmt.Println(value)
+	val := ctx.Expr().Accept(v)
+
+	fmt.Println(cleanStringRepr(val))
+
 	return nil
 }
 
@@ -383,7 +392,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	// handle string concatenation for +=
 	if op == "+=" {
 		if strVal, ok := currentValue.(string); ok {
-			if !v.currEnv.Assign(varName, strVal+fmt.Sprintf("%v", value)) {
+			if !v.currEnv.Assign(varName, strVal+cleanStringRepr(value)) {
 				panic("Failed to assign value to variable: " + varName)
 			}
 
@@ -554,14 +563,27 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 	return leftBool || rightBool
 }
 
+func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
+	var elements []any
+	for _, expr := range ctx.AllExpr() {
+		elements = append(elements, expr.Accept(v))
+	}
+	// return a pointer to the slice
+	return &elements
+}
+
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	array := ctx.Expr(0).Accept(v)
 	index := ctx.Expr(1).Accept(v)
 
-	arr, ok := array.([]any)
+	// expect pointer to the slice (*[]any)
+	arrPtr, ok := array.(*[]any)
 	if !ok {
 		panic("Attempting to index a non-array value")
 	}
+
+	// dereference it locally to perform size checks and lookups safely
+	arr := *arrPtr
 
 	idx, ok := index.(int)
 	if !ok {
@@ -575,41 +597,64 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	return arr[idx]
 }
 
-func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
-	var elements []any
-	for _, expr := range ctx.AllExpr() {
-		elements = append(elements, expr.Accept(v))
-	}
-	return elements
-}
-
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
-	varName := ctx.IDENTIFIER().GetText()
-	index := ctx.Expr(0).Accept(v)
-	value := ctx.Expr(1).Accept(v)
+	arrayName := ctx.IDENTIFIER().GetText()
 
-	target, ok := v.currEnv.Lookup(varName)
-	if !ok {
-		panic("Undefined variable: " + varName)
+	val, exists := v.currEnv.Lookup(arrayName)
+	if !exists {
+		panic("Undefined variable: " + arrayName)
 	}
 
-	arr, ok := target.([]any)
+	arrPtr, ok := val.(*[]any)
 	if !ok {
-		panic("Attempting to index a non-array variable: " + varName)
+		panic("Attempting to index a non-array variable: " + arrayName) // 👈 This is where your panic came from!
 	}
 
-	idx, ok := index.(int)
+	indexVal := ctx.Expr(0).Accept(v)
+	newVal := ctx.Expr(1).Accept(v)
+
+	idx, ok := indexVal.(int)
 	if !ok {
 		panic("Array index must be an integer")
 	}
 
+	arr := *arrPtr
 	if idx < 0 || idx >= len(arr) {
 		panic("Array index out of bounds")
 	}
 
-	arr[idx] = value
-	return nil
+	(*arrPtr)[idx] = newVal
+
+	return newVal
 }
+
+// func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
+// 	varName := ctx.IDENTIFIER().GetText()
+// 	index := ctx.Expr(0).Accept(v)
+// 	value := ctx.Expr(1).Accept(v)
+
+// 	target, ok := v.currEnv.Lookup(varName)
+// 	if !ok {
+// 		panic("Undefined variable: " + varName)
+// 	}
+
+// 	arr, ok := target.([]any)
+// 	if !ok {
+// 		panic("Attempting to index a non-array variable: " + varName)
+// 	}
+
+// 	idx, ok := index.(int)
+// 	if !ok {
+// 		panic("Array index must be an integer")
+// 	}
+
+// 	if idx < 0 || idx >= len(arr) {
+// 		panic("Array index out of bounds")
+// 	}
+
+// 	arr[idx] = value
+// 	return nil
+// }
 
 func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	funcName := ctx.IDENTIFIER(0).GetText()
@@ -717,4 +762,29 @@ func power(base, exp int) int {
 		result *= base
 	}
 	return result
+}
+
+// helper for standard print outputs
+func cleanStringRepr(val any) string {
+	if val == nil {
+		return "nil"
+	}
+
+	switch v := val.(type) {
+	case string:
+		return v
+	case *[]any:
+		var sb strings.Builder
+		sb.WriteString("[")
+		for i, element := range *v {
+			sb.WriteString(cleanStringRepr(element))
+			if i < len(*v)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString("]")
+		return sb.String()
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }

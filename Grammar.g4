@@ -6,6 +6,7 @@ statement   : (varDecl
             | assignStmt   
             | arrayAssignStmt
             | compoundAssignStmt
+            | exprStmt
             | printStmt   
             | ifStmt 
             | whileStmt
@@ -18,6 +19,7 @@ statement   : (varDecl
 returnStmt  : RETURN expr? ;
 terminator   : SEMICOLON | NL ;
 funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+exprStmt    : expr ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;

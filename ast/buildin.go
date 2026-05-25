@@ -30,8 +30,8 @@ func NewGlobalEnvironment() *Environment {
 		ArgsCount: 1,
 		Body: func(args []any) any {
 			// check for array slice
-			if arr, ok := args[0].([]any); ok {
-				return len(arr)
+			if arrPtr, ok := args[0].(*[]any); ok {
+				return len(*arrPtr) // dereference pointer
 			}
 			// check for string type
 			if str, ok := args[0].(string); ok {
@@ -40,15 +40,18 @@ func NewGlobalEnvironment() *Environment {
 			panic("InvalidArgument: len() expects an array or string type")
 		},
 	})
+
 	// append(arr, item)
 	globals.Define("append", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(args []any) any {
-			arr, ok := args[0].([]any)
+			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("InvalidArgument: append() expects an array as the first argument")
 			}
 
+			// grab the actual slice value
+			arr := *arrPtr
 			newItem := args[1]
 
 			// type safe guard
@@ -68,10 +71,10 @@ func NewGlobalEnvironment() *Environment {
 					}
 
 					// clean up Go-specific naming repr
-					if expectedName == "[]interface {}" || expectedName == "[]main.any" {
+					if expectedName == "[]interface {}" || expectedName == "*[]interface {}" || expectedName == "[]main.any" {
 						expectedName = "array"
 					}
-					if gotName == "[]interface {}" || gotName == "[]main.any" {
+					if gotName == "[]interface {}" || gotName == "*[]interface {}" || gotName == "[]main.any" {
 						gotName = "array"
 					}
 
@@ -79,7 +82,8 @@ func NewGlobalEnvironment() *Environment {
 				}
 			}
 
-			return append(arr, newItem)
+			*arrPtr = append(arr, newItem)
+			return arrPtr
 		},
 	})
 
@@ -110,7 +114,28 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("str", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(args []any) any {
-			return fmt.Sprintf("%v", args[0])
+			if args[0] == nil {
+				return "nil"
+			}
+
+			switch v := args[0].(type) {
+			case string:
+				return v
+			case *[]any:
+				elements := *v
+				var sb strings.Builder
+				sb.WriteString("[")
+				for i, element := range elements {
+					fmt.Fprintf(&sb, "%v", element)
+					if i < len(elements)-1 {
+						sb.WriteString(", ")
+					}
+				}
+				sb.WriteString("]")
+				return sb.String()
+			default:
+				return fmt.Sprintf("%v", v)
+			}
 		},
 	})
 
@@ -131,9 +156,9 @@ func NewGlobalEnvironment() *Environment {
 			case string:
 				// empty string "" is false
 				return v != ""
-			case []any:
-				// empty arra is false
-				return len(v) > 0
+			case *[]any:
+				// empty array is false
+				return len(*v) > 0
 			default:
 				// objects are true
 				return true
@@ -154,7 +179,7 @@ func NewGlobalEnvironment() *Environment {
 				return "string"
 			case bool:
 				return "bool"
-			case []any:
+			case *[]any:
 				return "array"
 			default:
 				if _, ok := args[0].(Callable); ok {
@@ -304,21 +329,21 @@ func NewGlobalEnvironment() *Environment {
 				for i := start; i > end; i-- {
 					result = append(result, i)
 				}
-				return result
+				return &result
 			}
 
 			result := make([]any, end-start)
 			for i := 0; i < (end - start); i++ {
 				result[i] = start + i
 			}
-			return result
+			return &result
 		},
 	})
 
 	globals.Define("set", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(args []any) any {
-			arr, ok := args[0].([]any)
+			arr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: set() expects an array as an argument")
 			}
@@ -326,13 +351,13 @@ func NewGlobalEnvironment() *Environment {
 			seen := make(map[any]bool)
 			uniqueArr := []any{}
 
-			for _, item := range arr {
+			for _, item := range *arr {
 				if !seen[item] {
 					seen[item] = true
 					uniqueArr = append(uniqueArr, item)
 				}
 			}
-			return uniqueArr
+			return &uniqueArr
 		},
 	})
 
@@ -355,6 +380,30 @@ func NewGlobalEnvironment() *Environment {
 				panic("upper() expects a string")
 			}
 			return strings.ToUpper(str)
+		},
+	})
+
+	globals.Define("pop", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			// grab shared pointer address
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: pop() expects an array reference")
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic("IndexError: pop from empty array")
+			}
+
+			lastIdx := len(arr) - 1
+			removedItem := arr[lastIdx]
+
+			// cutthe shared array down by mutating the memory address
+			*arrPtr = arr[:lastIdx]
+
+			return removedItem
 		},
 	})
 

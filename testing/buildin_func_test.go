@@ -59,7 +59,7 @@ func TestAppend(t *testing.T) {
                 var arr = [1, 2, 3]
                 var testResult = append(arr, 5)
             `,
-			expected:    []any{1, 2, 3, 5},
+			expected:    &[]any{1, 2, 3, 5},
 			shouldPanic: false,
 		},
 		{
@@ -77,11 +77,11 @@ func TestAppend(t *testing.T) {
                 var arr = [[1,3], [2,6], [5,7]]
                 var testResult = append(arr, [5]) 
             `,
-			expected: []any{
-				[]any{1, 3},
-				[]any{2, 6},
-				[]any{5, 7},
-				[]any{5},
+			expected: &[]any{
+				&[]any{1, 3},
+				&[]any{2, 6},
+				&[]any{5, 7},
+				&[]any{5},
 			},
 			shouldPanic: false,
 		},
@@ -580,12 +580,12 @@ func TestRange(t *testing.T) {
 		{
 			name:     "Range of 10",
 			input:    `var testResult = range(1,10)`,
-			expected: []any{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			expected: &[]any{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		},
 		{
 			name:     "Range of 0-10",
 			input:    `var testResult = range(10)`,
-			expected: []any{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+			expected: &[]any{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 		},
 	}
 
@@ -618,7 +618,7 @@ func TestSet(t *testing.T) {
 				var arr = [1,1, 2, 4, 6, 7, 1, 2]
 				var testResult = set(arr)
 			`,
-			expected: []any{1, 2, 4, 6, 7},
+			expected: &[]any{1, 2, 4, 6, 7},
 		},
 	}
 
@@ -667,6 +667,46 @@ func TestLowerUpper(t *testing.T) {
 			}
 
 			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestPop(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Pop simple array and test popped",
+			input: `
+				var arr = [1, 4, 6]
+				var testResult = pop(arr)`,
+			expected: 6,
+		},
+		{
+			name: "Pop simple array and test popped",
+			input: `
+				var arr = [1, 4, 6]
+				pop(arr)
+				var testResult = arr`,
+			expected: &[]any{1, 4},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}

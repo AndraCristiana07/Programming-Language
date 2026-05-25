@@ -51,6 +51,12 @@ func (s *BaseGrammarListener) EnterFuncStmt(ctx *FuncStmtContext) {}
 // ExitFuncStmt is called when production funcStmt is exited.
 func (s *BaseGrammarListener) ExitFuncStmt(ctx *FuncStmtContext) {}
 
+// EnterExprStmt is called when production exprStmt is entered.
+func (s *BaseGrammarListener) EnterExprStmt(ctx *ExprStmtContext) {}
+
+// ExitExprStmt is called when production exprStmt is exited.
+func (s *BaseGrammarListener) ExitExprStmt(ctx *ExprStmtContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 

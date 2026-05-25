@@ -188,6 +188,10 @@ func main() {
 		print lower("HellLo")
 		print upper("HeellsO")
 
+		print pop(arr2)
+		print arr2
+		pop(arr2)
+		print arr2
 		
 		`
 
