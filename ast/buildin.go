@@ -407,5 +407,45 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	// find(container, item)
+	globals.Define("find", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			switch container := args[0].(type) {
+			case string:
+				target, ok := args[1].(string)
+				if !ok {
+					panic("find() on a string expects a string target")
+				}
+				return strings.Index(container, target)
+			case *[]any:
+				for i, val := range *container {
+					if reflect.DeepEqual(val, args[1]) {
+						return i
+					}
+				}
+				return -1
+			default:
+				panic("TypeError: find() expects a string or array")
+			}
+		},
+	})
+
+	globals.Define("reverse", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("reverse() expects an array")
+			}
+			arr := *arrPtr
+			reversed := make([]any, len(arr))
+			for i, item := range arr {
+				reversed[len(arr)-1-i] = item
+			}
+			return &reversed
+		},
+	})
+
 	return globals
 }

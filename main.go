@@ -192,6 +192,9 @@ func main() {
 		print arr2
 		pop(arr2)
 		print arr2
+
+		print reverse(arr2)
+		print find(arr2, 2)
 		
 		`
 
