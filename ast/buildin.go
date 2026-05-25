@@ -159,5 +159,51 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("abs", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			val, ok := args[0].(int)
+			if !ok {
+				panic("abs() expects an integer")
+			}
+			if val < 0 {
+				return -val
+			}
+			return val
+		},
+	})
+
+	// min(item1, item2)
+	globals.Define("min", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			a, ok1 := args[0].(int)
+			b, ok2 := args[1].(int)
+			if !ok1 || !ok2 {
+				panic("min() expects two integers")
+			}
+			if a < b {
+				return a
+			}
+			return b
+		},
+	})
+
+	// max(item1, item2)
+	globals.Define("max", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			a, ok1 := args[0].(int)
+			b, ok2 := args[1].(int)
+			if !ok1 || !ok2 {
+				panic("max() expects two integers")
+			}
+			if a > b {
+				return a
+			}
+			return b
+		},
+	})
+
 	return globals
 }

@@ -166,6 +166,10 @@ func main() {
 		var arr1 = [[1,2], [3,5], [6,4]]
 		arr1 = append(arr1, [6])
 
+		print "abs of -5: " + abs(-5)
+		print "min : " + min(2, 6)
+		print "max: " + max(3, 8)
+
 		`
 
 	input := antlr.NewInputStream(inputCode)
