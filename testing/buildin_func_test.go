@@ -638,3 +638,38 @@ func TestSet(t *testing.T) {
 		})
 	}
 }
+
+func TestLowerUpper(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Lower of HEllo",
+			input:    `var testResult = lower("HEllo")`,
+			expected: "hello",
+		},
+		{
+			name:     "Upper of heLlo",
+			input:    `var testResult = upper("heLlo")`,
+			expected: "HELLO",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

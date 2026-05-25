@@ -184,6 +184,11 @@ func main() {
 		print "range with 9: " + range(9)
 		var arr2 = [1, 2, 2, 5, 1, 7]
 		print "set from arr: " + set(arr2)
+
+		print lower("HellLo")
+		print upper("HeellsO")
+
+		
 		`
 
 	input := antlr.NewInputStream(inputCode)

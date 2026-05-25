@@ -336,5 +336,27 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("lower", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("lower() expects a string")
+			}
+			return strings.ToLower(str)
+		},
+	})
+
+	globals.Define("upper", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("upper() expects a string")
+			}
+			return strings.ToUpper(str)
+		},
+	})
+
 	return globals
 }
