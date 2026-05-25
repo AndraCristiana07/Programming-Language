@@ -120,6 +120,11 @@ func main() {
 		var arr = [1, 2, 3]
 		print "Array: " + arr
 
+		print "len arr is: " + len(arr)
+		arr = append(arr, 4)
+		print "Modified append: " + arr
+
+
 		print "Array element at index 1: " + arr[1]
 		arr[0] = 10
 		print "Modified Array: " + arr
@@ -144,6 +149,20 @@ func main() {
 		var bitcomp = 5
 		bitcomp &= 5
 		print bitcomp
+
+		var toStr = str(5)
+		print toStr
+		print "type tostr: " + type(toStr)
+
+		var toInt = int("5")
+		print toInt
+		print "type toInt: " + type(toInt)
+
+		var testBool = false
+		print "type pf testBool: " + type(testBool)
+		print "type of arr: " + type(arr)
+		print "type of arr[0]: " + type(arr[0])
+
 		`
 
 	input := antlr.NewInputStream(inputCode)
@@ -161,8 +180,4 @@ func main() {
 	eval := ast.NewVisitor()
 	tree.Accept(eval)
 
-	// fmt.Println("Final variable states:")
-	// for k, v := range eval.vars {
-	// 	fmt.Printf("%s = %v\n", k, v)
-	// }
 }

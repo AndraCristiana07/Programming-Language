@@ -8,10 +8,13 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+type Callable interface {
+	NrArgs() int
+	Call(v *Visitor, args []any) any
+}
+
 type Visitor struct {
 	parser.BaseGrammarVisitor
-	// vars map[string]any
-	// also add env
 	currEnv *Environment
 }
 
@@ -22,12 +25,12 @@ type ReturnValueSignal struct {
 type RuntimeFunction struct {
 	Parameters []string
 	Body       *parser.BlockStmtContext
+	Env        *Environment
 }
 
 func NewVisitor() *Visitor {
 	return &Visitor{
-		// vars:    make(map[string]any),
-		currEnv: NewEnvironment(),
+		currEnv: NewGlobalEnvironment(),
 	}
 }
 
@@ -619,73 +622,84 @@ func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	v.currEnv.Define(funcName, &RuntimeFunction{
 		Parameters: params,
 		Body:       ctx.BlockStmt().(*parser.BlockStmtContext),
+		Env:        v.currEnv,
 	})
 
 	return nil
 }
 
-func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
-	funcName := ctx.IDENTIFIER().GetText()
+func (f *RuntimeFunction) Call(v *Visitor, args []any) any {
+	//link back to where the function was defined
+	funcEnv := NewScope(f.Env)
 
-	fn, exists := v.currEnv.Lookup(funcName)
-	if !exists {
-		panic("Undefined function: " + funcName)
+	// bind evaluated arguments to parameter names
+	for i, paramName := range f.Parameters {
+		funcEnv.Define(paramName, args[i])
 	}
 
-	runtimeFunc, ok := fn.(*RuntimeFunction)
-	if !ok {
-		panic(funcName + " is not a function")
-	}
-
-	if len(ctx.AllExpr()) != len(runtimeFunc.Parameters) {
-		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, len(runtimeFunc.Parameters), len(ctx.AllExpr())))
-	}
-
-	// evaluate arguments on the curr execution scope level
-	var argValues []any
-	for _, argExpr := range ctx.AllExpr() {
-		argValues = append(argValues, argExpr.Accept(v))
-	}
-
-	// 🔍 create nested scope referencing the current active environment
-	funcEnv := NewScope(v.currEnv)
-
-	// bind argument values to parameter keys
-	for i, paramName := range runtimeFunc.Parameters {
-		funcEnv.Define(paramName, argValues[i])
-	}
-
-	// keep track of our old env
+	// swap the active environment
 	previousEnv := v.currEnv
 	v.currEnv = funcEnv
 
 	var returnedVal any = nil
 	func() {
-		// safe recovery context to capture execution returns cleanly
+		// safe return value recovery handler
 		defer func() {
 			if r := recover(); r != nil {
 				if returnSignal, ok := r.(ReturnValueSignal); ok {
 					returnedVal = returnSignal.Value
 				} else {
-					panic(r)
+					panic(r) // panic if it's a bug/crash
 				}
 			}
 		}()
 
-		runtimeFunc.Body.Accept(v)
+		f.Body.Accept(v)
 	}()
 
-	// restore the caller's environment right after the function finishes!
+	// safely restore parent scope state
 	v.currEnv = previousEnv
-
 	return returnedVal
 }
+
+func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
+	funcName := ctx.IDENTIFIER().GetText()
+
+	// pull the entity out of the environment stack
+	fn, exists := v.currEnv.Lookup(funcName)
+	if !exists {
+		panic("Undefined function: " + funcName)
+	}
+
+	callable, ok := fn.(Callable)
+	if !ok {
+		panic(funcName + " is not a callable function")
+	}
+
+	// evaluate the call arguments at the caller's execution environment line
+	var argValues []any
+	for _, argExpr := range ctx.AllExpr() {
+		argValues = append(argValues, argExpr.Accept(v))
+	}
+
+	// validate input count parameters
+	if len(argValues) != callable.NrArgs() {
+		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)))
+	}
+
+	return callable.Call(v, argValues)
+}
+
 func (v *Visitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) any {
 	var returnValue any = nil
 	if ctx.Expr() != nil {
 		returnValue = ctx.Expr().Accept(v)
 	}
 	panic(ReturnValueSignal{Value: returnValue})
+}
+
+func (f *RuntimeFunction) NrArgs() int {
+	return len(f.Parameters)
 }
 
 func power(base, exp int) int {
