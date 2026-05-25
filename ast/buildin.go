@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -36,7 +37,6 @@ func NewGlobalEnvironment() *Environment {
 			panic("InvalidArgument: len() expects an array or string type")
 		},
 	})
-	// TODO: make it know what type it has in the arr
 	// append(arr, item)
 	globals.Define("append", &NativeFunction{
 		ArgsCount: 2,
@@ -45,7 +45,38 @@ func NewGlobalEnvironment() *Environment {
 			if !ok {
 				panic("InvalidArgument: append() expects an array as the first argument")
 			}
-			return append(arr, args[1])
+
+			newItem := args[1]
+
+			// type safe guard
+			if len(arr) > 0 {
+				firstItem := arr[0]
+
+				firstType := reflect.TypeOf(firstItem)
+				newType := reflect.TypeOf(newItem)
+
+				if firstType != newType {
+					var expectedName, gotName string = "unknown", "unknown"
+					if firstType != nil {
+						expectedName = firstType.String()
+					}
+					if newType != nil {
+						gotName = newType.String()
+					}
+
+					// clean up Go-specific naming repr
+					if expectedName == "[]interface {}" || expectedName == "[]main.any" {
+						expectedName = "array"
+					}
+					if gotName == "[]interface {}" || gotName == "[]main.any" {
+						gotName = "array"
+					}
+
+					panic(fmt.Sprintf("TypeError: Cannot append %s to an array of %s", gotName, expectedName))
+				}
+			}
+
+			return append(arr, newItem)
 		},
 	})
 

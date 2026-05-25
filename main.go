@@ -163,6 +163,9 @@ func main() {
 		print "type of arr: " + type(arr)
 		print "type of arr[0]: " + type(arr[0])
 
+		var arr1 = [[1,2], [3,5], [6,4]]
+		arr1 = append(arr1, [6])
+
 		`
 
 	input := antlr.NewInputStream(inputCode)
