@@ -447,5 +447,46 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("all", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: all() expects an array as an argument")
+			}
+
+			boolFunc, _ := globals.Lookup("bool")
+			boolCallable := boolFunc.(Callable)
+
+			for _, item := range *arrPtr {
+				truth := boolCallable.Call(nil, []any{item}).(bool)
+				if !truth {
+					return false
+				}
+			}
+			return true
+		},
+	})
+
+	globals.Define("any", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: any() expects an array as an argument")
+			}
+
+			boolFunc, _ := globals.Lookup("bool")
+			boolCallable := boolFunc.(Callable)
+
+			for _, item := range *arrPtr {
+				truth := boolCallable.Call(nil, []any{item}).(bool)
+				if truth {
+					return true
+				}
+			}
+			return false
+		},
+	})
 	return globals
 }

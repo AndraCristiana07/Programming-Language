@@ -195,6 +195,11 @@ func main() {
 
 		print reverse(arr2)
 		print find(arr2, 2)
+
+		var boolArr = [true, false, false]
+		print all(boolArr)
+		print any(boolArr)
+		
 		
 		`
 

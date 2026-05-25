@@ -784,3 +784,42 @@ func TestReverse(t *testing.T) {
 		})
 	}
 }
+
+func TestAllAny(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "All on simple array",
+			input: `
+				var arr = [true, false, true, true]
+				var testResult = all(arr)`,
+			expected: false,
+		},
+		{
+			name: "Any on simple array",
+			input: `
+				var arr = [true, false, true, true]
+				var testResult = any(arr)`,
+			expected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
