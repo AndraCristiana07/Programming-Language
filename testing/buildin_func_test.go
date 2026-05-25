@@ -868,3 +868,46 @@ func TestFilter(t *testing.T) {
 		})
 	}
 }
+
+func TestFloat(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Float on int",
+			input: ` var testResult = float(6)
+               `,
+			expected: 6.0,
+		},
+		{
+			name: "Float on string",
+			input: ` var testResult = float("6")
+               `,
+			expected: 6.0,
+		},
+		{
+			name: "Float on bool",
+			input: ` var testResult = float(true)
+               `,
+			expected: 1.0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

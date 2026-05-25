@@ -520,5 +520,29 @@ func NewGlobalEnvironment() *Environment {
 			return &filteredElements
 		},
 	})
+
+	globals.Define("float", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			switch v := args[0].(type) {
+			case float64:
+				return v
+			case int:
+				return float64(v)
+			case string:
+				if f, err := strconv.ParseFloat(v, 64); err == nil {
+					return f
+				}
+				panic("ValueError: Cannot convert string '" + v + "' to float")
+			case bool:
+				if v {
+					return 1.0
+				}
+				return 0.0
+			default:
+				panic("TypeError: Unsupported type for float() conversion")
+			}
+		},
+	})
 	return globals
 }
