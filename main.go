@@ -178,8 +178,11 @@ func main() {
 
 		var toBool = bool(20)
 		print "to bool: " + toBool
-		var name = input("Enter your name: ")
-		print "Hello, " + name	
+
+		print "range with 1-10: " + range(1, 10)
+
+		print "range with 9: " + range(9)
+
 
 		`
 

@@ -570,3 +570,38 @@ func TestBoolCast(t *testing.T) {
 		})
 	}
 }
+
+func TestRange(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Range of 10",
+			input:    `var testResult = range(1,10)`,
+			expected: []any{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		},
+		{
+			name:     "Range of 0-10",
+			input:    `var testResult = range(10)`,
+			expected: []any{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

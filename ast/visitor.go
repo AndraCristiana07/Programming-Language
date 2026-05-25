@@ -689,7 +689,7 @@ func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 	}
 
 	// validate input count parameters
-	if len(argValues) != callable.NrArgs() {
+	if callable.NrArgs() != -1 && len(argValues) != callable.NrArgs() {
 		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)))
 	}
 

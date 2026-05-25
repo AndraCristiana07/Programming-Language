@@ -275,5 +275,45 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("range", &NativeFunction{
+		ArgsCount: -1,
+		Body: func(args []any) any {
+			start := 0
+			end := 0
+
+			if len(args) == 1 {
+				val, ok := args[0].(int)
+				if !ok {
+					panic("TypeError: range() arguments must be integers")
+				}
+				end = val
+			} else if len(args) == 2 {
+				sVal, ok1 := args[0].(int)
+				eVal, ok2 := args[1].(int)
+				if !ok1 || !ok2 {
+					panic("TypeError: range() arguments must be integers")
+				}
+				start = sVal
+				end = eVal
+			} else {
+				panic("ArgumentError: range() expects 1 or 2 arguments")
+			}
+
+			if start > end {
+				result := []any{}
+				for i := start; i > end; i-- {
+					result = append(result, i)
+				}
+				return result
+			}
+
+			result := make([]any, end-start)
+			for i := 0; i < (end - start); i++ {
+				result[i] = start + i
+			}
+			return result
+		},
+	})
+
 	return globals
 }
