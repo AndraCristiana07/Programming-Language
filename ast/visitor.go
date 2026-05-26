@@ -176,11 +176,16 @@ func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 }
 
 func (v *Visitor) VisitString(ctx *parser.StringContext) any {
-	str := ctx.STRING().GetText()
-	// remove the surrounding quotes
-	return str[1 : len(str)-1]
-}
+	rawStr := ctx.STRING().GetText()
 
+	if unquoted, err := strconv.Unquote(rawStr); err == nil {
+		return unquoted
+	}
+
+	// remove the surrounding quotes
+
+	return rawStr[1 : len(rawStr)-1]
+}
 func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)

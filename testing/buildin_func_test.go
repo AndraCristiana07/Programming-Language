@@ -1309,3 +1309,60 @@ func TestStartsEndswtih(t *testing.T) {
 		})
 	}
 }
+
+func TestStringValidators(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Alphanumeric true",
+			input:    `var testResult = isalnum("Agent007")`,
+			expected: true,
+		},
+		{
+			name:     "Alphanumeric false due to space",
+			input:    `var testResult = isalnum("Agent 007")`,
+			expected: false,
+		},
+		{
+			name:     "Is digit true",
+			input:    `var testResult = isdigit("12345")`,
+			expected: true,
+		},
+		{
+			name:     "Is lower true",
+			input:    `var testResult = islower("hello")`,
+			expected: true,
+		},
+		{
+			name:     "Is upper false mixed case",
+			input:    `var testResult = isupper("Hello")`,
+			expected: false,
+		},
+		{
+			name:     "Is space false",
+			input:    `var testResult = isspace(" ana ")`,
+			expected: false,
+		},
+		{
+			name:     "Is space true",
+			input:    `var testResult = isspace(" \t\n ")`,
+			expected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}

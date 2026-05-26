@@ -766,5 +766,127 @@ func NewGlobalEnvironment() *Environment {
 			return strings.HasSuffix(str, suffix)
 		},
 	})
+
+	globals.Define("isalnum", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: isalnum() expects a string")
+			}
+			if len(str) == 0 {
+				return false
+			}
+
+			for _, r := range str {
+				if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')) {
+					return false
+				}
+			}
+			return true
+		},
+	})
+
+	globals.Define("isalpha", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: isalpha() expects a string")
+			}
+			if len(str) == 0 {
+				return false
+			}
+
+			for _, r := range str {
+				if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')) {
+					return false
+				}
+			}
+			return true
+		},
+	})
+
+	globals.Define("isdigit", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: isdigit() expects a string")
+			}
+			if len(str) == 0 {
+				return false
+			}
+
+			for _, r := range str {
+				if r < '0' || r > '9' {
+					return false
+				}
+			}
+			return true
+		},
+	})
+
+	globals.Define("islower", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: islower() expects a string")
+			}
+
+			hasCased := false
+			for _, r := range str {
+				if r >= 'A' && r <= 'Z' {
+					return false
+				}
+				if r >= 'a' && r <= 'z' {
+					hasCased = true
+				}
+			}
+			return hasCased
+		},
+	})
+	globals.Define("isupper", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: isupper() expects a string")
+			}
+
+			hasCased := false
+			for _, r := range str {
+				if r >= 'a' && r <= 'z' {
+					return false
+				}
+				if r >= 'A' && r <= 'Z' {
+					hasCased = true
+				}
+			}
+			return hasCased
+		},
+	})
+
+	globals.Define("isspace", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: isspace() expects a string")
+			}
+			if len(str) == 0 {
+				return false
+			}
+
+			for _, r := range str {
+				if r != ' ' && r != '\t' && r != '\n' && r != '\r' {
+					return false
+				}
+			}
+			return true
+		},
+	})
+
 	return globals
 }
