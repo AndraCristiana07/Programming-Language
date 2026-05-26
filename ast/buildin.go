@@ -214,6 +214,17 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("oct", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			val, ok := args[0].(int)
+			if !ok {
+				panic("InvalidArgument: oct() expects an integer")
+			}
+			return "0o" + strconv.FormatInt(int64(val), 8)
+		},
+	})
+
 	globals.Define("abs", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(args []any) any {
