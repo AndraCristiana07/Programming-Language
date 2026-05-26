@@ -689,5 +689,59 @@ func NewGlobalEnvironment() *Environment {
 			return totalInt
 		},
 	})
+
+	globals.Define("split", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			sep, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: split() expects two string arguments")
+			}
+
+			parts := strings.Split(str, sep)
+			result := make([]any, len(parts))
+			for i, part := range parts {
+				result[i] = part
+			}
+			return &result
+		},
+	})
+
+	globals.Define("insert", &NativeFunction{
+		ArgsCount: 3,
+		Body: func(args []any) any {
+			arrPtr, ok1 := args[0].(*[]any)
+			idx, ok2 := args[1].(int)
+			if !ok1 || !ok2 {
+				panic("TypeError: insert() expects an array and an integer index")
+			}
+
+			arr := *arrPtr
+			if idx < 0 || idx > len(arr) {
+				panic(fmt.Sprintf("IndexError: insert index %d out of bounds for length %d", idx, len(arr)))
+			}
+
+			// grow slice by appending a dummy element
+			arr = append(arr, nil)
+			// shift elements to the right by one slot
+			copy(arr[idx+1:], arr[idx:])
+			// insert the target item in the opened slot
+			arr[idx] = args[2]
+
+			*arrPtr = arr
+			return nil
+		},
+	})
+	globals.Define("strip", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: strip() expects a string argument")
+			}
+			return strings.TrimSpace(str)
+		},
+	})
 	return globals
 }

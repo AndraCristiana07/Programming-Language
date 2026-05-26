@@ -1152,3 +1152,103 @@ func TestSum(t *testing.T) {
 		})
 	}
 }
+
+func TestSplit(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Split string on -",
+			input: `
+				var phrase = "hello-world-here"
+				var testResult = split(phrase, "-")
+			`,
+			expected: &[]any{"hello", "world", "here"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestInsert(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Insert in simple arr",
+			input: `
+				var arr = [1, 4, 7, 3]
+				insert(arr, 2, 9)
+				var testResult = arr
+			`,
+			expected: &[]any{1, 4, 9, 7, 3},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestStrip(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Strip string",
+			input: `
+				var phrase = "   hello-world   "
+				var testResult = strip(phrase)
+			`,
+			expected: "hello-world",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

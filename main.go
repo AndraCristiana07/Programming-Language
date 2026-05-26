@@ -202,6 +202,9 @@ func main() {
 		print float(5)
 
 		print sum(arr2)
+		var phrase = "  hello-there  "
+		print "stripped: " + strip(phrase)
+		print "split: " + split(phrase, "-")
 		
 		`
 
