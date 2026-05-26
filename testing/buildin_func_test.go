@@ -911,3 +911,150 @@ func TestFloat(t *testing.T) {
 		})
 	}
 }
+
+func TestList(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "List on simple string",
+			input: ` var testResult = list("here")
+               `,
+			expected: &[]any{"h", "e", "r", "e"},
+		},
+		{
+			name: "List on string",
+			input: ` var testResult = list("here I am")
+               `,
+			expected: &[]any{"h", "e", "r", "e", " ", "I", " ", "a", "m"},
+		},
+
+		{
+			name: "List on array",
+			input: ` 
+				var arr = [1, 2, 4, 6, 7]
+				var testResult = list(arr)
+               `,
+			expected: &[]any{1, 2, 4, 6, 7},
+		},
+		{
+			name: "List on comp array",
+			input: ` 
+				var arr = [[1,2], [3,6], [7,5], [5,2]]
+				var testResult = list(arr)
+               `,
+			expected: &[]any{
+				&[]any{1, 2},
+				&[]any{3, 6},
+				&[]any{7, 5},
+				&[]any{5, 2},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestMap(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Map squares of integers",
+			input: `
+                func square(x) {
+                    return x * x
+                }
+                var nums = [1, 2, 3, 4]
+                var testResult = map(square, nums)`,
+			expected: &[]any{1, 4, 9, 16},
+		},
+		{
+			name: "Map strings to uppercase",
+			input: `
+                func goUppercase(word) {
+                    return upper(word) + "!"
+                }
+                var words = ["hello", "world"]
+                var testResult = map(goUppercase, words)`,
+			expected: &[]any{"HELLO!", "WORLD!"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestRound(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Round on int",
+			input: ` var testResult = round(6)
+               `,
+			expected: 6,
+		},
+		{
+			name: "Round on float",
+			input: ` var testResult = round(5.3)
+               `,
+			expected: 5,
+		},
+		{
+			name: "Float on bool",
+			input: ` var testResult = float(true)
+               `,
+			expected: 1.0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

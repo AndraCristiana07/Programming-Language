@@ -152,8 +152,16 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 }
 
 func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
-	// convert into integer
-	val, _ := strconv.Atoi(ctx.NUMBER().GetText())
+	numStr := ctx.NUMBER().GetText()
+
+	// float
+	if strings.Contains(numStr, ".") {
+		val, _ := strconv.ParseFloat(numStr, 64)
+		return val
+	}
+
+	// fall back to standard integers
+	val, _ := strconv.Atoi(numStr)
 	return val
 }
 
@@ -778,6 +786,12 @@ func cleanStringRepr(val any) string {
 	switch v := val.(type) {
 	case string:
 		return v
+	case float64:
+		// check if whole nr
+		if v == float64(int64(v)) {
+			return fmt.Sprintf("%.1f", v) // 5.0
+		}
+		return fmt.Sprintf("%g", v) //5.3
 	case *[]any:
 		var sb strings.Builder
 		sb.WriteString("[")

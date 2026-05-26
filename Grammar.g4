@@ -126,7 +126,7 @@ OR              : 'or' ;
 NOT             : 'not' ;
 
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
-NUMBER          : [0-9]+ ;
+NUMBER          : [0-9]+ ('.' [0-9]+)? ;
 STRING          : '"' (~["] | '""')* '"' ;
 NL              : [\r\n]+ ;
 WS              : [ \t]+ -> skip ;

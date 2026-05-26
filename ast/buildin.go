@@ -544,5 +544,66 @@ func NewGlobalEnvironment() *Environment {
 			}
 		},
 	})
+
+	globals.Define("list", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			switch v := args[0].(type) {
+			case string:
+				// convert string to an array of individual characters
+				result := []any{}
+				for _, r := range v {
+					result = append(result, string(r))
+				}
+				return &result
+			case *[]any:
+				// create copy of an existing array pointer
+				result := make([]any, len(*v))
+				copy(result, *v)
+				return &result
+			default:
+				panic("TypeError: list() expects a string or an array")
+			}
+		},
+	})
+	globals.Define("map", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			transform, ok := args[0].(Callable)
+			if !ok {
+				panic("TypeError: first argument to map() must be a callable function")
+			}
+
+			arrPtr, ok := args[1].(*[]any)
+			if !ok {
+				panic("TypeError: second argument to map() must be an array")
+			}
+
+			mappedElements := make([]any, len(*arrPtr))
+			for i, item := range *arrPtr {
+				mappedElements[i] = transform.Call(nil, []any{item})
+			}
+
+			return &mappedElements
+		},
+	})
+
+	globals.Define("round", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			switch v := args[0].(type) {
+			case int:
+				return v
+			case float64:
+				// basic round logic for floats to integers
+				if v < 0 {
+					return int(v - 0.5)
+				}
+				return int(v + 0.5)
+			default:
+				panic("TypeError: round() expects a number")
+			}
+		},
+	})
 	return globals
 }

@@ -199,7 +199,7 @@ func main() {
 		var boolArr = [true, false, false]
 		print all(boolArr)
 		print any(boolArr)
-		
+		print float(5)
 		
 		`
 
