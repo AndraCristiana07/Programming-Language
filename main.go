@@ -205,7 +205,9 @@ func main() {
 		var phrase = "  hello-there  "
 		print "stripped: " + strip(phrase)
 		print "split: " + split(phrase, "-")
-		
+		var filename = "script.exe"
+		print startswtih(filename, "script")          
+		print endswitsh(filename, ".txt")
 		`
 
 	input := antlr.NewInputStream(inputCode)

@@ -1252,3 +1252,60 @@ func TestStrip(t *testing.T) {
 		})
 	}
 }
+
+func TestStartsEndswtih(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Startswtih string",
+			input: `
+				var filename = "script.exe"
+				var testResult = startswtih(filename, "script")  
+			`,
+			expected: true,
+		},
+		{
+			name: "Startswtih string false",
+			input: `
+				var filename = "script.exe"
+				var testResult = startswtih(filename, "file")  
+			`,
+			expected: false,
+		},
+		{
+			name: "Endswtih string",
+			input: `
+				var filename = "script.exe"
+				var testResult = endswitsh(filename, "exe")  
+			`,
+			expected: true,
+		},
+		{
+			name: "Endswtih string",
+			input: `
+				var filename = "script.exe"
+				var testResult = endswitsh(filename, "txt")  
+			`,
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

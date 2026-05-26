@@ -743,5 +743,28 @@ func NewGlobalEnvironment() *Environment {
 			return strings.TrimSpace(str)
 		},
 	})
+
+	globals.Define("startswtih", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			prefix, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: startswtih() expects two string arguments")
+			}
+			return strings.HasPrefix(str, prefix)
+		},
+	})
+	globals.Define("endswitsh", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			suffix, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: endswitsh() expects two string arguments")
+			}
+			return strings.HasSuffix(str, suffix)
+		},
+	})
 	return globals
 }
