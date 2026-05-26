@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -614,6 +615,78 @@ func NewGlobalEnvironment() *Environment {
 			default:
 				panic("TypeError: round() expects a number")
 			}
+		},
+	})
+
+	globals.Define("sorted", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: sorted() expects an array")
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				return &[]any{}
+			}
+
+			sortedElements := make([]any, len(arr))
+			copy(sortedElements, arr)
+
+			// type check
+			switch sortedElements[0].(type) {
+			case int:
+				sort.Slice(sortedElements, func(i, j int) bool {
+					return sortedElements[i].(int) < sortedElements[j].(int)
+				})
+			case string:
+				sort.Slice(sortedElements, func(i, j int) bool {
+					return sortedElements[i].(string) < sortedElements[j].(string)
+				})
+			default:
+				panic("TypeError: sorted() only supports arrays of integers or strings")
+			}
+
+			return &sortedElements
+		},
+	})
+
+	globals.Define("sum", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: sum() expects an array")
+			}
+
+			var totalInt int = 0
+			var totalFloat float64 = 0.0
+			hasFloat := false
+
+			for _, item := range *arrPtr {
+				switch v := item.(type) {
+				case int:
+					if hasFloat {
+						totalFloat += float64(v)
+					} else {
+						totalInt += v
+					}
+				case float64:
+					if !hasFloat {
+						hasFloat = true
+						totalFloat = float64(totalInt)
+					}
+					totalFloat += v
+				default:
+					panic("TypeError: sum() array elements must be numbers")
+				}
+			}
+
+			if hasFloat {
+				return totalFloat
+			}
+			return totalInt
 		},
 	})
 	return globals

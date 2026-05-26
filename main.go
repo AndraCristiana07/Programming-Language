@@ -132,8 +132,8 @@ func main() {
 		func add(a, b) {
 			return a + b
 		}
-		var sum = add(5, 7)
-		print "Sum: " + sum
+		var sum1 = add(5, 7)
+		print "Sum1: " + sum1
 
 		func factorial(n) {
 			if (n == 0) {
@@ -200,6 +200,8 @@ func main() {
 		print all(boolArr)
 		print any(boolArr)
 		print float(5)
+
+		print sum(arr2)
 		
 		`
 
