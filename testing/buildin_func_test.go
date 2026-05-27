@@ -1366,3 +1366,45 @@ func TestStringValidators(t *testing.T) {
 		})
 	}
 }
+
+func TestRightStringFinders(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Replace a with o",
+			input:    `var testResult = replace("banana", "a", "o")`,
+			expected: "bonono",
+		},
+		{
+			name:     "Rfind match last occurrence index world",
+			input:    `var testResult = rfind("hello world world", "world")`,
+			expected: 12,
+		},
+		{
+			name:     "Rfind not finding",
+			input:    `var testResult = rfind("hello", "missing")`,
+			expected: -1,
+		},
+		{
+			name:     "Rindex matches last occurrence index apple",
+			input:    `var testResult = rindex("apple banana apple", "apple")`,
+			expected: 13,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}

@@ -208,6 +208,10 @@ func main() {
 		var filename = "script.exe"
 		print startswtih(filename, "script")          
 		print endswitsh(filename, ".txt")
+
+		print replace("banana", "a", "o")
+		print rfind("in here", "here")
+		print rindex("more go more", "more")
 		`
 
 	input := antlr.NewInputStream(inputCode)

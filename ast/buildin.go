@@ -888,5 +888,49 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("replace", &NativeFunction{
+		ArgsCount: 3,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			old, ok2 := args[1].(string)
+			newStr, ok3 := args[2].(string)
+			if !ok1 || !ok2 || !ok3 {
+				panic("TypeError: replace() expects three string arguments")
+			}
+
+			return strings.ReplaceAll(str, old, newStr)
+		},
+	})
+
+	globals.Define("rfind", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			substr, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: rfind() expects two string arguments")
+			}
+
+			return strings.LastIndex(str, substr)
+		},
+	})
+
+	globals.Define("rindex", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			substr, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: rindex() expects two string arguments")
+			}
+
+			idx := strings.LastIndex(str, substr)
+			if idx == -1 {
+				panic(fmt.Sprintf("ValueError: substring '%s' not found in rindex()", substr))
+			}
+
+			return idx
+		},
+	})
 	return globals
 }
