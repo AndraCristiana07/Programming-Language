@@ -212,6 +212,13 @@ func main() {
 		print replace("banana", "a", "o")
 		print rfind("in here", "here")
 		print rindex("more go more", "more")
+
+		var countStr = "one apple per apple per person"
+		print count(countStr, "apple")
+
+		var arr2 = ["apple", "pear", "kiwi"]
+		print enumerate(arr2) 
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

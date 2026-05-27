@@ -932,5 +932,65 @@ func NewGlobalEnvironment() *Environment {
 			return idx
 		},
 	})
+
+	globals.Define("divmod", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			a, ok1 := args[0].(int)
+			b, ok2 := args[1].(int)
+			if !ok1 || !ok2 {
+				panic("TypeError: divmod() expects two integers")
+			}
+			if b == 0 {
+				panic("ZeroDivisionError: integer division or modulo by zero")
+			}
+
+			result := []any{a / b, a % b}
+			return &result
+		},
+	})
+
+	globals.Define("pow", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			base, ok1 := args[0].(int)
+			exp, ok2 := args[1].(int)
+			if !ok1 || !ok2 {
+				panic("TypeError: pow() expects two string arguments")
+			}
+
+			return power(base, exp)
+		},
+	})
+
+	globals.Define("count", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			str, ok1 := args[0].(string)
+			sub, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: count() expects two strings")
+			}
+			return strings.Count(str, sub)
+		},
+	})
+
+	globals.Define("enumerate", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: enumerate() expects an array")
+			}
+
+			arr := *arrPtr
+			result := make([]any, len(arr))
+			for i, val := range arr {
+				pair := []any{i, val}
+				result[i] = &pair
+			}
+			return &result
+		},
+	})
 	return globals
 }

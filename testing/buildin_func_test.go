@@ -1408,3 +1408,115 @@ func TestRightStringFinders(t *testing.T) {
 		})
 	}
 }
+
+func TestDivPow(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Divmod 6/2",
+			input: `
+				var testResult = divmod(6, 2)  
+			`,
+			expected: &[]any{3, 0},
+		},
+		{
+			name: "Pow 2^3",
+			input: `
+				var testResult = pow(2, 3)  
+			`,
+			expected: 8,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestCount(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Count on string",
+			input: `
+				var countStr = "one apple per apple per person"
+				var testResult = count(countStr, "apple")`,
+			expected: 2,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestEnumerate(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Enumerate simple array",
+			input: `
+				var arr = ["apple", "pear", "kiwi"]
+				var testResult = enumerate(arr)  
+			`,
+			expected: &[]any{
+				&[]any{0, "apple"},
+				&[]any{1, "pear"},
+				&[]any{2, "kiwi"},
+			},
+		},
+		{
+			name: "Pow 2^3",
+			input: `
+				var testResult = pow(2, 3)  
+			`,
+			expected: 8,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
