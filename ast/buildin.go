@@ -992,5 +992,53 @@ func NewGlobalEnvironment() *Environment {
 			return &result
 		},
 	})
+
+	globals.Define("index", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: index() expects an array as the first argument")
+			}
+
+			for i, val := range *arrPtr {
+				if reflect.DeepEqual(val, args[1]) {
+					return i
+				}
+			}
+			panic(fmt.Sprintf("ValueError: element '%v' is not in array", args[1]))
+		},
+	})
+
+	globals.Define("isinstance", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(args []any) any {
+			targetType, ok := args[1].(string)
+			if !ok {
+				panic("TypeError: isinstance() second argument must be a type string")
+			}
+
+			var actualType string
+			switch args[0].(type) {
+			case int:
+				actualType = "int"
+			case float64:
+				actualType = "float"
+			case string:
+				actualType = "string"
+			case bool:
+				actualType = "bool"
+			case *[]any:
+				actualType = "array"
+			case Callable:
+				actualType = "function"
+			default:
+				actualType = "nil"
+			}
+
+			return actualType == targetType
+		},
+	})
+
 	return globals
 }

@@ -1520,3 +1520,87 @@ func TestEnumerate(t *testing.T) {
 		})
 	}
 }
+
+func TestIndex(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Count on string",
+			input: `
+				var arr = ["apple", "pear", "kiwi"]
+				var testResult = index(arr, "apple")`,
+			expected: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestIsinstance(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "isinstance on int",
+			input: `
+				var testResult = isinstance(5, "int")`,
+			expected: true,
+		},
+		{
+			name: "isinstance on string",
+			input: `
+				var testResult = isinstance("hello", "string")`,
+			expected: true,
+		},
+		{
+			name: "isinstance on bool",
+			input: `
+				var testResult = isinstance(true, "bool")`,
+			expected: true,
+		},
+		{
+			name: "isinstance on array",
+			input: `
+				var testResult = isinstance([4,6,4], "array")`,
+			expected: true,
+		},
+		{
+			name: "isinstance on function",
+			input: `
+				func add(a,b) {
+					return a+b
+				}
+				var testResult = isinstance(add, "function")`,
+			expected: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}
