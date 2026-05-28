@@ -1707,3 +1707,82 @@ func TestFormat(t *testing.T) {
 		})
 	}
 }
+
+func TestZip(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Zip with simple arrays",
+			input: `
+				var arr1 = [1, 4, 7, 3]
+				var arr2 = [5, 9, 17, 13]
+
+				var testResult = zip(arr1, arr2)
+			`,
+			expected: &[]any{
+				&[]any{1, 5},
+				&[]any{4, 9},
+				&[]any{7, 17},
+				&[]any{3, 13},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestJoin(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Join simple str array",
+			input: `
+                var arr = ["a", "l", "l"]
+                var testResult = join(arr, "")  
+            `,
+			expected: "all",
+		},
+		{
+			name: "Join str array with -",
+			input: `
+                var arr = ["here", "I", "am"]
+                var testResult = join(arr, "-")  
+            `,
+			expected: "here-I-am",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}

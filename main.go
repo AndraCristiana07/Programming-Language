@@ -224,6 +224,14 @@ func main() {
 
 		var xEval = "50 + 5"
 		print eval(xEval)
+
+		print format(2, "b")
+
+		var a1 = [2, 4, 6, 1]
+		var a2 = ["a", "c", "f", "g"]
+		print zip(a1, a2)
+		print join(a2,"-")
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

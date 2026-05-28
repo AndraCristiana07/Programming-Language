@@ -1118,5 +1118,62 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("zip", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr1, ok1 := args[0].(*[]any)
+			arrPtr2, ok2 := args[1].(*[]any)
+			if !ok1 || !ok2 {
+				panic("TypeError: zip() expects two array")
+			}
+
+			arr1 := *arrPtr1
+			arr2 := *arrPtr2
+
+			minLen := len(arr1)
+			if len(arr2) < minLen {
+				minLen = len(arr2)
+			}
+
+			result := make([]any, minLen)
+			for i := 0; i < minLen; i++ {
+				pair := []any{arr1[i], arr2[i]}
+				result[i] = &pair
+			}
+			return &result
+		},
+	})
+
+	globals.Define("join", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok1 := args[0].(*[]any)
+			delim, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: join() expects an array pointer and a delimiter string")
+			}
+
+			arr := *arrPtr
+			strParts := make([]string, len(arr))
+
+			for i, val := range arr {
+				switch v := val.(type) {
+				case string:
+					strParts[i] = v
+				case int:
+					strParts[i] = strconv.Itoa(v)
+				case float64:
+					strParts[i] = strconv.FormatFloat(v, 'g', -1, 64)
+				case bool:
+					strParts[i] = strconv.FormatBool(v)
+				default:
+					strParts[i] = fmt.Sprintf("%v", val)
+				}
+			}
+
+			return strings.Join(strParts, delim)
+		},
+	})
+
 	return globals
 }
