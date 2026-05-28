@@ -122,6 +122,9 @@ type GrammarListener interface {
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
 
+	// EnterFieldAccess is called when entering the FieldAccess production.
+	EnterFieldAccess(c *FieldAccessContext)
+
 	// EnterParentheses is called when entering the Parentheses production.
 	EnterParentheses(c *ParenthesesContext)
 
@@ -241,6 +244,9 @@ type GrammarListener interface {
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)
+
+	// ExitFieldAccess is called when exiting the FieldAccess production.
+	ExitFieldAccess(c *FieldAccessContext)
 
 	// ExitParentheses is called when exiting the Parentheses production.
 	ExitParentheses(c *ParenthesesContext)

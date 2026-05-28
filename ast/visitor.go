@@ -859,6 +859,24 @@ func (v *Visitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) any {
 	panic(ReturnValueSignal{Value: returnValue})
 }
 
+func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
+	//eval left side object
+	obj := ctx.Expr().Accept(v)
+	// get field name
+	fieldName := ctx.IDENTIFIER().GetText()
+
+	switch container := obj.(type) {
+	case *map[string]any:
+		val, exists := (*container)[fieldName]
+		if !exists {
+			return nil
+		}
+		return val
+	default:
+		panic(fmt.Sprintf("TypeError: Cannot read property '%s' of type %T", fieldName, obj))
+	}
+}
+
 func (f *RuntimeFunction) NrArgs() int {
 	return len(f.Parameters)
 }
@@ -923,43 +941,69 @@ func cleanStringRepr(val any) string {
 }
 
 func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
-	idxCtx, ok := leftCtx.(*parser.ArrayIndexContext)
-	if !ok {
-		return nil, nil
-	}
+	// braket lookup
+	if idxCtx, ok := leftCtx.(*parser.ArrayIndexContext); ok {
+		// get inner target
+		innerTargetCtx := idxCtx.Expr(0)
+		indexVal := idxCtx.Expr(1).Accept(v)
 
-	// get inner target
-	innerTargetCtx := idxCtx.Expr(0)
-	indexVal := idxCtx.Expr(1).Accept(v)
+		// check if there;s another nest
+		if _, isNestedIdx := innerTargetCtx.(*parser.ArrayIndexContext); isNestedIdx {
+			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
+			return v.unwrapContainer(parentContainer, parentIndex), indexVal
+		}
+		if _, isNestedField := innerTargetCtx.(*parser.FieldAccessContext); isNestedField {
+			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
+			return v.unwrapContainer(parentContainer, parentIndex), indexVal
+		}
 
-	// check if there;s another nest
-	if nestedIdxCtx, isNested := innerTargetCtx.(*parser.ArrayIndexContext); isNested {
-		parentContainer, parentIndex := v.resolveAssignTarget(nestedIdxCtx)
-
-		switch obj := parentContainer.(type) {
-		case *[]any:
-			idx, ok := parentIndex.(int)
-			if !ok {
-				panic("TypeError: Array index must be an integer")
+		// plain struct
+		if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
+			name := identCtx.IDENTIFIER().GetText()
+			container, exists := v.currEnv.Lookup(name)
+			if !exists {
+				panic("Undefined variable: " + name)
 			}
-			return (*obj)[idx], indexVal
-		case *map[string]any:
-			keyStr := fmt.Sprintf("%v", parentIndex)
-			return (*obj)[keyStr], indexVal
-		default:
-			panic(fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer))
+			return container, indexVal
 		}
 	}
 
-	// plain struct
-	if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
-		name := identCtx.IDENTIFIER().GetText()
-		container, exists := v.currEnv.Lookup(name)
-		if !exists {
-			panic("Undefined variable: " + name)
+	// field acces by dot
+	if fieldCtx, ok := leftCtx.(*parser.FieldAccessContext); ok {
+		innerTargetCtx := fieldCtx.Expr()
+		fieldName := fieldCtx.IDENTIFIER().GetText()
+
+		// nested
+		if _, isNestedIdx := innerTargetCtx.(*parser.ArrayIndexContext); isNestedIdx {
+			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
+			return v.unwrapContainer(parentContainer, parentIndex), fieldName
 		}
-		return container, indexVal
+		if _, isNestedField := innerTargetCtx.(*parser.FieldAccessContext); isNestedField {
+			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
+			return v.unwrapContainer(parentContainer, parentIndex), fieldName
+		}
+
+		// plain case
+		if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
+			name := identCtx.IDENTIFIER().GetText()
+			container, exists := v.currEnv.Lookup(name)
+			if !exists {
+				panic("Undefined variable: " + name)
+			}
+			return container, fieldName
+		}
 	}
 
 	return nil, nil
+}
+
+func (v *Visitor) unwrapContainer(parentContainer any, parentIndex any) any {
+	switch obj := parentContainer.(type) {
+	case *[]any:
+		return (*obj)[parentIndex.(int)]
+	case *map[string]any:
+		return (*obj)[fmt.Sprintf("%v", parentIndex)]
+	default:
+		panic(fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer))
+	}
 }

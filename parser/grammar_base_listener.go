@@ -249,6 +249,12 @@ func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}
 // ExitBoolean is called when production Boolean is exited.
 func (s *BaseGrammarListener) ExitBoolean(ctx *BooleanContext) {}
 
+// EnterFieldAccess is called when production FieldAccess is entered.
+func (s *BaseGrammarListener) EnterFieldAccess(ctx *FieldAccessContext) {}
+
+// ExitFieldAccess is called when production FieldAccess is exited.
+func (s *BaseGrammarListener) ExitFieldAccess(ctx *FieldAccessContext) {}
+
 // EnterParentheses is called when production Parentheses is entered.
 func (s *BaseGrammarListener) EnterParentheses(ctx *ParenthesesContext) {}
 

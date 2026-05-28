@@ -122,6 +122,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#FieldAccess.
+	VisitFieldAccess(ctx *FieldAccessContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Parentheses.
 	VisitParentheses(ctx *ParenthesesContext) interface{}
 

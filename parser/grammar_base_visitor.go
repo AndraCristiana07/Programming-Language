@@ -160,6 +160,10 @@ func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitFieldAccess(ctx *FieldAccessContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
 	return v.VisitChildren(ctx)
 }

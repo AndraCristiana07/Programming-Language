@@ -42,8 +42,9 @@ forPost   : assignStmt
 postfixStmt        : expr op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
+            | expr DOT IDENTIFIER                               # FieldAccess
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
-            | op=(NOT | BITNOT | MINUS) expr                       # Unary
+            | op=(NOT | BITNOT | MINUS) expr                    # Unary
             | expr op=EXPONENTIAL expr                          # Exponential
             | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
             | expr op=(PLUS | MINUS) expr                       # AddSub
@@ -66,6 +67,7 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
 
 mapEntry : expr ':' expr ;
 
+DOT             : '.' ;
 VAR             : 'var' ;
 EQUALS          : '=' ;
 PLUS            : '+' ;

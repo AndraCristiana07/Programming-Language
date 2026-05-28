@@ -130,6 +130,27 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Reassign with dot field access on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				users.name = "Alice"
+				var testResult = users
+			`,
+			expected: &map[string]any{"name": "Alice", "age": 20},
+		},
+		{
+			name: "Reassign with dot field access on nested map",
+			input: `
+				var schools =  {"sch1":{"Alice":"class1", "Bob":"class2"}, "sch2":{"Anna":"class4", "Fred":"class2"}}
+				schools.sch1.Alice = "class5"
+				var testResult = schools
+			`,
+			expected: &map[string]any{
+				"sch1": &map[string]any{"Alice": "class5", "Bob": "class2"},
+				"sch2": &map[string]any{"Anna": "class4", "Fred": "class2"},
+			},
+		},
 	}
 
 	for _, tc := range tests {

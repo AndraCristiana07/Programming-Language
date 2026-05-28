@@ -33,24 +33,25 @@ var GrammarParserStaticData struct {
 func grammarParserInit() {
 	staticData := &GrammarParserStaticData
 	staticData.LiteralNames = []string{
-		"", "'null'", "':'", "'var'", "'='", "'+'", "'-'", "'*'", "'/'", "'<'",
-		"'>'", "'=='", "'!='", "'<='", "'>='", "'{'", "'('", "')'", "'}'", "'['",
-		"']'", "'if'", "'else'", "'while'", "'for'", "';'", "','", "'++'", "'--'",
-		"'%'", "'**'", "'+='", "'-='", "'*='", "'/='", "'%='", "'**='", "'&'",
-		"'|'", "'^'", "'<<'", "'>>'", "'~'", "'&='", "'|='", "'^='", "'<<='",
-		"'>>='", "'func'", "'return'", "'print'", "'true'", "'false'", "'and'",
-		"'or'", "'not'",
+		"", "'null'", "':'", "'.'", "'var'", "'='", "'+'", "'-'", "'*'", "'/'",
+		"'<'", "'>'", "'=='", "'!='", "'<='", "'>='", "'{'", "'('", "')'", "'}'",
+		"'['", "']'", "'if'", "'else'", "'while'", "'for'", "';'", "','", "'++'",
+		"'--'", "'%'", "'**'", "'+='", "'-='", "'*='", "'/='", "'%='", "'**='",
+		"'&'", "'|'", "'^'", "'<<'", "'>>'", "'~'", "'&='", "'|='", "'^='",
+		"'<<='", "'>>='", "'func'", "'return'", "'print'", "'true'", "'false'",
+		"'and'", "'or'", "'not'",
 	}
 	staticData.SymbolicNames = []string{
-		"", "", "", "VAR", "EQUALS", "PLUS", "MINUS", "STAR", "SLASH", "LESS",
-		"GREATER", "EQUALEQUAL", "BANGEQUAL", "LESSEQUAL", "GREATEREQUAL", "LBRACE",
-		"LPAREN", "RPAREN", "RBRACE", "LBRACKET", "RBRACKET", "IF", "ELSE",
-		"WHILE", "FOR", "SEMICOLON", "COMMA", "INC", "DEC", "MODULO", "EXPONENTIAL",
-		"PLUSEQUAL", "MINUSEQUAL", "STAREQUAL", "SLASHEQUAL", "MODEQUAL", "EXPONENTIALEQUAL",
-		"BITAND", "BITOR", "BITXOR", "BITLSHIFT", "BITRSHIFT", "BITNOT", "BITANDEQUAL",
-		"BITOREQUAL", "BITXOREQAUL", "BITLSHIFTEQUAL", "BITRSHIFTEQUAL", "FUNC",
-		"RETURN", "PRINT", "TRUE", "FALSE", "AND", "OR", "NOT", "IDENTIFIER",
-		"NUMBER", "STRING", "LINE_COMMENT", "BLOCK_COMMENT", "NL", "WS",
+		"", "", "", "DOT", "VAR", "EQUALS", "PLUS", "MINUS", "STAR", "SLASH",
+		"LESS", "GREATER", "EQUALEQUAL", "BANGEQUAL", "LESSEQUAL", "GREATEREQUAL",
+		"LBRACE", "LPAREN", "RPAREN", "RBRACE", "LBRACKET", "RBRACKET", "IF",
+		"ELSE", "WHILE", "FOR", "SEMICOLON", "COMMA", "INC", "DEC", "MODULO",
+		"EXPONENTIAL", "PLUSEQUAL", "MINUSEQUAL", "STAREQUAL", "SLASHEQUAL",
+		"MODEQUAL", "EXPONENTIALEQUAL", "BITAND", "BITOR", "BITXOR", "BITLSHIFT",
+		"BITRSHIFT", "BITNOT", "BITANDEQUAL", "BITOREQUAL", "BITXOREQAUL", "BITLSHIFTEQUAL",
+		"BITRSHIFTEQUAL", "FUNC", "RETURN", "PRINT", "TRUE", "FALSE", "AND",
+		"OR", "NOT", "IDENTIFIER", "NUMBER", "STRING", "LINE_COMMENT", "BLOCK_COMMENT",
+		"NL", "WS",
 	}
 	staticData.RuleNames = []string{
 		"program", "statement", "returnStmt", "terminator", "funcStmt", "exprStmt",
@@ -60,7 +61,7 @@ func grammarParserInit() {
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 62, 257, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 63, 260, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 2, 15, 7, 15,
 		2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 1, 0, 1, 0, 1,
@@ -84,100 +85,102 @@ func grammarParserInit() {
 		18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18,
 		1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1,
 		18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18,
-		1, 18, 1, 18, 1, 18, 1, 18, 5, 18, 248, 8, 18, 10, 18, 12, 18, 251, 9,
-		18, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 0, 1, 36, 20, 0, 2, 4, 6, 8, 10,
-		12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 0, 9, 2, 0, 25,
-		25, 61, 61, 2, 0, 31, 36, 43, 47, 1, 0, 27, 28, 3, 0, 6, 6, 42, 42, 55,
-		55, 1, 0, 51, 52, 2, 0, 7, 8, 29, 29, 1, 0, 5, 6, 1, 0, 40, 41, 1, 0, 9,
-		14, 286, 0, 45, 1, 0, 0, 0, 2, 62, 1, 0, 0, 0, 4, 67, 1, 0, 0, 0, 6, 71,
-		1, 0, 0, 0, 8, 73, 1, 0, 0, 0, 10, 89, 1, 0, 0, 0, 12, 91, 1, 0, 0, 0,
-		14, 96, 1, 0, 0, 0, 16, 100, 1, 0, 0, 0, 18, 107, 1, 0, 0, 0, 20, 111,
-		1, 0, 0, 0, 22, 114, 1, 0, 0, 0, 24, 123, 1, 0, 0, 0, 26, 129, 1, 0, 0,
-		0, 28, 139, 1, 0, 0, 0, 30, 152, 1, 0, 0, 0, 32, 156, 1, 0, 0, 0, 34, 158,
-		1, 0, 0, 0, 36, 210, 1, 0, 0, 0, 38, 252, 1, 0, 0, 0, 40, 44, 3, 2, 1,
-		0, 41, 44, 3, 8, 4, 0, 42, 44, 3, 6, 3, 0, 43, 40, 1, 0, 0, 0, 43, 41,
-		1, 0, 0, 0, 43, 42, 1, 0, 0, 0, 44, 47, 1, 0, 0, 0, 45, 43, 1, 0, 0, 0,
-		45, 46, 1, 0, 0, 0, 46, 48, 1, 0, 0, 0, 47, 45, 1, 0, 0, 0, 48, 49, 5,
-		0, 0, 1, 49, 1, 1, 0, 0, 0, 50, 63, 3, 12, 6, 0, 51, 63, 3, 14, 7, 0, 52,
-		63, 3, 16, 8, 0, 53, 63, 3, 18, 9, 0, 54, 63, 3, 10, 5, 0, 55, 63, 3, 20,
-		10, 0, 56, 63, 3, 22, 11, 0, 57, 63, 3, 24, 12, 0, 58, 63, 3, 26, 13, 0,
-		59, 63, 3, 28, 14, 0, 60, 63, 3, 34, 17, 0, 61, 63, 3, 4, 2, 0, 62, 50,
-		1, 0, 0, 0, 62, 51, 1, 0, 0, 0, 62, 52, 1, 0, 0, 0, 62, 53, 1, 0, 0, 0,
-		62, 54, 1, 0, 0, 0, 62, 55, 1, 0, 0, 0, 62, 56, 1, 0, 0, 0, 62, 57, 1,
-		0, 0, 0, 62, 58, 1, 0, 0, 0, 62, 59, 1, 0, 0, 0, 62, 60, 1, 0, 0, 0, 62,
-		61, 1, 0, 0, 0, 63, 65, 1, 0, 0, 0, 64, 66, 3, 6, 3, 0, 65, 64, 1, 0, 0,
-		0, 65, 66, 1, 0, 0, 0, 66, 3, 1, 0, 0, 0, 67, 69, 5, 49, 0, 0, 68, 70,
-		3, 36, 18, 0, 69, 68, 1, 0, 0, 0, 69, 70, 1, 0, 0, 0, 70, 5, 1, 0, 0, 0,
-		71, 72, 7, 0, 0, 0, 72, 7, 1, 0, 0, 0, 73, 74, 5, 48, 0, 0, 74, 75, 5,
-		56, 0, 0, 75, 84, 5, 16, 0, 0, 76, 81, 5, 56, 0, 0, 77, 78, 5, 26, 0, 0,
-		78, 80, 5, 56, 0, 0, 79, 77, 1, 0, 0, 0, 80, 83, 1, 0, 0, 0, 81, 79, 1,
-		0, 0, 0, 81, 82, 1, 0, 0, 0, 82, 85, 1, 0, 0, 0, 83, 81, 1, 0, 0, 0, 84,
-		76, 1, 0, 0, 0, 84, 85, 1, 0, 0, 0, 85, 86, 1, 0, 0, 0, 86, 87, 5, 17,
-		0, 0, 87, 88, 3, 28, 14, 0, 88, 9, 1, 0, 0, 0, 89, 90, 3, 36, 18, 0, 90,
-		11, 1, 0, 0, 0, 91, 92, 5, 3, 0, 0, 92, 93, 5, 56, 0, 0, 93, 94, 5, 4,
-		0, 0, 94, 95, 3, 36, 18, 0, 95, 13, 1, 0, 0, 0, 96, 97, 3, 36, 18, 0, 97,
-		98, 5, 4, 0, 0, 98, 99, 3, 36, 18, 0, 99, 15, 1, 0, 0, 0, 100, 101, 5,
-		56, 0, 0, 101, 102, 5, 19, 0, 0, 102, 103, 3, 36, 18, 0, 103, 104, 5, 20,
-		0, 0, 104, 105, 5, 4, 0, 0, 105, 106, 3, 36, 18, 0, 106, 17, 1, 0, 0, 0,
-		107, 108, 3, 36, 18, 0, 108, 109, 7, 1, 0, 0, 109, 110, 3, 36, 18, 0, 110,
-		19, 1, 0, 0, 0, 111, 112, 5, 50, 0, 0, 112, 113, 3, 36, 18, 0, 113, 21,
-		1, 0, 0, 0, 114, 115, 5, 21, 0, 0, 115, 116, 5, 16, 0, 0, 116, 117, 3,
-		36, 18, 0, 117, 118, 5, 17, 0, 0, 118, 121, 3, 28, 14, 0, 119, 120, 5,
-		22, 0, 0, 120, 122, 3, 28, 14, 0, 121, 119, 1, 0, 0, 0, 121, 122, 1, 0,
-		0, 0, 122, 23, 1, 0, 0, 0, 123, 124, 5, 23, 0, 0, 124, 125, 5, 16, 0, 0,
-		125, 126, 3, 36, 18, 0, 126, 127, 5, 17, 0, 0, 127, 128, 3, 28, 14, 0,
-		128, 25, 1, 0, 0, 0, 129, 130, 5, 24, 0, 0, 130, 131, 5, 16, 0, 0, 131,
-		132, 3, 30, 15, 0, 132, 133, 5, 25, 0, 0, 133, 134, 3, 36, 18, 0, 134,
-		135, 5, 25, 0, 0, 135, 136, 3, 32, 16, 0, 136, 137, 5, 17, 0, 0, 137, 138,
-		3, 28, 14, 0, 138, 27, 1, 0, 0, 0, 139, 145, 5, 15, 0, 0, 140, 144, 3,
-		2, 1, 0, 141, 144, 3, 8, 4, 0, 142, 144, 3, 6, 3, 0, 143, 140, 1, 0, 0,
-		0, 143, 141, 1, 0, 0, 0, 143, 142, 1, 0, 0, 0, 144, 147, 1, 0, 0, 0, 145,
-		143, 1, 0, 0, 0, 145, 146, 1, 0, 0, 0, 146, 148, 1, 0, 0, 0, 147, 145,
-		1, 0, 0, 0, 148, 149, 5, 18, 0, 0, 149, 29, 1, 0, 0, 0, 150, 153, 3, 12,
-		6, 0, 151, 153, 3, 14, 7, 0, 152, 150, 1, 0, 0, 0, 152, 151, 1, 0, 0, 0,
-		153, 31, 1, 0, 0, 0, 154, 157, 3, 14, 7, 0, 155, 157, 3, 34, 17, 0, 156,
-		154, 1, 0, 0, 0, 156, 155, 1, 0, 0, 0, 157, 33, 1, 0, 0, 0, 158, 159, 3,
-		36, 18, 0, 159, 160, 7, 2, 0, 0, 160, 35, 1, 0, 0, 0, 161, 162, 6, 18,
-		-1, 0, 162, 163, 5, 56, 0, 0, 163, 172, 5, 16, 0, 0, 164, 169, 3, 36, 18,
-		0, 165, 166, 5, 26, 0, 0, 166, 168, 3, 36, 18, 0, 167, 165, 1, 0, 0, 0,
-		168, 171, 1, 0, 0, 0, 169, 167, 1, 0, 0, 0, 169, 170, 1, 0, 0, 0, 170,
-		173, 1, 0, 0, 0, 171, 169, 1, 0, 0, 0, 172, 164, 1, 0, 0, 0, 172, 173,
-		1, 0, 0, 0, 173, 174, 1, 0, 0, 0, 174, 211, 5, 17, 0, 0, 175, 176, 7, 3,
-		0, 0, 176, 211, 3, 36, 18, 19, 177, 186, 5, 19, 0, 0, 178, 183, 3, 36,
-		18, 0, 179, 180, 5, 26, 0, 0, 180, 182, 3, 36, 18, 0, 181, 179, 1, 0, 0,
-		0, 182, 185, 1, 0, 0, 0, 183, 181, 1, 0, 0, 0, 183, 184, 1, 0, 0, 0, 184,
-		187, 1, 0, 0, 0, 185, 183, 1, 0, 0, 0, 186, 178, 1, 0, 0, 0, 186, 187,
-		1, 0, 0, 0, 187, 188, 1, 0, 0, 0, 188, 211, 5, 20, 0, 0, 189, 198, 5, 15,
-		0, 0, 190, 195, 3, 38, 19, 0, 191, 192, 5, 26, 0, 0, 192, 194, 3, 38, 19,
-		0, 193, 191, 1, 0, 0, 0, 194, 197, 1, 0, 0, 0, 195, 193, 1, 0, 0, 0, 195,
-		196, 1, 0, 0, 0, 196, 199, 1, 0, 0, 0, 197, 195, 1, 0, 0, 0, 198, 190,
-		1, 0, 0, 0, 198, 199, 1, 0, 0, 0, 199, 200, 1, 0, 0, 0, 200, 211, 5, 18,
-		0, 0, 201, 211, 5, 56, 0, 0, 202, 211, 5, 57, 0, 0, 203, 211, 7, 4, 0,
-		0, 204, 211, 5, 58, 0, 0, 205, 211, 5, 1, 0, 0, 206, 207, 5, 16, 0, 0,
-		207, 208, 3, 36, 18, 0, 208, 209, 5, 17, 0, 0, 209, 211, 1, 0, 0, 0, 210,
-		161, 1, 0, 0, 0, 210, 175, 1, 0, 0, 0, 210, 177, 1, 0, 0, 0, 210, 189,
-		1, 0, 0, 0, 210, 201, 1, 0, 0, 0, 210, 202, 1, 0, 0, 0, 210, 203, 1, 0,
-		0, 0, 210, 204, 1, 0, 0, 0, 210, 205, 1, 0, 0, 0, 210, 206, 1, 0, 0, 0,
-		211, 249, 1, 0, 0, 0, 212, 213, 10, 18, 0, 0, 213, 214, 5, 30, 0, 0, 214,
-		248, 3, 36, 18, 19, 215, 216, 10, 17, 0, 0, 216, 217, 7, 5, 0, 0, 217,
-		248, 3, 36, 18, 18, 218, 219, 10, 16, 0, 0, 219, 220, 7, 6, 0, 0, 220,
-		248, 3, 36, 18, 17, 221, 222, 10, 15, 0, 0, 222, 223, 7, 7, 0, 0, 223,
-		248, 3, 36, 18, 16, 224, 225, 10, 14, 0, 0, 225, 226, 5, 37, 0, 0, 226,
-		248, 3, 36, 18, 15, 227, 228, 10, 13, 0, 0, 228, 229, 5, 39, 0, 0, 229,
-		248, 3, 36, 18, 14, 230, 231, 10, 12, 0, 0, 231, 232, 5, 38, 0, 0, 232,
-		248, 3, 36, 18, 13, 233, 234, 10, 11, 0, 0, 234, 235, 7, 8, 0, 0, 235,
-		248, 3, 36, 18, 12, 236, 237, 10, 10, 0, 0, 237, 238, 5, 53, 0, 0, 238,
-		248, 3, 36, 18, 11, 239, 240, 10, 9, 0, 0, 240, 241, 5, 54, 0, 0, 241,
-		248, 3, 36, 18, 10, 242, 243, 10, 21, 0, 0, 243, 244, 5, 19, 0, 0, 244,
-		245, 3, 36, 18, 0, 245, 246, 5, 20, 0, 0, 246, 248, 1, 0, 0, 0, 247, 212,
-		1, 0, 0, 0, 247, 215, 1, 0, 0, 0, 247, 218, 1, 0, 0, 0, 247, 221, 1, 0,
-		0, 0, 247, 224, 1, 0, 0, 0, 247, 227, 1, 0, 0, 0, 247, 230, 1, 0, 0, 0,
-		247, 233, 1, 0, 0, 0, 247, 236, 1, 0, 0, 0, 247, 239, 1, 0, 0, 0, 247,
-		242, 1, 0, 0, 0, 248, 251, 1, 0, 0, 0, 249, 247, 1, 0, 0, 0, 249, 250,
-		1, 0, 0, 0, 250, 37, 1, 0, 0, 0, 251, 249, 1, 0, 0, 0, 252, 253, 3, 36,
-		18, 0, 253, 254, 5, 2, 0, 0, 254, 255, 3, 36, 18, 0, 255, 39, 1, 0, 0,
-		0, 21, 43, 45, 62, 65, 69, 81, 84, 121, 143, 145, 152, 156, 169, 172, 183,
-		186, 195, 198, 210, 247, 249,
+		1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 5, 18, 251, 8, 18, 10,
+		18, 12, 18, 254, 9, 18, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 0, 1, 36, 20,
+		0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36,
+		38, 0, 9, 2, 0, 26, 26, 62, 62, 2, 0, 32, 37, 44, 48, 1, 0, 28, 29, 3,
+		0, 7, 7, 43, 43, 56, 56, 1, 0, 52, 53, 2, 0, 8, 9, 30, 30, 1, 0, 6, 7,
+		1, 0, 41, 42, 1, 0, 10, 15, 290, 0, 45, 1, 0, 0, 0, 2, 62, 1, 0, 0, 0,
+		4, 67, 1, 0, 0, 0, 6, 71, 1, 0, 0, 0, 8, 73, 1, 0, 0, 0, 10, 89, 1, 0,
+		0, 0, 12, 91, 1, 0, 0, 0, 14, 96, 1, 0, 0, 0, 16, 100, 1, 0, 0, 0, 18,
+		107, 1, 0, 0, 0, 20, 111, 1, 0, 0, 0, 22, 114, 1, 0, 0, 0, 24, 123, 1,
+		0, 0, 0, 26, 129, 1, 0, 0, 0, 28, 139, 1, 0, 0, 0, 30, 152, 1, 0, 0, 0,
+		32, 156, 1, 0, 0, 0, 34, 158, 1, 0, 0, 0, 36, 210, 1, 0, 0, 0, 38, 255,
+		1, 0, 0, 0, 40, 44, 3, 2, 1, 0, 41, 44, 3, 8, 4, 0, 42, 44, 3, 6, 3, 0,
+		43, 40, 1, 0, 0, 0, 43, 41, 1, 0, 0, 0, 43, 42, 1, 0, 0, 0, 44, 47, 1,
+		0, 0, 0, 45, 43, 1, 0, 0, 0, 45, 46, 1, 0, 0, 0, 46, 48, 1, 0, 0, 0, 47,
+		45, 1, 0, 0, 0, 48, 49, 5, 0, 0, 1, 49, 1, 1, 0, 0, 0, 50, 63, 3, 12, 6,
+		0, 51, 63, 3, 14, 7, 0, 52, 63, 3, 16, 8, 0, 53, 63, 3, 18, 9, 0, 54, 63,
+		3, 10, 5, 0, 55, 63, 3, 20, 10, 0, 56, 63, 3, 22, 11, 0, 57, 63, 3, 24,
+		12, 0, 58, 63, 3, 26, 13, 0, 59, 63, 3, 28, 14, 0, 60, 63, 3, 34, 17, 0,
+		61, 63, 3, 4, 2, 0, 62, 50, 1, 0, 0, 0, 62, 51, 1, 0, 0, 0, 62, 52, 1,
+		0, 0, 0, 62, 53, 1, 0, 0, 0, 62, 54, 1, 0, 0, 0, 62, 55, 1, 0, 0, 0, 62,
+		56, 1, 0, 0, 0, 62, 57, 1, 0, 0, 0, 62, 58, 1, 0, 0, 0, 62, 59, 1, 0, 0,
+		0, 62, 60, 1, 0, 0, 0, 62, 61, 1, 0, 0, 0, 63, 65, 1, 0, 0, 0, 64, 66,
+		3, 6, 3, 0, 65, 64, 1, 0, 0, 0, 65, 66, 1, 0, 0, 0, 66, 3, 1, 0, 0, 0,
+		67, 69, 5, 50, 0, 0, 68, 70, 3, 36, 18, 0, 69, 68, 1, 0, 0, 0, 69, 70,
+		1, 0, 0, 0, 70, 5, 1, 0, 0, 0, 71, 72, 7, 0, 0, 0, 72, 7, 1, 0, 0, 0, 73,
+		74, 5, 49, 0, 0, 74, 75, 5, 57, 0, 0, 75, 84, 5, 17, 0, 0, 76, 81, 5, 57,
+		0, 0, 77, 78, 5, 27, 0, 0, 78, 80, 5, 57, 0, 0, 79, 77, 1, 0, 0, 0, 80,
+		83, 1, 0, 0, 0, 81, 79, 1, 0, 0, 0, 81, 82, 1, 0, 0, 0, 82, 85, 1, 0, 0,
+		0, 83, 81, 1, 0, 0, 0, 84, 76, 1, 0, 0, 0, 84, 85, 1, 0, 0, 0, 85, 86,
+		1, 0, 0, 0, 86, 87, 5, 18, 0, 0, 87, 88, 3, 28, 14, 0, 88, 9, 1, 0, 0,
+		0, 89, 90, 3, 36, 18, 0, 90, 11, 1, 0, 0, 0, 91, 92, 5, 4, 0, 0, 92, 93,
+		5, 57, 0, 0, 93, 94, 5, 5, 0, 0, 94, 95, 3, 36, 18, 0, 95, 13, 1, 0, 0,
+		0, 96, 97, 3, 36, 18, 0, 97, 98, 5, 5, 0, 0, 98, 99, 3, 36, 18, 0, 99,
+		15, 1, 0, 0, 0, 100, 101, 5, 57, 0, 0, 101, 102, 5, 20, 0, 0, 102, 103,
+		3, 36, 18, 0, 103, 104, 5, 21, 0, 0, 104, 105, 5, 5, 0, 0, 105, 106, 3,
+		36, 18, 0, 106, 17, 1, 0, 0, 0, 107, 108, 3, 36, 18, 0, 108, 109, 7, 1,
+		0, 0, 109, 110, 3, 36, 18, 0, 110, 19, 1, 0, 0, 0, 111, 112, 5, 51, 0,
+		0, 112, 113, 3, 36, 18, 0, 113, 21, 1, 0, 0, 0, 114, 115, 5, 22, 0, 0,
+		115, 116, 5, 17, 0, 0, 116, 117, 3, 36, 18, 0, 117, 118, 5, 18, 0, 0, 118,
+		121, 3, 28, 14, 0, 119, 120, 5, 23, 0, 0, 120, 122, 3, 28, 14, 0, 121,
+		119, 1, 0, 0, 0, 121, 122, 1, 0, 0, 0, 122, 23, 1, 0, 0, 0, 123, 124, 5,
+		24, 0, 0, 124, 125, 5, 17, 0, 0, 125, 126, 3, 36, 18, 0, 126, 127, 5, 18,
+		0, 0, 127, 128, 3, 28, 14, 0, 128, 25, 1, 0, 0, 0, 129, 130, 5, 25, 0,
+		0, 130, 131, 5, 17, 0, 0, 131, 132, 3, 30, 15, 0, 132, 133, 5, 26, 0, 0,
+		133, 134, 3, 36, 18, 0, 134, 135, 5, 26, 0, 0, 135, 136, 3, 32, 16, 0,
+		136, 137, 5, 18, 0, 0, 137, 138, 3, 28, 14, 0, 138, 27, 1, 0, 0, 0, 139,
+		145, 5, 16, 0, 0, 140, 144, 3, 2, 1, 0, 141, 144, 3, 8, 4, 0, 142, 144,
+		3, 6, 3, 0, 143, 140, 1, 0, 0, 0, 143, 141, 1, 0, 0, 0, 143, 142, 1, 0,
+		0, 0, 144, 147, 1, 0, 0, 0, 145, 143, 1, 0, 0, 0, 145, 146, 1, 0, 0, 0,
+		146, 148, 1, 0, 0, 0, 147, 145, 1, 0, 0, 0, 148, 149, 5, 19, 0, 0, 149,
+		29, 1, 0, 0, 0, 150, 153, 3, 12, 6, 0, 151, 153, 3, 14, 7, 0, 152, 150,
+		1, 0, 0, 0, 152, 151, 1, 0, 0, 0, 153, 31, 1, 0, 0, 0, 154, 157, 3, 14,
+		7, 0, 155, 157, 3, 34, 17, 0, 156, 154, 1, 0, 0, 0, 156, 155, 1, 0, 0,
+		0, 157, 33, 1, 0, 0, 0, 158, 159, 3, 36, 18, 0, 159, 160, 7, 2, 0, 0, 160,
+		35, 1, 0, 0, 0, 161, 162, 6, 18, -1, 0, 162, 163, 5, 57, 0, 0, 163, 172,
+		5, 17, 0, 0, 164, 169, 3, 36, 18, 0, 165, 166, 5, 27, 0, 0, 166, 168, 3,
+		36, 18, 0, 167, 165, 1, 0, 0, 0, 168, 171, 1, 0, 0, 0, 169, 167, 1, 0,
+		0, 0, 169, 170, 1, 0, 0, 0, 170, 173, 1, 0, 0, 0, 171, 169, 1, 0, 0, 0,
+		172, 164, 1, 0, 0, 0, 172, 173, 1, 0, 0, 0, 173, 174, 1, 0, 0, 0, 174,
+		211, 5, 18, 0, 0, 175, 176, 7, 3, 0, 0, 176, 211, 3, 36, 18, 19, 177, 186,
+		5, 20, 0, 0, 178, 183, 3, 36, 18, 0, 179, 180, 5, 27, 0, 0, 180, 182, 3,
+		36, 18, 0, 181, 179, 1, 0, 0, 0, 182, 185, 1, 0, 0, 0, 183, 181, 1, 0,
+		0, 0, 183, 184, 1, 0, 0, 0, 184, 187, 1, 0, 0, 0, 185, 183, 1, 0, 0, 0,
+		186, 178, 1, 0, 0, 0, 186, 187, 1, 0, 0, 0, 187, 188, 1, 0, 0, 0, 188,
+		211, 5, 21, 0, 0, 189, 198, 5, 16, 0, 0, 190, 195, 3, 38, 19, 0, 191, 192,
+		5, 27, 0, 0, 192, 194, 3, 38, 19, 0, 193, 191, 1, 0, 0, 0, 194, 197, 1,
+		0, 0, 0, 195, 193, 1, 0, 0, 0, 195, 196, 1, 0, 0, 0, 196, 199, 1, 0, 0,
+		0, 197, 195, 1, 0, 0, 0, 198, 190, 1, 0, 0, 0, 198, 199, 1, 0, 0, 0, 199,
+		200, 1, 0, 0, 0, 200, 211, 5, 19, 0, 0, 201, 211, 5, 57, 0, 0, 202, 211,
+		5, 58, 0, 0, 203, 211, 7, 4, 0, 0, 204, 211, 5, 59, 0, 0, 205, 211, 5,
+		1, 0, 0, 206, 207, 5, 17, 0, 0, 207, 208, 3, 36, 18, 0, 208, 209, 5, 18,
+		0, 0, 209, 211, 1, 0, 0, 0, 210, 161, 1, 0, 0, 0, 210, 175, 1, 0, 0, 0,
+		210, 177, 1, 0, 0, 0, 210, 189, 1, 0, 0, 0, 210, 201, 1, 0, 0, 0, 210,
+		202, 1, 0, 0, 0, 210, 203, 1, 0, 0, 0, 210, 204, 1, 0, 0, 0, 210, 205,
+		1, 0, 0, 0, 210, 206, 1, 0, 0, 0, 211, 252, 1, 0, 0, 0, 212, 213, 10, 18,
+		0, 0, 213, 214, 5, 31, 0, 0, 214, 251, 3, 36, 18, 19, 215, 216, 10, 17,
+		0, 0, 216, 217, 7, 5, 0, 0, 217, 251, 3, 36, 18, 18, 218, 219, 10, 16,
+		0, 0, 219, 220, 7, 6, 0, 0, 220, 251, 3, 36, 18, 17, 221, 222, 10, 15,
+		0, 0, 222, 223, 7, 7, 0, 0, 223, 251, 3, 36, 18, 16, 224, 225, 10, 14,
+		0, 0, 225, 226, 5, 38, 0, 0, 226, 251, 3, 36, 18, 15, 227, 228, 10, 13,
+		0, 0, 228, 229, 5, 40, 0, 0, 229, 251, 3, 36, 18, 14, 230, 231, 10, 12,
+		0, 0, 231, 232, 5, 39, 0, 0, 232, 251, 3, 36, 18, 13, 233, 234, 10, 11,
+		0, 0, 234, 235, 7, 8, 0, 0, 235, 251, 3, 36, 18, 12, 236, 237, 10, 10,
+		0, 0, 237, 238, 5, 54, 0, 0, 238, 251, 3, 36, 18, 11, 239, 240, 10, 9,
+		0, 0, 240, 241, 5, 55, 0, 0, 241, 251, 3, 36, 18, 10, 242, 243, 10, 22,
+		0, 0, 243, 244, 5, 20, 0, 0, 244, 245, 3, 36, 18, 0, 245, 246, 5, 21, 0,
+		0, 246, 251, 1, 0, 0, 0, 247, 248, 10, 21, 0, 0, 248, 249, 5, 3, 0, 0,
+		249, 251, 5, 57, 0, 0, 250, 212, 1, 0, 0, 0, 250, 215, 1, 0, 0, 0, 250,
+		218, 1, 0, 0, 0, 250, 221, 1, 0, 0, 0, 250, 224, 1, 0, 0, 0, 250, 227,
+		1, 0, 0, 0, 250, 230, 1, 0, 0, 0, 250, 233, 1, 0, 0, 0, 250, 236, 1, 0,
+		0, 0, 250, 239, 1, 0, 0, 0, 250, 242, 1, 0, 0, 0, 250, 247, 1, 0, 0, 0,
+		251, 254, 1, 0, 0, 0, 252, 250, 1, 0, 0, 0, 252, 253, 1, 0, 0, 0, 253,
+		37, 1, 0, 0, 0, 254, 252, 1, 0, 0, 0, 255, 256, 3, 36, 18, 0, 256, 257,
+		5, 2, 0, 0, 257, 258, 3, 36, 18, 0, 258, 39, 1, 0, 0, 0, 21, 43, 45, 62,
+		65, 69, 81, 84, 121, 143, 145, 152, 156, 169, 172, 183, 186, 195, 198,
+		210, 250, 252,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -218,66 +221,67 @@ const (
 	GrammarParserEOF              = antlr.TokenEOF
 	GrammarParserT__0             = 1
 	GrammarParserT__1             = 2
-	GrammarParserVAR              = 3
-	GrammarParserEQUALS           = 4
-	GrammarParserPLUS             = 5
-	GrammarParserMINUS            = 6
-	GrammarParserSTAR             = 7
-	GrammarParserSLASH            = 8
-	GrammarParserLESS             = 9
-	GrammarParserGREATER          = 10
-	GrammarParserEQUALEQUAL       = 11
-	GrammarParserBANGEQUAL        = 12
-	GrammarParserLESSEQUAL        = 13
-	GrammarParserGREATEREQUAL     = 14
-	GrammarParserLBRACE           = 15
-	GrammarParserLPAREN           = 16
-	GrammarParserRPAREN           = 17
-	GrammarParserRBRACE           = 18
-	GrammarParserLBRACKET         = 19
-	GrammarParserRBRACKET         = 20
-	GrammarParserIF               = 21
-	GrammarParserELSE             = 22
-	GrammarParserWHILE            = 23
-	GrammarParserFOR              = 24
-	GrammarParserSEMICOLON        = 25
-	GrammarParserCOMMA            = 26
-	GrammarParserINC              = 27
-	GrammarParserDEC              = 28
-	GrammarParserMODULO           = 29
-	GrammarParserEXPONENTIAL      = 30
-	GrammarParserPLUSEQUAL        = 31
-	GrammarParserMINUSEQUAL       = 32
-	GrammarParserSTAREQUAL        = 33
-	GrammarParserSLASHEQUAL       = 34
-	GrammarParserMODEQUAL         = 35
-	GrammarParserEXPONENTIALEQUAL = 36
-	GrammarParserBITAND           = 37
-	GrammarParserBITOR            = 38
-	GrammarParserBITXOR           = 39
-	GrammarParserBITLSHIFT        = 40
-	GrammarParserBITRSHIFT        = 41
-	GrammarParserBITNOT           = 42
-	GrammarParserBITANDEQUAL      = 43
-	GrammarParserBITOREQUAL       = 44
-	GrammarParserBITXOREQAUL      = 45
-	GrammarParserBITLSHIFTEQUAL   = 46
-	GrammarParserBITRSHIFTEQUAL   = 47
-	GrammarParserFUNC             = 48
-	GrammarParserRETURN           = 49
-	GrammarParserPRINT            = 50
-	GrammarParserTRUE             = 51
-	GrammarParserFALSE            = 52
-	GrammarParserAND              = 53
-	GrammarParserOR               = 54
-	GrammarParserNOT              = 55
-	GrammarParserIDENTIFIER       = 56
-	GrammarParserNUMBER           = 57
-	GrammarParserSTRING           = 58
-	GrammarParserLINE_COMMENT     = 59
-	GrammarParserBLOCK_COMMENT    = 60
-	GrammarParserNL               = 61
-	GrammarParserWS               = 62
+	GrammarParserDOT              = 3
+	GrammarParserVAR              = 4
+	GrammarParserEQUALS           = 5
+	GrammarParserPLUS             = 6
+	GrammarParserMINUS            = 7
+	GrammarParserSTAR             = 8
+	GrammarParserSLASH            = 9
+	GrammarParserLESS             = 10
+	GrammarParserGREATER          = 11
+	GrammarParserEQUALEQUAL       = 12
+	GrammarParserBANGEQUAL        = 13
+	GrammarParserLESSEQUAL        = 14
+	GrammarParserGREATEREQUAL     = 15
+	GrammarParserLBRACE           = 16
+	GrammarParserLPAREN           = 17
+	GrammarParserRPAREN           = 18
+	GrammarParserRBRACE           = 19
+	GrammarParserLBRACKET         = 20
+	GrammarParserRBRACKET         = 21
+	GrammarParserIF               = 22
+	GrammarParserELSE             = 23
+	GrammarParserWHILE            = 24
+	GrammarParserFOR              = 25
+	GrammarParserSEMICOLON        = 26
+	GrammarParserCOMMA            = 27
+	GrammarParserINC              = 28
+	GrammarParserDEC              = 29
+	GrammarParserMODULO           = 30
+	GrammarParserEXPONENTIAL      = 31
+	GrammarParserPLUSEQUAL        = 32
+	GrammarParserMINUSEQUAL       = 33
+	GrammarParserSTAREQUAL        = 34
+	GrammarParserSLASHEQUAL       = 35
+	GrammarParserMODEQUAL         = 36
+	GrammarParserEXPONENTIALEQUAL = 37
+	GrammarParserBITAND           = 38
+	GrammarParserBITOR            = 39
+	GrammarParserBITXOR           = 40
+	GrammarParserBITLSHIFT        = 41
+	GrammarParserBITRSHIFT        = 42
+	GrammarParserBITNOT           = 43
+	GrammarParserBITANDEQUAL      = 44
+	GrammarParserBITOREQUAL       = 45
+	GrammarParserBITXOREQAUL      = 46
+	GrammarParserBITLSHIFTEQUAL   = 47
+	GrammarParserBITRSHIFTEQUAL   = 48
+	GrammarParserFUNC             = 49
+	GrammarParserRETURN           = 50
+	GrammarParserPRINT            = 51
+	GrammarParserTRUE             = 52
+	GrammarParserFALSE            = 53
+	GrammarParserAND              = 54
+	GrammarParserOR               = 55
+	GrammarParserNOT              = 56
+	GrammarParserIDENTIFIER       = 57
+	GrammarParserNUMBER           = 58
+	GrammarParserSTRING           = 59
+	GrammarParserLINE_COMMENT     = 60
+	GrammarParserBLOCK_COMMENT    = 61
+	GrammarParserNL               = 62
+	GrammarParserWS               = 63
 )
 
 // GrammarParser rules.
@@ -526,7 +530,7 @@ func (p *GrammarParser) Program() (localctx IProgramContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2855005086884134986) != 0 {
+	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&5710010173768269970) != 0 {
 		p.SetState(43)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
@@ -2301,7 +2305,7 @@ func (p *GrammarParser) CompoundAssignStmt() (localctx ICompoundAssignStmtContex
 
 		_la = p.GetTokenStream().LA(1)
 
-		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&272814175158272) != 0) {
+		if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&545628350316544) != 0) {
 			var _ri = p.GetErrorHandler().RecoverInline(p)
 
 			localctx.(*CompoundAssignStmtContext).op = _ri
@@ -3433,7 +3437,7 @@ func (p *GrammarParser) BlockStmt() (localctx IBlockStmtContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2855005086884134986) != 0 {
+	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&5710010173768269970) != 0 {
 		p.SetState(143)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
@@ -5621,6 +5625,70 @@ func (s *BooleanContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	}
 }
 
+type FieldAccessContext struct {
+	ExprContext
+}
+
+func NewFieldAccessContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *FieldAccessContext {
+	var p = new(FieldAccessContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *FieldAccessContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *FieldAccessContext) Expr() IExprContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IExprContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *FieldAccessContext) DOT() antlr.TerminalNode {
+	return s.GetToken(GrammarParserDOT, 0)
+}
+
+func (s *FieldAccessContext) IDENTIFIER() antlr.TerminalNode {
+	return s.GetToken(GrammarParserIDENTIFIER, 0)
+}
+
+func (s *FieldAccessContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(GrammarListener); ok {
+		listenerT.EnterFieldAccess(s)
+	}
+}
+
+func (s *FieldAccessContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(GrammarListener); ok {
+		listenerT.ExitFieldAccess(s)
+	}
+}
+
+func (s *FieldAccessContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case GrammarVisitor:
+		return t.VisitFieldAccess(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
 type ParenthesesContext struct {
 	ExprContext
 }
@@ -5738,7 +5806,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&547191752772649026) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1094383505545298050) != 0 {
 			{
 				p.SetState(164)
 				p.expr(0)
@@ -5795,7 +5863,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 			_la = p.GetTokenStream().LA(1)
 
-			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&36033195065475136) != 0) {
+			if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&72066390130950272) != 0) {
 				var _ri = p.GetErrorHandler().RecoverInline(p)
 
 				localctx.(*UnaryContext).op = _ri
@@ -5828,7 +5896,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&547191752772649026) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1094383505545298050) != 0 {
 			{
 				p.SetState(178)
 				p.expr(0)
@@ -5891,7 +5959,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&547191752772649026) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1094383505545298050) != 0 {
 			{
 				p.SetState(190)
 				p.MapEntry()
@@ -6039,7 +6107,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
-	p.SetState(249)
+	p.SetState(252)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -6054,7 +6122,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				p.TriggerExitRuleEvent()
 			}
 			_prevctx = localctx
-			p.SetState(247)
+			p.SetState(250)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -6104,7 +6172,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 					_la = p.GetTokenStream().LA(1)
 
-					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&536871296) != 0) {
+					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&1073742592) != 0) {
 						var _ri = p.GetErrorHandler().RecoverInline(p)
 
 						localctx.(*MulDivModContext).op = _ri
@@ -6275,7 +6343,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 					_la = p.GetTokenStream().LA(1)
 
-					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&32256) != 0) {
+					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&64512) != 0) {
 						var _ri = p.GetErrorHandler().RecoverInline(p)
 
 						localctx.(*ComparisonContext).op = _ri
@@ -6344,8 +6412,8 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, GrammarParserRULE_expr)
 				p.SetState(242)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 21)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 21)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 22)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 22)", ""))
 					goto errorExit
 				}
 				{
@@ -6369,12 +6437,38 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 
+			case 12:
+				localctx = NewFieldAccessContext(p, NewExprContext(p, _parentctx, _parentState))
+				p.PushNewRecursionContext(localctx, _startState, GrammarParserRULE_expr)
+				p.SetState(247)
+
+				if !(p.Precpred(p.GetParserRuleContext(), 21)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 21)", ""))
+					goto errorExit
+				}
+				{
+					p.SetState(248)
+					p.Match(GrammarParserDOT)
+					if p.HasError() {
+						// Recognition error - abort rule
+						goto errorExit
+					}
+				}
+				{
+					p.SetState(249)
+					p.Match(GrammarParserIDENTIFIER)
+					if p.HasError() {
+						// Recognition error - abort rule
+						goto errorExit
+					}
+				}
+
 			case antlr.ATNInvalidAltNumber:
 				goto errorExit
 			}
 
 		}
-		p.SetState(251)
+		p.SetState(254)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -6521,11 +6615,11 @@ func (p *GrammarParser) MapEntry() (localctx IMapEntryContext) {
 	p.EnterRule(localctx, 38, GrammarParserRULE_mapEntry)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(252)
+		p.SetState(255)
 		p.expr(0)
 	}
 	{
-		p.SetState(253)
+		p.SetState(256)
 		p.Match(GrammarParserT__1)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -6533,7 +6627,7 @@ func (p *GrammarParser) MapEntry() (localctx IMapEntryContext) {
 		}
 	}
 	{
-		p.SetState(254)
+		p.SetState(257)
 		p.expr(0)
 	}
 
@@ -6597,6 +6691,9 @@ func (p *GrammarParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) 
 		return p.Precpred(p.GetParserRuleContext(), 9)
 
 	case 10:
+		return p.Precpred(p.GetParserRuleContext(), 22)
+
+	case 11:
 		return p.Precpred(p.GetParserRuleContext(), 21)
 
 	default:
