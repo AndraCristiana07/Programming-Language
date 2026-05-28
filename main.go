@@ -236,7 +236,9 @@ func main() {
 		print map1
 		print values(map1)
 		print keys(map1)
-
+		// this is a comment {print e}
+		var nullVal = null
+		print nullVal
 
 		`
 

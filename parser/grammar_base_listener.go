@@ -129,6 +129,12 @@ func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
 // ExitPostfixStmt is called when production postfixStmt is exited.
 func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
 
+// EnterNull is called when production Null is entered.
+func (s *BaseGrammarListener) EnterNull(ctx *NullContext) {}
+
+// ExitNull is called when production Null is exited.
+func (s *BaseGrammarListener) ExitNull(ctx *NullContext) {}
+
 // EnterBitOr is called when production BitOr is entered.
 func (s *BaseGrammarListener) EnterBitOr(ctx *BitOrContext) {}
 

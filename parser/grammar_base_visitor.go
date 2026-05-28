@@ -80,6 +80,10 @@ func (v *BaseGrammarVisitor) VisitPostfixStmt(ctx *PostfixStmtContext) interface
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitNull(ctx *NullContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
 	return v.VisitChildren(ctx)
 }

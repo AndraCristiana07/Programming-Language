@@ -60,6 +60,7 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | NUMBER                                            # Number     
             | val=(TRUE | FALSE)                                # Boolean
             | STRING                                            # String
+            | 'null'                                            # Null
             | LPAREN expr RPAREN                                # Parentheses
             ;
 
@@ -130,5 +131,12 @@ NOT             : 'not' ;
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
 NUMBER          : [0-9]+ ('.' [0-9]+)? ;
 STRING          : '"' (~["] | '""')* '"' ;
+LINE_COMMENT
+    : '//' ~[\r\n]* -> skip
+    ;
+
+BLOCK_COMMENT
+    : '/*' .*? '*/' -> skip
+    ;
 NL              : [\r\n]+ ;
 WS              : [ \t]+ -> skip ;

@@ -62,6 +62,9 @@ type GrammarListener interface {
 	// EnterPostfixStmt is called when entering the postfixStmt production.
 	EnterPostfixStmt(c *PostfixStmtContext)
 
+	// EnterNull is called when entering the Null production.
+	EnterNull(c *NullContext)
+
 	// EnterBitOr is called when entering the BitOr production.
 	EnterBitOr(c *BitOrContext)
 
@@ -178,6 +181,9 @@ type GrammarListener interface {
 
 	// ExitPostfixStmt is called when exiting the postfixStmt production.
 	ExitPostfixStmt(c *PostfixStmtContext)
+
+	// ExitNull is called when exiting the Null production.
+	ExitNull(c *NullContext)
 
 	// ExitBitOr is called when exiting the BitOr production.
 	ExitBitOr(c *BitOrContext)

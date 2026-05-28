@@ -182,6 +182,10 @@ func (v *Visitor) VisitMapLiteral(ctx *parser.MapLiteralContext) any {
 	return &nativeMap
 }
 
+func (v *Visitor) VisitNull(ctx *parser.NullContext) any {
+	return nil
+}
+
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	// return v.vars[varName]
@@ -802,7 +806,7 @@ func power(base, exp int) int {
 // helper for standard print outputs
 func cleanStringRepr(val any) string {
 	if val == nil {
-		return "nil"
+		return "null"
 	}
 
 	switch v := val.(type) {

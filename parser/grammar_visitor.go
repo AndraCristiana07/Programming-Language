@@ -62,6 +62,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#postfixStmt.
 	VisitPostfixStmt(ctx *PostfixStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#Null.
+	VisitNull(ctx *NullContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#BitOr.
 	VisitBitOr(ctx *BitOrContext) interface{}
 
