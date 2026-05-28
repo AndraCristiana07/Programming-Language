@@ -219,6 +219,11 @@ func main() {
 		var arr2 = ["apple", "pear", "kiwi"]
 		print enumerate(arr2) 
 
+		var xExec = "print 55"
+		exec(xExec)
+
+		var xEval = "50 + 5"
+		print eval(xEval)
 		`
 
 	input := antlr.NewInputStream(inputCode)

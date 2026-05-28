@@ -3,16 +3,19 @@ package ast
 import (
 	"bufio"
 	"fmt"
+	"my_language/parser"
 	"os"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/antlr4-go/antlr/v4"
 )
 
 type NativeFunction struct {
 	ArgsCount int
-	Body      func(args []any) any
+	Body      func(v *Visitor, args []any) any
 }
 
 func (n *NativeFunction) NrArgs() int {
@@ -20,7 +23,7 @@ func (n *NativeFunction) NrArgs() int {
 }
 
 func (n *NativeFunction) Call(v *Visitor, args []any) any {
-	return n.Body(args)
+	return n.Body(v, args)
 }
 
 func NewGlobalEnvironment() *Environment {
@@ -29,7 +32,7 @@ func NewGlobalEnvironment() *Environment {
 	//  len(arr)
 	globals.Define("len", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			// check for array slice
 			if arrPtr, ok := args[0].(*[]any); ok {
 				return len(*arrPtr) // dereference pointer
@@ -45,7 +48,7 @@ func NewGlobalEnvironment() *Environment {
 	// append(arr, item)
 	globals.Define("append", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("InvalidArgument: append() expects an array as the first argument")
@@ -91,7 +94,7 @@ func NewGlobalEnvironment() *Environment {
 	// int(value)
 	globals.Define("int", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			switch v := args[0].(type) {
 			case string:
 				if i, err := strconv.Atoi(v); err == nil {
@@ -114,7 +117,7 @@ func NewGlobalEnvironment() *Environment {
 	// str(value)
 	globals.Define("str", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			if args[0] == nil {
 				return "nil"
 			}
@@ -142,7 +145,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("bool", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val := args[0]
 			if val == nil {
 				return false
@@ -169,7 +172,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("type", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			if args[0] == nil {
 				return "nil"
 			}
@@ -193,7 +196,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("bin", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
 				panic("InvalidArgument: bin() expects an integer")
@@ -205,7 +208,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("hex", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
 				panic("InvalidArgument: hex() expects an integer")
@@ -217,7 +220,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("oct", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
 				panic("InvalidArgument: oct() expects an integer")
@@ -228,7 +231,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("abs", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
 				panic("abs() expects an integer")
@@ -243,7 +246,7 @@ func NewGlobalEnvironment() *Environment {
 	// min(item1, item2)
 	globals.Define("min", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			a, ok1 := args[0].(int)
 			b, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
@@ -259,7 +262,7 @@ func NewGlobalEnvironment() *Environment {
 	// max(item1, item2)
 	globals.Define("max", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			a, ok1 := args[0].(int)
 			b, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
@@ -274,7 +277,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("input", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			prompt, ok := args[0].(string)
 			if !ok {
 				panic("input() expects a string prompt")
@@ -292,7 +295,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("ord", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok || len(str) != 1 {
 				panic("ord() expects a single-character string")
@@ -303,7 +306,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("chr", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok || val < 0 || val > 255 {
 				panic("chr() expects an integer ASCII code (0-255)")
@@ -314,7 +317,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("range", &NativeFunction{
 		ArgsCount: -1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			start := 0
 			end := 0
 
@@ -354,7 +357,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("set", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: set() expects an array as an argument")
@@ -375,7 +378,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("lower", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("lower() expects a string")
@@ -386,7 +389,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("upper", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("upper() expects a string")
@@ -397,7 +400,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("pop", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			// grab shared pointer address
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
@@ -422,7 +425,7 @@ func NewGlobalEnvironment() *Environment {
 	// find(container, item)
 	globals.Define("find", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			switch container := args[0].(type) {
 			case string:
 				target, ok := args[1].(string)
@@ -445,7 +448,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("reverse", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("reverse() expects an array")
@@ -461,7 +464,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("all", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: all() expects an array as an argument")
@@ -482,7 +485,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("any", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: any() expects an array as an argument")
@@ -503,7 +506,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("filter", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			// validate the predicate function
 			predicate, ok := args[0].(Callable)
 			if !ok {
@@ -535,7 +538,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("float", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			switch v := args[0].(type) {
 			case float64:
 				return v
@@ -559,7 +562,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("list", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			switch v := args[0].(type) {
 			case string:
 				// convert string to an array of individual characters
@@ -580,7 +583,7 @@ func NewGlobalEnvironment() *Environment {
 	})
 	globals.Define("map", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			transform, ok := args[0].(Callable)
 			if !ok {
 				panic("TypeError: first argument to map() must be a callable function")
@@ -602,7 +605,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("round", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			switch v := args[0].(type) {
 			case int:
 				return v
@@ -620,7 +623,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("sorted", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: sorted() expects an array")
@@ -654,7 +657,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("sum", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: sum() expects an array")
@@ -692,7 +695,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("split", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			sep, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -710,7 +713,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("insert", &NativeFunction{
 		ArgsCount: 3,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok1 := args[0].(*[]any)
 			idx, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
@@ -735,7 +738,7 @@ func NewGlobalEnvironment() *Environment {
 	})
 	globals.Define("strip", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: strip() expects a string argument")
@@ -746,7 +749,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("startswtih", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			prefix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -757,7 +760,7 @@ func NewGlobalEnvironment() *Environment {
 	})
 	globals.Define("endswitsh", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			suffix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -769,7 +772,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("isalnum", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: isalnum() expects a string")
@@ -789,7 +792,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("isalpha", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: isalpha() expects a string")
@@ -809,7 +812,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("isdigit", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: isdigit() expects a string")
@@ -829,7 +832,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("islower", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: islower() expects a string")
@@ -849,7 +852,7 @@ func NewGlobalEnvironment() *Environment {
 	})
 	globals.Define("isupper", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: isupper() expects a string")
@@ -870,7 +873,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("isspace", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
 				panic("TypeError: isspace() expects a string")
@@ -890,7 +893,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("replace", &NativeFunction{
 		ArgsCount: 3,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			old, ok2 := args[1].(string)
 			newStr, ok3 := args[2].(string)
@@ -904,7 +907,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("rfind", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			substr, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -917,7 +920,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("rindex", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			substr, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -935,7 +938,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("divmod", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			a, ok1 := args[0].(int)
 			b, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
@@ -952,7 +955,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("pow", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			base, ok1 := args[0].(int)
 			exp, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
@@ -965,7 +968,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("count", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			sub, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
@@ -977,7 +980,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("enumerate", &NativeFunction{
 		ArgsCount: 1,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: enumerate() expects an array")
@@ -995,7 +998,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("index", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
 				panic("TypeError: index() expects an array as the first argument")
@@ -1012,7 +1015,7 @@ func NewGlobalEnvironment() *Environment {
 
 	globals.Define("isinstance", &NativeFunction{
 		ArgsCount: 2,
-		Body: func(args []any) any {
+		Body: func(v *Visitor, args []any) any {
 			targetType, ok := args[1].(string)
 			if !ok {
 				panic("TypeError: isinstance() second argument must be a type string")
@@ -1037,6 +1040,81 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			return actualType == targetType
+		},
+	})
+	globals.Define("eval", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			code, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: eval() expects a string argument")
+			}
+
+			// givw dynamic string into ANTLR pipeline
+			inputStream := antlr.NewInputStream(code)
+			lexer := parser.NewGrammarLexer(inputStream)
+			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+			p := parser.NewGrammarParser(tokens)
+
+			tree := p.Expr()
+
+			return tree.Accept(v)
+		},
+	})
+
+	globals.Define("exec", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			code, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: exec() expects a string argument")
+			}
+
+			inputStream := antlr.NewInputStream(code)
+			lexer := parser.NewGrammarLexer(inputStream)
+			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+			p := parser.NewGrammarParser(tokens)
+
+			tree := p.Program()
+
+			tree.Accept(v)
+			return nil
+		},
+	})
+
+	globals.Define("format", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			spec, ok := args[1].(string)
+			if !ok {
+				panic("TypeError: format() specifier must be a string")
+			}
+
+			switch spec {
+			case "x": // hexadecimal
+				if val, ok := args[0].(int); ok {
+					return fmt.Sprintf("%x", val)
+				}
+			case "X": // hexadecimal uppercase
+				if val, ok := args[0].(int); ok {
+					return fmt.Sprintf("%X", val)
+				}
+			case "b": // binary
+				if val, ok := args[0].(int); ok {
+					return fmt.Sprintf("%b", val)
+				}
+			case "f": // float
+				if val, ok := args[0].(float64); ok {
+					return fmt.Sprintf("%f", val)
+				}
+			case "F": // float upper
+				if val, ok := args[0].(float64); ok {
+					return fmt.Sprintf("%F", val)
+				}
+			}
+
+			// default formatting
+			return fmt.Sprintf("%v", args[0])
 		},
 	})
 

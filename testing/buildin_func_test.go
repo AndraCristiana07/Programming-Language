@@ -1604,3 +1604,106 @@ func TestIsinstance(t *testing.T) {
 		})
 	}
 }
+
+func TestExecEval(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Exec assignment",
+			input: `
+				var targetVar = 0
+				var xExec = "targetVar = 50" 
+				exec(xExec)
+				var testResult = targetVar  
+			`,
+			expected: 50,
+		},
+		{
+			name: "Eval 50+5",
+			input: `
+				var xEval = "50 + 5"
+				var testResult = eval(xEval) 
+			`,
+			expected: 55,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestFormat(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Format hex",
+			input: `
+                var targetVar = 15
+                var testResult = format(targetVar, "x")  
+            `,
+			expected: "f",
+		},
+		{
+			name: "Format binary",
+			input: `
+                var targetVar = 5
+                var testResult = format(targetVar, "b")  
+            `,
+			expected: "101",
+		},
+		{
+			name: "Format fixed float",
+			input: `
+                var targetVar = float(5)
+                var testResult = format(targetVar, "f")  
+            `,
+			expected: "5.000000",
+		},
+		{
+			name: "Format uppercase hex",
+			input: `
+				var targetVar = 14
+				var testResult = format(targetVar, "X")  
+			`,
+			expected: "E",
+		},
+		{
+			name: "Format with uppercase F",
+			input: `
+				var targetVar = float(7)
+				var testResult = format(targetVar, "F")  
+    		`,
+			expected: "7.000000",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if result != tc.expected {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
