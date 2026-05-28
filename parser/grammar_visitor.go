@@ -89,6 +89,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Unary.
 	VisitUnary(ctx *UnaryContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#MapLiteral.
+	VisitMapLiteral(ctx *MapLiteralContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#MulDivMod.
 	VisitMulDivMod(ctx *MulDivModContext) interface{}
 
@@ -118,4 +121,7 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#Parentheses.
 	VisitParentheses(ctx *ParenthesesContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#mapEntry.
+	VisitMapEntry(ctx *MapEntryContext) interface{}
 }

@@ -183,6 +183,12 @@ func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
 // ExitUnary is called when production Unary is exited.
 func (s *BaseGrammarListener) ExitUnary(ctx *UnaryContext) {}
 
+// EnterMapLiteral is called when production MapLiteral is entered.
+func (s *BaseGrammarListener) EnterMapLiteral(ctx *MapLiteralContext) {}
+
+// ExitMapLiteral is called when production MapLiteral is exited.
+func (s *BaseGrammarListener) ExitMapLiteral(ctx *MapLiteralContext) {}
+
 // EnterMulDivMod is called when production MulDivMod is entered.
 func (s *BaseGrammarListener) EnterMulDivMod(ctx *MulDivModContext) {}
 
@@ -242,3 +248,9 @@ func (s *BaseGrammarListener) EnterParentheses(ctx *ParenthesesContext) {}
 
 // ExitParentheses is called when production Parentheses is exited.
 func (s *BaseGrammarListener) ExitParentheses(ctx *ParenthesesContext) {}
+
+// EnterMapEntry is called when production mapEntry is entered.
+func (s *BaseGrammarListener) EnterMapEntry(ctx *MapEntryContext) {}
+
+// ExitMapEntry is called when production mapEntry is exited.
+func (s *BaseGrammarListener) ExitMapEntry(ctx *MapEntryContext) {}

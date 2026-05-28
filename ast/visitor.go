@@ -165,6 +165,23 @@ func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
 	return val
 }
 
+func (v *Visitor) VisitMapLiteral(ctx *parser.MapLiteralContext) any {
+	// init empty map
+	nativeMap := make(map[string]any)
+
+	// loop through key-value entries
+	for _, entryCtx := range ctx.AllMapEntry() {
+		rawKey := entryCtx.Expr(0).Accept(v)
+		val := entryCtx.Expr(1).Accept(v)
+
+		// make sure key converts to a string
+		keyStr := fmt.Sprintf("%v", rawKey)
+		nativeMap[keyStr] = val
+	}
+
+	return &nativeMap
+}
+
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	// return v.vars[varName]
@@ -807,6 +824,23 @@ func cleanStringRepr(val any) string {
 			}
 		}
 		sb.WriteString("]")
+		return sb.String()
+	case *map[string]any:
+		var sb strings.Builder
+		sb.WriteString("{")
+
+		m := *v
+		i := 0
+		for key, element := range m {
+			// format as key: value
+			fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(element))
+
+			if i < len(m)-1 {
+				sb.WriteString(", ")
+			}
+			i++
+		}
+		sb.WriteString("}")
 		return sb.String()
 	default:
 		return fmt.Sprintf("%v", v)

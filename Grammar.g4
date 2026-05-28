@@ -55,6 +55,7 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | expr op=AND expr                                  # And
             | expr op=OR expr                                   # Or
             | LBRACKET (expr (COMMA expr)*)? RBRACKET           # ArrayLiteral
+            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE       # MapLiteral                              
             | IDENTIFIER                                        # Identifier          
             | NUMBER                                            # Number     
             | val=(TRUE | FALSE)                                # Boolean
@@ -62,6 +63,7 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | LPAREN expr RPAREN                                # Parentheses
             ;
 
+mapEntry : expr ':' expr ;
 
 VAR             : 'var' ;
 EQUALS          : '=' ;

@@ -89,6 +89,9 @@ type GrammarListener interface {
 	// EnterUnary is called when entering the Unary production.
 	EnterUnary(c *UnaryContext)
 
+	// EnterMapLiteral is called when entering the MapLiteral production.
+	EnterMapLiteral(c *MapLiteralContext)
+
 	// EnterMulDivMod is called when entering the MulDivMod production.
 	EnterMulDivMod(c *MulDivModContext)
 
@@ -118,6 +121,9 @@ type GrammarListener interface {
 
 	// EnterParentheses is called when entering the Parentheses production.
 	EnterParentheses(c *ParenthesesContext)
+
+	// EnterMapEntry is called when entering the mapEntry production.
+	EnterMapEntry(c *MapEntryContext)
 
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
@@ -200,6 +206,9 @@ type GrammarListener interface {
 	// ExitUnary is called when exiting the Unary production.
 	ExitUnary(c *UnaryContext)
 
+	// ExitMapLiteral is called when exiting the MapLiteral production.
+	ExitMapLiteral(c *MapLiteralContext)
+
 	// ExitMulDivMod is called when exiting the MulDivMod production.
 	ExitMulDivMod(c *MulDivModContext)
 
@@ -229,4 +238,7 @@ type GrammarListener interface {
 
 	// ExitParentheses is called when exiting the Parentheses production.
 	ExitParentheses(c *ParenthesesContext)
+
+	// ExitMapEntry is called when exiting the mapEntry production.
+	ExitMapEntry(c *MapEntryContext)
 }

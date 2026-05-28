@@ -232,6 +232,12 @@ func main() {
 		print zip(a1, a2)
 		print join(a2,"-")
 
+		var map1 = {"a":1, "c":5}
+		print map1
+		print values(map1)
+		print keys(map1)
+
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

@@ -116,6 +116,10 @@ func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitMulDivMod(ctx *MulDivModContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -153,5 +157,9 @@ func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
 }
 
 func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMapEntry(ctx *MapEntryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
