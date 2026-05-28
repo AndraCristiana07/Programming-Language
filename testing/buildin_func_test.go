@@ -1234,6 +1234,22 @@ func TestStrip(t *testing.T) {
 			`,
 			expected: "hello-world",
 		},
+		{
+			name: "Lstrip on string",
+			input: `
+				var phrase = "   hi there left side   "
+				var testResult = lstrip(phrase)
+			`,
+			expected: "hi there left side   ",
+		},
+		{
+			name: "Rstrip on string",
+			input: `
+				var phrase = "   hi there left side   "
+				var testResult = rstrip(phrase)
+			`,
+			expected: "   hi there left side",
+		},
 	}
 
 	for _, tc := range tests {

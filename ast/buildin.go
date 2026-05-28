@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -581,6 +582,7 @@ func NewGlobalEnvironment() *Environment {
 			}
 		},
 	})
+
 	globals.Define("map", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
@@ -850,6 +852,7 @@ func NewGlobalEnvironment() *Environment {
 			return hasCased
 		},
 	})
+
 	globals.Define("isupper", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
@@ -1042,6 +1045,7 @@ func NewGlobalEnvironment() *Environment {
 			return actualType == targetType
 		},
 	})
+
 	globals.Define("eval", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
@@ -1172,6 +1176,62 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			return strings.Join(strParts, delim)
+		},
+	})
+
+	globals.Define("rsplit", &NativeFunction{
+		ArgsCount: 3,
+		Body: func(v *Visitor, args []any) any {
+			str, ok1 := args[0].(string)
+			sep, ok2 := args[1].(string)
+			maxsplit, ok3 := args[2].(int)
+			if !ok1 || !ok2 || !ok3 {
+				panic("TypeError: rsplit() expects two strings and an integer maxsplit count")
+			}
+
+			var parts []string
+			if maxsplit < 0 {
+				parts = strings.Split(str, sep)
+			} else {
+				parts = strings.Split(str, sep)
+				if len(parts) > maxsplit+1 {
+					keepIdx := len(parts) - maxsplit
+					mergedFirstPart := strings.Join(parts[:keepIdx], sep)
+
+					finalParts := append([]string{mergedFirstPart}, parts[keepIdx:]...)
+					parts = finalParts
+				}
+			}
+
+			result := make([]any, len(parts))
+			for i, part := range parts {
+				result[i] = part
+			}
+			return &result
+		},
+	})
+
+	globals.Define("lstrip", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: lstrip() expects a string argument")
+			}
+
+			return strings.TrimLeftFunc(str, unicode.IsSpace)
+		},
+	})
+
+	globals.Define("rstrip", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: rstrip() expects a string argument")
+			}
+
+			return strings.TrimRightFunc(str, unicode.IsSpace)
 		},
 	})
 
