@@ -1235,5 +1235,55 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("swapcase", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			str, ok := args[0].(string)
+			if !ok {
+				panic("TypeError: swapcase() expects a string argument")
+			}
+
+			runes := []rune(str)
+			for i, r := range runes {
+				if unicode.IsUpper(r) {
+					runes[i] = unicode.ToLower(r)
+				} else if unicode.IsLower(r) {
+					runes[i] = unicode.ToUpper(r)
+				}
+			}
+			return string(runes)
+		},
+	})
+
+	globals.Define("remove", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic("TypeError: remove() expects an array pointer as the first argument")
+			}
+
+			arr := *arrPtr
+			target := args[1]
+			foundIdx := -1
+
+			// first occurrence matching the target
+			for i, val := range arr {
+				if reflect.DeepEqual(val, target) {
+					foundIdx = i
+					break
+				}
+			}
+
+			if foundIdx == -1 {
+				panic("ValueError: remove(x): x not in array")
+			}
+
+			// re-assign the slice back to the pointer
+			*arrPtr = append(arr[:foundIdx], arr[foundIdx+1:]...)
+			return nil
+		},
+	})
+
 	return globals
 }

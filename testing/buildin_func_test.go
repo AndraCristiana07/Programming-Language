@@ -1802,3 +1802,61 @@ func TestJoin(t *testing.T) {
 		})
 	}
 }
+
+func TestSwapcase(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name:     "Swapcase flips cases completely",
+			input:    `var testResult = swapcase("Hello World 123")`,
+			expected: "hELLO wORLD 123",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestRemove(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+		{
+			name: "Remove drops the first match from array",
+			input: `
+                var arr = [10, 20, 30, 20]
+                remove(arr, 20)
+                var testResult = arr
+            `,
+			expected: &[]any{10, 30, 20},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing entirely")
+			}
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
