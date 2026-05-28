@@ -112,27 +112,50 @@ func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 }
 
 func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
-	varName := ctx.IDENTIFIER().GetText()
-	value := ctx.Expr().Accept(v)
-	// v.vars[varName] = value
-	if !v.currEnv.Assign(varName, value) {
-		panic("Undefined variable: " + varName)
+	leftHandSide := ctx.Expr(0)
+	assignedValue := ctx.Expr(1).Accept(v)
+
+	// nested
+	container, indexVal := v.resolveAssignTarget(leftHandSide)
+
+	if container != nil {
+		switch obj := container.(type) {
+		case *[]any:
+			idx, ok := indexVal.(int)
+			if !ok {
+				panic("TypeError: Array index must be an integer")
+			}
+			(*obj)[idx] = assignedValue
+		case *map[string]any:
+			keyStr := fmt.Sprintf("%v", indexVal)
+			(*obj)[keyStr] = assignedValue
+		default:
+			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+		}
+	} else {
+		// plain assign
+		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+			name := identCtx.IDENTIFIER().GetText()
+			if !v.currEnv.Assign(name, assignedValue) {
+				panic(fmt.Sprintf("Undefined variable: %s", name))
+			}
+		} else {
+			panic("SyntaxError: Invalid assignment target")
+		}
 	}
+
 	return nil
 }
 
 func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
-	varName := ctx.IDENTIFIER().GetText()
+	leftHandSide := ctx.Expr()
 	op := ctx.GetOp().GetText()
 
-	value, exists := v.currEnv.Lookup(varName)
-	if !exists {
-		panic("Undefined variable: " + varName)
-	}
+	currentValue := leftHandSide.Accept(v)
 
-	intValue, ok := value.(int)
+	intValue, ok := currentValue.(int)
 	if !ok {
-		panic("Variable is not an integer: " + varName)
+		panic("TypeError: Postfix increment/decrement target must be an integer")
 	}
 
 	switch op {
@@ -144,13 +167,38 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 		panic("Unknown postfix operator: " + op)
 	}
 
-	if !v.currEnv.Assign(varName, intValue) {
-		panic("Failed to assign value to variable: " + varName)
+	// write result to destination
+	container, indexVal := v.resolveAssignTarget(leftHandSide)
+
+	if container != nil {
+		// nested
+		switch obj := container.(type) {
+		case *[]any:
+			idx, ok := indexVal.(int)
+			if !ok {
+				panic("TypeError: Array index must be an integer")
+			}
+			(*obj)[idx] = intValue
+		case *map[string]any:
+			keyStr := fmt.Sprintf("%v", indexVal)
+			(*obj)[keyStr] = intValue
+		default:
+			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+		}
+	} else {
+		// plain assign
+		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+			varName := identCtx.IDENTIFIER().GetText()
+			if !v.currEnv.Assign(varName, intValue) {
+				panic("Failed to assign value to variable: " + varName)
+			}
+		} else {
+			panic("SyntaxError: Invalid postfix statement target")
+		}
 	}
 
 	return nil
 }
-
 func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
 	numStr := ctx.NUMBER().GetText()
 
@@ -414,75 +462,98 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 }
 
 func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext) any {
-	varName := ctx.IDENTIFIER().GetText()
+	leftHandSide := ctx.Expr(0)
+	currentValue := leftHandSide.Accept(v)
+	value := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
-	value := ctx.Expr().Accept(v)
 
-	currentValue, exists := v.currEnv.Lookup(varName)
-	if !exists {
-		panic("Undefined variable: " + varName)
-	}
+	var result any
 
-	// handle string concatenation for +=
+	// string concatenation
 	if op == "+=" {
 		if strVal, ok := currentValue.(string); ok {
-			if !v.currEnv.Assign(varName, strVal+cleanStringRepr(value)) {
+			result = strVal + cleanStringRepr(value)
+		}
+	}
+
+	// int math
+	if result == nil {
+		intCurrentValue, ok := currentValue.(int)
+		if !ok {
+			panic("TypeError: Left-hand side of compound assignment must evaluate to an integer or string")
+		}
+
+		intValue, ok := value.(int)
+		if !ok {
+			panic("TypeError: Right-hand side of compound assignment must be an integer")
+		}
+
+		switch op {
+		case "+=":
+			result = intCurrentValue + intValue
+		case "-=":
+			result = intCurrentValue - intValue
+		case "*=":
+			result = intCurrentValue * intValue
+		case "/=":
+			if intValue == 0 {
+				panic("ZeroDivisionError: Division by zero in compound assignment")
+			}
+			result = intCurrentValue / intValue
+		case "%=":
+			if intValue == 0 {
+				panic("ZeroDivisionError: Modulo by zero in compound assignment")
+			}
+			result = intCurrentValue % intValue
+		case "**=":
+			result = power(intCurrentValue, intValue)
+		case "&=":
+			result = intCurrentValue & intValue
+		case "|=":
+			result = intCurrentValue | intValue
+		case "^=":
+			result = intCurrentValue ^ intValue
+		case "<<=":
+			result = intCurrentValue << intValue
+		case ">>=":
+			result = intCurrentValue >> intValue
+		default:
+			panic("Unknown compound assignment operator: " + op)
+		}
+	}
+
+	// write result to destination
+	container, indexVal := v.resolveAssignTarget(leftHandSide)
+
+	if container != nil {
+		// nested
+		switch obj := container.(type) {
+		case *[]any:
+			idx, ok := indexVal.(int)
+			if !ok {
+				panic("TypeError: Array index must be an integer")
+			}
+			(*obj)[idx] = result
+		case *map[string]any:
+			keyStr := fmt.Sprintf("%v", indexVal)
+			(*obj)[keyStr] = result
+		default:
+			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+		}
+	} else {
+		// plain assign
+		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+			varName := identCtx.IDENTIFIER().GetText()
+			if !v.currEnv.Assign(varName, result) {
 				panic("Failed to assign value to variable: " + varName)
 			}
-
-			return nil
+		} else {
+			panic("SyntaxError: Invalid compound assignment target")
 		}
 	}
 
-	intCurrentValue, ok := currentValue.(int)
-	if !ok {
-		panic("Variable is not an integer: " + varName)
-	}
-
-	intValue, ok := value.(int)
-	if !ok {
-		panic("Right-hand side of compound assignment must be an integer")
-	}
-
-	var result int
-	switch op {
-	case "+=":
-		result = intCurrentValue + intValue
-	case "-=":
-		result = intCurrentValue - intValue
-	case "*=":
-		result = intCurrentValue * intValue
-	case "/=":
-		if intValue == 0 {
-			panic("Division by zero in compound assignment")
-		}
-		result = intCurrentValue / intValue
-	case "%=":
-		if intValue == 0 {
-			panic("Modulo by zero in compound assignment")
-		}
-		result = intCurrentValue % intValue
-	case "**=":
-		result = power(intCurrentValue, intValue)
-	case "&=":
-		result = intCurrentValue & intValue
-	case "|=":
-		result = intCurrentValue | intValue
-	case "^=":
-		result = intCurrentValue ^ intValue
-	case "<<=":
-		result = intCurrentValue << intValue
-	case ">>=":
-		result = intCurrentValue >> intValue
-	default:
-		panic("Unknown compound assignment operator: " + op)
-	}
-	if !v.currEnv.Assign(varName, result) {
-		panic("Failed to assign value to variable: " + varName)
-	}
 	return nil
 }
-
 func (v *Visitor) VisitParentheses(ctx *parser.ParenthesesContext) any {
 	return ctx.Expr().Accept(v)
 }
@@ -849,4 +920,46 @@ func cleanStringRepr(val any) string {
 	default:
 		return fmt.Sprintf("%v", v)
 	}
+}
+
+func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
+	idxCtx, ok := leftCtx.(*parser.ArrayIndexContext)
+	if !ok {
+		return nil, nil
+	}
+
+	// get inner target
+	innerTargetCtx := idxCtx.Expr(0)
+	indexVal := idxCtx.Expr(1).Accept(v)
+
+	// check if there;s another nest
+	if nestedIdxCtx, isNested := innerTargetCtx.(*parser.ArrayIndexContext); isNested {
+		parentContainer, parentIndex := v.resolveAssignTarget(nestedIdxCtx)
+
+		switch obj := parentContainer.(type) {
+		case *[]any:
+			idx, ok := parentIndex.(int)
+			if !ok {
+				panic("TypeError: Array index must be an integer")
+			}
+			return (*obj)[idx], indexVal
+		case *map[string]any:
+			keyStr := fmt.Sprintf("%v", parentIndex)
+			return (*obj)[keyStr], indexVal
+		default:
+			panic(fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer))
+		}
+	}
+
+	// plain struct
+	if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
+		name := identCtx.IDENTIFIER().GetText()
+		container, exists := v.currEnv.Lookup(name)
+		if !exists {
+			panic("Undefined variable: " + name)
+		}
+		return container, indexVal
+	}
+
+	return nil, nil
 }

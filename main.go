@@ -240,6 +240,11 @@ func main() {
 		var nullVal = null
 		print nullVal
 
+		var map2 = {"here":[1,3,5], "there":[6,13,51]}
+		print map2
+		map2["here"][1] = 7
+		print map2
+
 		`
 
 	input := antlr.NewInputStream(inputCode)

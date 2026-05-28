@@ -115,11 +115,11 @@ func grammarParserInit() {
 		76, 1, 0, 0, 0, 84, 85, 1, 0, 0, 0, 85, 86, 1, 0, 0, 0, 86, 87, 5, 17,
 		0, 0, 87, 88, 3, 28, 14, 0, 88, 9, 1, 0, 0, 0, 89, 90, 3, 36, 18, 0, 90,
 		11, 1, 0, 0, 0, 91, 92, 5, 3, 0, 0, 92, 93, 5, 56, 0, 0, 93, 94, 5, 4,
-		0, 0, 94, 95, 3, 36, 18, 0, 95, 13, 1, 0, 0, 0, 96, 97, 5, 56, 0, 0, 97,
+		0, 0, 94, 95, 3, 36, 18, 0, 95, 13, 1, 0, 0, 0, 96, 97, 3, 36, 18, 0, 97,
 		98, 5, 4, 0, 0, 98, 99, 3, 36, 18, 0, 99, 15, 1, 0, 0, 0, 100, 101, 5,
 		56, 0, 0, 101, 102, 5, 19, 0, 0, 102, 103, 3, 36, 18, 0, 103, 104, 5, 20,
 		0, 0, 104, 105, 5, 4, 0, 0, 105, 106, 3, 36, 18, 0, 106, 17, 1, 0, 0, 0,
-		107, 108, 5, 56, 0, 0, 108, 109, 7, 1, 0, 0, 109, 110, 3, 36, 18, 0, 110,
+		107, 108, 3, 36, 18, 0, 108, 109, 7, 1, 0, 0, 109, 110, 3, 36, 18, 0, 110,
 		19, 1, 0, 0, 0, 111, 112, 5, 50, 0, 0, 112, 113, 3, 36, 18, 0, 113, 21,
 		1, 0, 0, 0, 114, 115, 5, 21, 0, 0, 115, 116, 5, 16, 0, 0, 116, 117, 3,
 		36, 18, 0, 117, 118, 5, 17, 0, 0, 118, 121, 3, 28, 14, 0, 119, 120, 5,
@@ -136,19 +136,19 @@ func grammarParserInit() {
 		1, 0, 0, 0, 148, 149, 5, 18, 0, 0, 149, 29, 1, 0, 0, 0, 150, 153, 3, 12,
 		6, 0, 151, 153, 3, 14, 7, 0, 152, 150, 1, 0, 0, 0, 152, 151, 1, 0, 0, 0,
 		153, 31, 1, 0, 0, 0, 154, 157, 3, 14, 7, 0, 155, 157, 3, 34, 17, 0, 156,
-		154, 1, 0, 0, 0, 156, 155, 1, 0, 0, 0, 157, 33, 1, 0, 0, 0, 158, 159, 5,
-		56, 0, 0, 159, 160, 7, 2, 0, 0, 160, 35, 1, 0, 0, 0, 161, 162, 6, 18, -1,
-		0, 162, 163, 5, 56, 0, 0, 163, 172, 5, 16, 0, 0, 164, 169, 3, 36, 18, 0,
-		165, 166, 5, 26, 0, 0, 166, 168, 3, 36, 18, 0, 167, 165, 1, 0, 0, 0, 168,
-		171, 1, 0, 0, 0, 169, 167, 1, 0, 0, 0, 169, 170, 1, 0, 0, 0, 170, 173,
-		1, 0, 0, 0, 171, 169, 1, 0, 0, 0, 172, 164, 1, 0, 0, 0, 172, 173, 1, 0,
-		0, 0, 173, 174, 1, 0, 0, 0, 174, 211, 5, 17, 0, 0, 175, 176, 7, 3, 0, 0,
-		176, 211, 3, 36, 18, 19, 177, 186, 5, 19, 0, 0, 178, 183, 3, 36, 18, 0,
-		179, 180, 5, 26, 0, 0, 180, 182, 3, 36, 18, 0, 181, 179, 1, 0, 0, 0, 182,
-		185, 1, 0, 0, 0, 183, 181, 1, 0, 0, 0, 183, 184, 1, 0, 0, 0, 184, 187,
-		1, 0, 0, 0, 185, 183, 1, 0, 0, 0, 186, 178, 1, 0, 0, 0, 186, 187, 1, 0,
-		0, 0, 187, 188, 1, 0, 0, 0, 188, 211, 5, 20, 0, 0, 189, 198, 5, 15, 0,
-		0, 190, 195, 3, 38, 19, 0, 191, 192, 5, 26, 0, 0, 192, 194, 3, 38, 19,
+		154, 1, 0, 0, 0, 156, 155, 1, 0, 0, 0, 157, 33, 1, 0, 0, 0, 158, 159, 3,
+		36, 18, 0, 159, 160, 7, 2, 0, 0, 160, 35, 1, 0, 0, 0, 161, 162, 6, 18,
+		-1, 0, 162, 163, 5, 56, 0, 0, 163, 172, 5, 16, 0, 0, 164, 169, 3, 36, 18,
+		0, 165, 166, 5, 26, 0, 0, 166, 168, 3, 36, 18, 0, 167, 165, 1, 0, 0, 0,
+		168, 171, 1, 0, 0, 0, 169, 167, 1, 0, 0, 0, 169, 170, 1, 0, 0, 0, 170,
+		173, 1, 0, 0, 0, 171, 169, 1, 0, 0, 0, 172, 164, 1, 0, 0, 0, 172, 173,
+		1, 0, 0, 0, 173, 174, 1, 0, 0, 0, 174, 211, 5, 17, 0, 0, 175, 176, 7, 3,
+		0, 0, 176, 211, 3, 36, 18, 19, 177, 186, 5, 19, 0, 0, 178, 183, 3, 36,
+		18, 0, 179, 180, 5, 26, 0, 0, 180, 182, 3, 36, 18, 0, 181, 179, 1, 0, 0,
+		0, 182, 185, 1, 0, 0, 0, 183, 181, 1, 0, 0, 0, 183, 184, 1, 0, 0, 0, 184,
+		187, 1, 0, 0, 0, 185, 183, 1, 0, 0, 0, 186, 178, 1, 0, 0, 0, 186, 187,
+		1, 0, 0, 0, 187, 188, 1, 0, 0, 0, 188, 211, 5, 20, 0, 0, 189, 198, 5, 15,
+		0, 0, 190, 195, 3, 38, 19, 0, 191, 192, 5, 26, 0, 0, 192, 194, 3, 38, 19,
 		0, 193, 191, 1, 0, 0, 0, 194, 197, 1, 0, 0, 0, 195, 193, 1, 0, 0, 0, 195,
 		196, 1, 0, 0, 0, 196, 199, 1, 0, 0, 0, 197, 195, 1, 0, 0, 0, 198, 190,
 		1, 0, 0, 0, 198, 199, 1, 0, 0, 0, 199, 200, 1, 0, 0, 0, 200, 211, 5, 18,
@@ -1753,9 +1753,9 @@ type IAssignStmtContext interface {
 	GetParser() antlr.Parser
 
 	// Getter signatures
-	IDENTIFIER() antlr.TerminalNode
+	AllExpr() []IExprContext
+	Expr(i int) IExprContext
 	EQUALS() antlr.TerminalNode
-	Expr() IExprContext
 
 	// IsAssignStmtContext differentiates from other interfaces.
 	IsAssignStmtContext()
@@ -1793,20 +1793,37 @@ func NewAssignStmtContext(parser antlr.Parser, parent antlr.ParserRuleContext, i
 
 func (s *AssignStmtContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *AssignStmtContext) IDENTIFIER() antlr.TerminalNode {
-	return s.GetToken(GrammarParserIDENTIFIER, 0)
+func (s *AssignStmtContext) AllExpr() []IExprContext {
+	children := s.GetChildren()
+	len := 0
+	for _, ctx := range children {
+		if _, ok := ctx.(IExprContext); ok {
+			len++
+		}
+	}
+
+	tst := make([]IExprContext, len)
+	i := 0
+	for _, ctx := range children {
+		if t, ok := ctx.(IExprContext); ok {
+			tst[i] = t.(IExprContext)
+			i++
+		}
+	}
+
+	return tst
 }
 
-func (s *AssignStmtContext) EQUALS() antlr.TerminalNode {
-	return s.GetToken(GrammarParserEQUALS, 0)
-}
-
-func (s *AssignStmtContext) Expr() IExprContext {
+func (s *AssignStmtContext) Expr(i int) IExprContext {
 	var t antlr.RuleContext
+	j := 0
 	for _, ctx := range s.GetChildren() {
 		if _, ok := ctx.(IExprContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
+			if j == i {
+				t = ctx.(antlr.RuleContext)
+				break
+			}
+			j++
 		}
 	}
 
@@ -1815,6 +1832,10 @@ func (s *AssignStmtContext) Expr() IExprContext {
 	}
 
 	return t.(IExprContext)
+}
+
+func (s *AssignStmtContext) EQUALS() antlr.TerminalNode {
+	return s.GetToken(GrammarParserEQUALS, 0)
 }
 
 func (s *AssignStmtContext) GetRuleContext() antlr.RuleContext {
@@ -1853,11 +1874,7 @@ func (p *GrammarParser) AssignStmt() (localctx IAssignStmtContext) {
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(96)
-		p.Match(GrammarParserIDENTIFIER)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
-		}
+		p.expr(0)
 	}
 	{
 		p.SetState(97)
@@ -2095,8 +2112,8 @@ type ICompoundAssignStmtContext interface {
 	SetOp(antlr.Token)
 
 	// Getter signatures
-	IDENTIFIER() antlr.TerminalNode
-	Expr() IExprContext
+	AllExpr() []IExprContext
+	Expr(i int) IExprContext
 	PLUSEQUAL() antlr.TerminalNode
 	MINUSEQUAL() antlr.TerminalNode
 	STAREQUAL() antlr.TerminalNode
@@ -2150,16 +2167,37 @@ func (s *CompoundAssignStmtContext) GetOp() antlr.Token { return s.op }
 
 func (s *CompoundAssignStmtContext) SetOp(v antlr.Token) { s.op = v }
 
-func (s *CompoundAssignStmtContext) IDENTIFIER() antlr.TerminalNode {
-	return s.GetToken(GrammarParserIDENTIFIER, 0)
+func (s *CompoundAssignStmtContext) AllExpr() []IExprContext {
+	children := s.GetChildren()
+	len := 0
+	for _, ctx := range children {
+		if _, ok := ctx.(IExprContext); ok {
+			len++
+		}
+	}
+
+	tst := make([]IExprContext, len)
+	i := 0
+	for _, ctx := range children {
+		if t, ok := ctx.(IExprContext); ok {
+			tst[i] = t.(IExprContext)
+			i++
+		}
+	}
+
+	return tst
 }
 
-func (s *CompoundAssignStmtContext) Expr() IExprContext {
+func (s *CompoundAssignStmtContext) Expr(i int) IExprContext {
 	var t antlr.RuleContext
+	j := 0
 	for _, ctx := range s.GetChildren() {
 		if _, ok := ctx.(IExprContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
+			if j == i {
+				t = ctx.(antlr.RuleContext)
+				break
+			}
+			j++
 		}
 	}
 
@@ -2252,11 +2290,7 @@ func (p *GrammarParser) CompoundAssignStmt() (localctx ICompoundAssignStmtContex
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(107)
-		p.Match(GrammarParserIDENTIFIER)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
-		}
+		p.expr(0)
 	}
 	{
 		p.SetState(108)
@@ -3585,7 +3619,7 @@ func (p *GrammarParser) ForInit() (localctx IForInitContext) {
 			p.VarDecl()
 		}
 
-	case GrammarParserIDENTIFIER:
+	case GrammarParserT__0, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserBITNOT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(151)
@@ -3774,7 +3808,7 @@ type IPostfixStmtContext interface {
 	SetOp(antlr.Token)
 
 	// Getter signatures
-	IDENTIFIER() antlr.TerminalNode
+	Expr() IExprContext
 	INC() antlr.TerminalNode
 	DEC() antlr.TerminalNode
 
@@ -3819,8 +3853,20 @@ func (s *PostfixStmtContext) GetOp() antlr.Token { return s.op }
 
 func (s *PostfixStmtContext) SetOp(v antlr.Token) { s.op = v }
 
-func (s *PostfixStmtContext) IDENTIFIER() antlr.TerminalNode {
-	return s.GetToken(GrammarParserIDENTIFIER, 0)
+func (s *PostfixStmtContext) Expr() IExprContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IExprContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
 }
 
 func (s *PostfixStmtContext) INC() antlr.TerminalNode {
@@ -3869,11 +3915,7 @@ func (p *GrammarParser) PostfixStmt() (localctx IPostfixStmtContext) {
 	p.EnterOuterAlt(localctx, 1)
 	{
 		p.SetState(158)
-		p.Match(GrammarParserIDENTIFIER)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
-		}
+		p.expr(0)
 	}
 	{
 		p.SetState(159)
