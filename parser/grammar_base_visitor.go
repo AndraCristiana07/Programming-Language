@@ -28,6 +28,10 @@ func (v *BaseGrammarVisitor) VisitFuncStmt(ctx *FuncStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitExprStmt(ctx *ExprStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }

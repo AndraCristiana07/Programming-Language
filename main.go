@@ -120,6 +120,11 @@ func main() {
 		var arr = [1, 2, 3]
 		print "Array: " + arr
 
+		print "len arr is: " + len(arr)
+		arr = append(arr, 4)
+		print "Modified append: " + arr
+
+
 		print "Array element at index 1: " + arr[1]
 		arr[0] = 10
 		print "Modified Array: " + arr
@@ -127,8 +132,8 @@ func main() {
 		func add(a, b) {
 			return a + b
 		}
-		var sum = add(5, 7)
-		print "Sum: " + sum
+		var sum1 = add(5, 7)
+		print "Sum1: " + sum1
 
 		func factorial(n) {
 			if (n == 0) {
@@ -144,6 +149,89 @@ func main() {
 		var bitcomp = 5
 		bitcomp &= 5
 		print bitcomp
+
+		var toStr = str(5)
+		print toStr
+		print "type tostr: " + type(toStr)
+
+		var toInt = int("5")
+		print toInt
+		print "type toInt: " + type(toInt)
+
+		var testBool = false
+		print "type pf testBool: " + type(testBool)
+		print "type of arr: " + type(arr)
+		print "type of arr[0]: " + type(arr[0])
+
+		var arr1 = [[1,2], [3,5], [6,4]]
+		arr1 = append(arr1, [6])
+
+		print "abs of -5: " + abs(-5)
+		print "min : " + min(2, 6)
+		print "max: " + max(3, 8)
+
+		var toChr = chr(67)
+		print toChr
+
+		var toOrd = ord("c")
+		print toOrd
+
+		var toBool = bool(20)
+		print "to bool: " + toBool
+
+		print "range with 1-10: " + range(1, 10)
+
+		print "range with 9: " + range(9)
+		var arr2 = [1, 2, 2, 5, 1, 7]
+		print "set from arr: " + set(arr2)
+
+		print lower("HellLo")
+		print upper("HeellsO")
+
+		print pop(arr2)
+		print arr2
+		pop(arr2)
+		print arr2
+
+		print reverse(arr2)
+		print find(arr2, 2)
+
+		var boolArr = [true, false, false]
+		print all(boolArr)
+		print any(boolArr)
+		print float(5)
+
+		print sum(arr2)
+		var phrase = "  hello-there  "
+		print "stripped: " + strip(phrase)
+		print "split: " + split(phrase, "-")
+		var filename = "script.exe"
+		print startswtih(filename, "script")          
+		print endswitsh(filename, ".txt")
+
+		print replace("banana", "a", "o")
+		print rfind("in here", "here")
+		print rindex("more go more", "more")
+
+		var countStr = "one apple per apple per person"
+		print count(countStr, "apple")
+
+		var arr2 = ["apple", "pear", "kiwi"]
+		print enumerate(arr2) 
+
+		var xExec = "print 55"
+		exec(xExec)
+
+		var xEval = "50 + 5"
+		print eval(xEval)
+
+		print format(2, "b")
+
+		var a1 = [2, 4, 6, 1]
+		var a2 = ["a", "c", "f", "g"]
+		print zip(a1, a2)
+		print join(a2,"-")
+
 		`
 
 	input := antlr.NewInputStream(inputCode)
@@ -161,8 +249,4 @@ func main() {
 	eval := ast.NewVisitor()
 	tree.Accept(eval)
 
-	// fmt.Println("Final variable states:")
-	// for k, v := range eval.vars {
-	// 	fmt.Printf("%s = %v\n", k, v)
-	// }
 }

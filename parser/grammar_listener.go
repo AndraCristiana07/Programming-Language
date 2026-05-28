@@ -23,6 +23,9 @@ type GrammarListener interface {
 	// EnterFuncStmt is called when entering the funcStmt production.
 	EnterFuncStmt(c *FuncStmtContext)
 
+	// EnterExprStmt is called when entering the exprStmt production.
+	EnterExprStmt(c *ExprStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -130,6 +133,9 @@ type GrammarListener interface {
 
 	// ExitFuncStmt is called when exiting the funcStmt production.
 	ExitFuncStmt(c *FuncStmtContext)
+
+	// ExitExprStmt is called when exiting the exprStmt production.
+	ExitExprStmt(c *ExprStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

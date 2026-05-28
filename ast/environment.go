@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type Environment struct {
 	vars   map[string]any
 	parent *Environment
@@ -22,6 +24,11 @@ func NewScope(parent *Environment) *Environment {
 
 // sets a var strictly in the curr block
 func (e *Environment) Define(name string, value any) {
+	if existingValue, exists := e.vars[name]; exists {
+		if _, isNative := existingValue.(*NativeFunction); isNative {
+			panic(fmt.Sprintf("CompileError: '%s' is a protected built-in function and cannot be redefined", name))
+		}
+	}
 	e.vars[name] = value
 }
 
@@ -39,13 +46,18 @@ func (e *Environment) Lookup(name string) (any, bool) {
 
 // go up the scopes to update a variable
 func (e *Environment) Assign(name string, value any) bool {
-	_, exists := e.vars[name]
-	if exists {
+	if existingValue, exists := e.vars[name]; exists {
+		if _, isNative := existingValue.(*NativeFunction); isNative {
+			panic(fmt.Sprintf("CompileError: Cannot assign a value to protected built-in function '%s'", name))
+		}
+
 		e.vars[name] = value
 		return true
 	}
+
 	if e.parent != nil {
 		return e.parent.Assign(name, value)
 	}
+
 	return false
 }

@@ -23,6 +23,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#funcStmt.
 	VisitFuncStmt(ctx *FuncStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#exprStmt.
+	VisitExprStmt(ctx *ExprStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 

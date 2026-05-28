@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"my_language/parser"
 	"strconv"
+	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 )
 
+type Callable interface {
+	NrArgs() int
+	Call(v *Visitor, args []any) any
+}
+
 type Visitor struct {
 	parser.BaseGrammarVisitor
-	// vars map[string]any
-	// also add env
 	currEnv *Environment
 }
 
@@ -22,12 +26,12 @@ type ReturnValueSignal struct {
 type RuntimeFunction struct {
 	Parameters []string
 	Body       *parser.BlockStmtContext
+	Env        *Environment
 }
 
 func NewVisitor() *Visitor {
 	return &Visitor{
-		// vars:    make(map[string]any),
-		currEnv: NewEnvironment(),
+		currEnv: NewGlobalEnvironment(),
 	}
 }
 
@@ -47,6 +51,10 @@ func (v *Visitor) VisitProgram(ctx *parser.ProgramContext) any {
 	return nil
 }
 
+func (v *Visitor) VisitExprStmt(ctx *parser.ExprStmtContext) any {
+	return ctx.Expr().Accept(v)
+}
+
 func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 	if ctx.VarDecl() != nil {
 		return ctx.VarDecl().Accept(v)
@@ -56,6 +64,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ArrayAssignStmt().Accept(v)
 	} else if ctx.CompoundAssignStmt() != nil {
 		return ctx.CompoundAssignStmt().Accept(v)
+	} else if ctx.ExprStmt() != nil {
+		return ctx.ExprStmt().Accept(v)
 	} else if ctx.PrintStmt() != nil {
 		return ctx.PrintStmt().Accept(v)
 	} else if ctx.BlockStmt() != nil {
@@ -142,8 +152,16 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 }
 
 func (v *Visitor) VisitNumber(ctx *parser.NumberContext) any {
-	// convert into integer
-	val, _ := strconv.Atoi(ctx.NUMBER().GetText())
+	numStr := ctx.NUMBER().GetText()
+
+	// float
+	if strings.Contains(numStr, ".") {
+		val, _ := strconv.ParseFloat(numStr, 64)
+		return val
+	}
+
+	// fall back to standard integers
+	val, _ := strconv.Atoi(numStr)
 	return val
 }
 
@@ -158,11 +176,16 @@ func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 }
 
 func (v *Visitor) VisitString(ctx *parser.StringContext) any {
-	str := ctx.STRING().GetText()
-	// remove the surrounding quotes
-	return str[1 : len(str)-1]
-}
+	rawStr := ctx.STRING().GetText()
 
+	if unquoted, err := strconv.Unquote(rawStr); err == nil {
+		return unquoted
+	}
+
+	// remove the surrounding quotes
+
+	return rawStr[1 : len(rawStr)-1]
+}
 func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)
@@ -173,7 +196,7 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 
 	if leftIsString || rightIsString {
 		if op == "+" {
-			return fmt.Sprintf("%v%v", left, right)
+			return cleanStringRepr(left) + cleanStringRepr(right)
 		} else {
 			panic("Unsupported operator for strings: " + op)
 		}
@@ -287,8 +310,10 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 }
 
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
-	value := ctx.Expr().Accept(v)
-	fmt.Println(value)
+	val := ctx.Expr().Accept(v)
+
+	fmt.Println(cleanStringRepr(val))
+
 	return nil
 }
 
@@ -380,7 +405,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	// handle string concatenation for +=
 	if op == "+=" {
 		if strVal, ok := currentValue.(string); ok {
-			if !v.currEnv.Assign(varName, strVal+fmt.Sprintf("%v", value)) {
+			if !v.currEnv.Assign(varName, strVal+cleanStringRepr(value)) {
 				panic("Failed to assign value to variable: " + varName)
 			}
 
@@ -458,6 +483,12 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 			panic("Operand of '~' must be an integer")
 		}
 		return ^intVal
+	case "-":
+		intVal, ok := value.(int)
+		if !ok {
+			panic("TypeError: Unary minus operator can only be applied to an integer")
+		}
+		return -intVal
 	default:
 		panic("Unknown unary operator: " + op)
 	}
@@ -545,14 +576,27 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 	return leftBool || rightBool
 }
 
+func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
+	var elements []any
+	for _, expr := range ctx.AllExpr() {
+		elements = append(elements, expr.Accept(v))
+	}
+	// return a pointer to the slice
+	return &elements
+}
+
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	array := ctx.Expr(0).Accept(v)
 	index := ctx.Expr(1).Accept(v)
 
-	arr, ok := array.([]any)
+	// expect pointer to the slice (*[]any)
+	arrPtr, ok := array.(*[]any)
 	if !ok {
 		panic("Attempting to index a non-array value")
 	}
+
+	// dereference it locally to perform size checks and lookups safely
+	arr := *arrPtr
 
 	idx, ok := index.(int)
 	if !ok {
@@ -566,41 +610,64 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	return arr[idx]
 }
 
-func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
-	var elements []any
-	for _, expr := range ctx.AllExpr() {
-		elements = append(elements, expr.Accept(v))
-	}
-	return elements
-}
-
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
-	varName := ctx.IDENTIFIER().GetText()
-	index := ctx.Expr(0).Accept(v)
-	value := ctx.Expr(1).Accept(v)
+	arrayName := ctx.IDENTIFIER().GetText()
 
-	target, ok := v.currEnv.Lookup(varName)
-	if !ok {
-		panic("Undefined variable: " + varName)
+	val, exists := v.currEnv.Lookup(arrayName)
+	if !exists {
+		panic("Undefined variable: " + arrayName)
 	}
 
-	arr, ok := target.([]any)
+	arrPtr, ok := val.(*[]any)
 	if !ok {
-		panic("Attempting to index a non-array variable: " + varName)
+		panic("Attempting to index a non-array variable: " + arrayName) // 👈 This is where your panic came from!
 	}
 
-	idx, ok := index.(int)
+	indexVal := ctx.Expr(0).Accept(v)
+	newVal := ctx.Expr(1).Accept(v)
+
+	idx, ok := indexVal.(int)
 	if !ok {
 		panic("Array index must be an integer")
 	}
 
+	arr := *arrPtr
 	if idx < 0 || idx >= len(arr) {
 		panic("Array index out of bounds")
 	}
 
-	arr[idx] = value
-	return nil
+	(*arrPtr)[idx] = newVal
+
+	return newVal
 }
+
+// func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
+// 	varName := ctx.IDENTIFIER().GetText()
+// 	index := ctx.Expr(0).Accept(v)
+// 	value := ctx.Expr(1).Accept(v)
+
+// 	target, ok := v.currEnv.Lookup(varName)
+// 	if !ok {
+// 		panic("Undefined variable: " + varName)
+// 	}
+
+// 	arr, ok := target.([]any)
+// 	if !ok {
+// 		panic("Attempting to index a non-array variable: " + varName)
+// 	}
+
+// 	idx, ok := index.(int)
+// 	if !ok {
+// 		panic("Array index must be an integer")
+// 	}
+
+// 	if idx < 0 || idx >= len(arr) {
+// 		panic("Array index out of bounds")
+// 	}
+
+// 	arr[idx] = value
+// 	return nil
+// }
 
 func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	funcName := ctx.IDENTIFIER(0).GetText()
@@ -619,73 +686,89 @@ func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	v.currEnv.Define(funcName, &RuntimeFunction{
 		Parameters: params,
 		Body:       ctx.BlockStmt().(*parser.BlockStmtContext),
+		Env:        v.currEnv,
 	})
 
 	return nil
 }
 
-func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
-	funcName := ctx.IDENTIFIER().GetText()
+func (f *RuntimeFunction) Call(v *Visitor, args []any) any {
+	//link back to where the function was defined
+	funcEnv := NewScope(f.Env)
 
-	fn, exists := v.currEnv.Lookup(funcName)
-	if !exists {
-		panic("Undefined function: " + funcName)
+	// bind evaluated arguments to parameter names
+	for i, paramName := range f.Parameters {
+		funcEnv.Define(paramName, args[i])
 	}
 
-	runtimeFunc, ok := fn.(*RuntimeFunction)
-	if !ok {
-		panic(funcName + " is not a function")
+	// if no visitor provided, create a temporary one
+	if v == nil {
+		v = &Visitor{currEnv: funcEnv}
 	}
 
-	if len(ctx.AllExpr()) != len(runtimeFunc.Parameters) {
-		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, len(runtimeFunc.Parameters), len(ctx.AllExpr())))
-	}
-
-	// evaluate arguments on the curr execution scope level
-	var argValues []any
-	for _, argExpr := range ctx.AllExpr() {
-		argValues = append(argValues, argExpr.Accept(v))
-	}
-
-	// 🔍 create nested scope referencing the current active environment
-	funcEnv := NewScope(v.currEnv)
-
-	// bind argument values to parameter keys
-	for i, paramName := range runtimeFunc.Parameters {
-		funcEnv.Define(paramName, argValues[i])
-	}
-
-	// keep track of our old env
+	// swap the active environment
 	previousEnv := v.currEnv
 	v.currEnv = funcEnv
 
 	var returnedVal any = nil
 	func() {
-		// safe recovery context to capture execution returns cleanly
+		// safe return value recovery handler
 		defer func() {
 			if r := recover(); r != nil {
 				if returnSignal, ok := r.(ReturnValueSignal); ok {
 					returnedVal = returnSignal.Value
 				} else {
-					panic(r)
+					panic(r) // panic if it's a bug/crash
 				}
 			}
 		}()
 
-		runtimeFunc.Body.Accept(v)
+		f.Body.Accept(v)
 	}()
 
-	// restore the caller's environment right after the function finishes!
+	// safely restore parent scope state
 	v.currEnv = previousEnv
-
 	return returnedVal
 }
+
+func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
+	funcName := ctx.IDENTIFIER().GetText()
+
+	// pull the entity out of the environment stack
+	fn, exists := v.currEnv.Lookup(funcName)
+	if !exists {
+		panic("Undefined function: " + funcName)
+	}
+
+	callable, ok := fn.(Callable)
+	if !ok {
+		panic(funcName + " is not a callable function")
+	}
+
+	// evaluate the call arguments at the caller's execution environment line
+	var argValues []any
+	for _, argExpr := range ctx.AllExpr() {
+		argValues = append(argValues, argExpr.Accept(v))
+	}
+
+	// validate input count parameters
+	if callable.NrArgs() != -1 && len(argValues) != callable.NrArgs() {
+		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)))
+	}
+
+	return callable.Call(v, argValues)
+}
+
 func (v *Visitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) any {
 	var returnValue any = nil
 	if ctx.Expr() != nil {
 		returnValue = ctx.Expr().Accept(v)
 	}
 	panic(ReturnValueSignal{Value: returnValue})
+}
+
+func (f *RuntimeFunction) NrArgs() int {
+	return len(f.Parameters)
 }
 
 func power(base, exp int) int {
@@ -697,4 +780,35 @@ func power(base, exp int) int {
 		result *= base
 	}
 	return result
+}
+
+// helper for standard print outputs
+func cleanStringRepr(val any) string {
+	if val == nil {
+		return "nil"
+	}
+
+	switch v := val.(type) {
+	case string:
+		return v
+	case float64:
+		// check if whole nr
+		if v == float64(int64(v)) {
+			return fmt.Sprintf("%.1f", v) // 5.0
+		}
+		return fmt.Sprintf("%g", v) //5.3
+	case *[]any:
+		var sb strings.Builder
+		sb.WriteString("[")
+		for i, element := range *v {
+			sb.WriteString(cleanStringRepr(element))
+			if i < len(*v)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString("]")
+		return sb.String()
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }

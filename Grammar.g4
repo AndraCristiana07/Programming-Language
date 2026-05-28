@@ -6,6 +6,7 @@ statement   : (varDecl
             | assignStmt   
             | arrayAssignStmt
             | compoundAssignStmt
+            | exprStmt
             | printStmt   
             | ifStmt 
             | whileStmt
@@ -18,6 +19,7 @@ statement   : (varDecl
 returnStmt  : RETURN expr? ;
 terminator   : SEMICOLON | NL ;
 funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+exprStmt    : expr ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt  : IDENTIFIER EQUALS expr ;
@@ -41,7 +43,7 @@ postfixStmt : IDENTIFIER op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
-            | (op=NOT | op=BITNOT) expr                         # Unary
+            | op=(NOT | BITNOT | MINUS) expr                       # Unary
             | expr op=EXPONENTIAL expr                          # Exponential
             | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
             | expr op=(PLUS | MINUS) expr                       # AddSub
@@ -124,7 +126,7 @@ OR              : 'or' ;
 NOT             : 'not' ;
 
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
-NUMBER          : [0-9]+ ;
+NUMBER          : [0-9]+ ('.' [0-9]+)? ;
 STRING          : '"' (~["] | '""')* '"' ;
 NL              : [\r\n]+ ;
 WS              : [ \t]+ -> skip ;
