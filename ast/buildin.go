@@ -3,6 +3,7 @@ package ast
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"my_language/parser"
 	"os"
 	"reflect"
@@ -25,6 +26,11 @@ func (n *NativeFunction) NrArgs() int {
 
 func (n *NativeFunction) Call(v *Visitor, args []any) any {
 	return n.Body(v, args)
+}
+
+type FileHandle struct {
+	File *os.File
+	Mode string // "r", "w", "a" (read, write, append)
 }
 
 func NewGlobalEnvironment() *Environment {
@@ -1281,6 +1287,91 @@ func NewGlobalEnvironment() *Environment {
 
 			// re-assign the slice back to the pointer
 			*arrPtr = append(arr[:foundIdx], arr[foundIdx+1:]...)
+			return nil
+		},
+	})
+
+	globals.Define("open", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			filename, ok1 := args[0].(string)
+			mode, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: open() expects a filename string and a mode string")
+			}
+
+			var flags int
+			switch mode {
+			case "r":
+				flags = os.O_RDONLY
+			case "w":
+				flags = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+			case "a":
+				flags = os.O_WRONLY | os.O_CREATE | os.O_APPEND
+			default:
+				panic("ValueError: mode must be 'r', 'w', or 'a'")
+			}
+
+			file, err := os.OpenFile(filename, flags, 0666)
+			if err != nil {
+				panic(fmt.Sprintf("IOError: could not open file '%s': %v", filename, err))
+			}
+
+			return &FileHandle{File: file, Mode: mode}
+		},
+	})
+
+	globals.Define("read", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			handle, ok := args[0].(*FileHandle)
+			if !ok {
+				panic("TypeError: read() expects a valid FileHandle object")
+			}
+			if handle.Mode != "r" {
+				panic("IOError: file not opened for reading")
+			}
+
+			content, err := io.ReadAll(handle.File)
+			if err != nil {
+				panic(fmt.Sprintf("IOError: failed reading file: %v", err))
+			}
+			return string(content)
+		},
+	})
+
+	globals.Define("write", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			handle, ok1 := args[0].(*FileHandle)
+			content, ok2 := args[1].(string)
+			if !ok1 || !ok2 {
+				panic("TypeError: write() expects a FileHandle object and a content string")
+			}
+			if handle.Mode == "r" {
+				panic("IOError: file opened as read-only")
+			}
+
+			_, err := handle.File.WriteString(content)
+			if err != nil {
+				panic(fmt.Sprintf("IOError: failed writing to file: %v", err))
+			}
+			return nil
+		},
+	})
+
+	globals.Define("close", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			handle, ok := args[0].(*FileHandle)
+			if !ok {
+				panic("TypeError: close() expects a valid FileHandle object")
+			}
+
+			err := handle.File.Close()
+			if err != nil {
+				panic(fmt.Sprintf("IOError: failed closing file cleanly: %v", err))
+			}
 			return nil
 		},
 	})

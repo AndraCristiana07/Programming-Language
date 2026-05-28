@@ -1,6 +1,8 @@
 package testing
 
 import (
+	"fmt"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -1858,5 +1860,31 @@ func TestRemove(t *testing.T) {
 				t.Errorf("Expected %v (%T), got %v (%T)", tc.expected, tc.expected, result, result)
 			}
 		})
+	}
+}
+
+func TestFileIOBuiltins(t *testing.T) {
+	tmpDir := t.TempDir()
+	testFilePath := filepath.ToSlash(filepath.Join(tmpDir, "sample.txt"))
+
+	inputScript := fmt.Sprintf(`
+        var fileW = open("%s", "w")
+        write(fileW, "Hello from the engine!")
+        close(fileW)
+
+        var fileR = open("%s", "r")
+        var testResult = read(fileR)
+        close(fileR)
+    `, testFilePath, testFilePath)
+
+	env := runInterpreter(inputScript)
+	result, ok := env.Lookup("testResult")
+	if !ok {
+		t.Fatalf("Variable 'testResult' missing entirely from environment evaluation")
+	}
+
+	expected := "Hello from the engine!"
+	if result != expected {
+		t.Errorf("Expected exact file contents '%s', instead got '%v'", expected, result)
 	}
 }
