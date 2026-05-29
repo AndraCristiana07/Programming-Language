@@ -32,6 +32,12 @@ type GrammarListener interface {
 	// EnterThrowStmt is called when entering the throwStmt production.
 	EnterThrowStmt(c *ThrowStmtContext)
 
+	// EnterBreakStmt is called when entering the breakStmt production.
+	EnterBreakStmt(c *BreakStmtContext)
+
+	// EnterContinueStmt is called when entering the continueStmt production.
+	EnterContinueStmt(c *ContinueStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -160,6 +166,12 @@ type GrammarListener interface {
 
 	// ExitThrowStmt is called when exiting the throwStmt production.
 	ExitThrowStmt(c *ThrowStmtContext)
+
+	// ExitBreakStmt is called when exiting the breakStmt production.
+	ExitBreakStmt(c *BreakStmtContext)
+
+	// ExitContinueStmt is called when exiting the continueStmt production.
+	ExitContinueStmt(c *ContinueStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

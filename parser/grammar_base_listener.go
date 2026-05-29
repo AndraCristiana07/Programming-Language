@@ -69,6 +69,18 @@ func (s *BaseGrammarListener) EnterThrowStmt(ctx *ThrowStmtContext) {}
 // ExitThrowStmt is called when production throwStmt is exited.
 func (s *BaseGrammarListener) ExitThrowStmt(ctx *ThrowStmtContext) {}
 
+// EnterBreakStmt is called when production breakStmt is entered.
+func (s *BaseGrammarListener) EnterBreakStmt(ctx *BreakStmtContext) {}
+
+// ExitBreakStmt is called when production breakStmt is exited.
+func (s *BaseGrammarListener) ExitBreakStmt(ctx *BreakStmtContext) {}
+
+// EnterContinueStmt is called when production continueStmt is entered.
+func (s *BaseGrammarListener) EnterContinueStmt(ctx *ContinueStmtContext) {}
+
+// ExitContinueStmt is called when production continueStmt is exited.
+func (s *BaseGrammarListener) ExitContinueStmt(ctx *ContinueStmtContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 

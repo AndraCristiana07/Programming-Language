@@ -15,7 +15,9 @@ statement   : (varDecl
             | postfixStmt
             | tryCatchStmt
             | throwStmt
-            | returnStmt) terminator?
+            | returnStmt
+            | breakStmt        
+            | continueStmt) terminator?
             ;
 
 returnStmt  : RETURN expr? ;
@@ -24,6 +26,8 @@ funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN bl
 exprStmt    : expr ;
 tryCatchStmt : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
 throwStmt    : THROW expr ;
+breakStmt    : BREAK;
+continueStmt : CONTINUE;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt         : expr EQUALS expr ;
@@ -99,6 +103,8 @@ IF              : 'if' ;
 ELSE            : 'else' ;
 WHILE           : 'while' ;
 FOR             : 'for' ;
+BREAK           : 'break' ;
+CONTINUE        : 'continue' ;
 
 SEMICOLON       : ';' ;
 COMMA           : ',' ;

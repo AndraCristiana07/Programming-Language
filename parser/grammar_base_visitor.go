@@ -40,6 +40,14 @@ func (v *BaseGrammarVisitor) VisitThrowStmt(ctx *ThrowStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitBreakStmt(ctx *BreakStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitContinueStmt(ctx *ContinueStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -275,3 +275,18 @@ try {
     print "Message: " + err.message
     print "Line: "    + err.line
 }
+
+var newRes = 0;
+var i = 0;
+while (i < 10) {
+    i = i + 1;
+    if (i == 3) {
+        continue
+    }
+    if (i == 6) {
+        break
+    }
+    newRes = newRes + i;
+}
+
+print "result after while: " + newRes

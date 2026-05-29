@@ -29,6 +29,9 @@ type RuntimeFunction struct {
 	Env        *Environment
 }
 
+type BreakSignal struct{}
+type ContinueSignal struct{}
+
 func NewVisitor() *Visitor {
 	return &Visitor{
 		currEnv: NewGlobalEnvironment(),
@@ -84,6 +87,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ThrowStmt().Accept(v)
 	} else if ctx.ReturnStmt() != nil {
 		return ctx.ReturnStmt().Accept(v)
+	} else if ctx.BreakStmt() != nil {
+		return ctx.BreakStmt().Accept(v)
+	} else if ctx.ContinueStmt() != nil {
+		return ctx.ContinueStmt().Accept(v)
 	}
 
 	return nil
@@ -96,6 +103,13 @@ func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {
 		return ctx.AssignStmt().Accept(v)
 	}
 	return nil
+}
+func (v *Visitor) VisitBreakStmt(ctx *parser.BreakStmtContext) any {
+	return BreakSignal{}
+}
+
+func (v *Visitor) VisitContinueStmt(ctx *parser.ContinueStmtContext) any {
+	return ContinueSignal{}
 }
 
 func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
@@ -401,14 +415,23 @@ func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 
 func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
 	for _, child := range ctx.GetChildren() {
+		var res any
+
 		if stmt, ok := child.(*parser.StatementContext); ok {
 			if stmt != nil {
-				stmt.Accept(v)
+				res = stmt.Accept(v)
 			}
 		} else if fn, ok := child.(*parser.FuncStmtContext); ok {
 			if fn != nil {
-				fn.Accept(v)
+				res = fn.Accept(v)
 			}
+		}
+
+		if _, ok := res.(BreakSignal); ok {
+			return BreakSignal{}
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			return ContinueSignal{}
 		}
 	}
 	return nil
@@ -422,9 +445,9 @@ func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
 	}
 
 	if conditionBool {
-		ctx.GetThenBranch().Accept(v)
+		return ctx.GetThenBranch().Accept(v)
 	} else if ctx.GetElseBranch() != nil {
-		ctx.GetElseBranch().Accept(v)
+		return ctx.GetElseBranch().Accept(v)
 	}
 
 	return nil
@@ -441,7 +464,15 @@ func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
 		if !conditionBool {
 			break
 		}
-		ctx.GetBody().Accept(v)
+
+		res := ctx.GetBody().Accept(v)
+
+		if _, ok := res.(BreakSignal); ok {
+			break // exit while loop
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			continue // jump to the next condition evaluation
+		}
 	}
 	return nil
 }
@@ -462,12 +493,24 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 				break
 			}
 		}
+
+		var res any
 		if ctx.GetBody() != nil {
-			ctx.GetBody().Accept(v)
+			res = ctx.GetBody().Accept(v)
 		}
 
+		if _, ok := res.(BreakSignal); ok {
+			break // exit the loop entirely
+		}
+
+		// execute post statement
 		if ctx.GetPost() != nil {
 			ctx.GetPost().Accept(v)
+		}
+
+		// handle continue after the post statement has run
+		if _, ok := res.(ContinueSignal); ok {
+			continue
 		}
 	}
 

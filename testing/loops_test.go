@@ -41,6 +41,38 @@ func TestWhileLoop(t *testing.T) {
             `,
 			expected: 25,
 		},
+		{
+			name: "While loop with break",
+			input: `
+                var testResult = 0 
+				var i = 0
+                while (i < 25) { 
+                    i++
+					if (i >= 10){
+						break
+					}
+					testResult += i
+                }
+
+            `,
+			expected: 45,
+		},
+		{
+			name: "While loop with continue",
+			input: `
+                var testResult = 0 
+				var i = 0
+                while (i < 12) { 
+                    i++
+					if (i == 10){
+						continue
+					}
+					testResult += i
+                }
+
+            `,
+			expected: 68,
+		},
 	}
 
 	for _, tc := range tests {
@@ -129,6 +161,69 @@ func TestForLoop(t *testing.T) {
                 }
             `,
 			expected: 8,
+		},
+		{
+			name: "For loop with inc ++",
+			input: `
+                var testResult = 1 
+                for (var i = 1; i <= 3; i++) {
+                    testResult = testResult * 2 
+                }
+            `,
+			expected: 8,
+		},
+		{
+			name: "For loop with dec --",
+			input: `
+                var testResult = 1 
+                for (var i = 3; i > 0; i--) {
+                    testResult = testResult * 2 
+                }
+            `,
+			expected: 8,
+		},
+		{
+			name: "For loop with continue",
+			input: `
+			 	var testResult = 0
+				for (var i = 1; i < 4; i = i + 1) {
+					if (i == 3) {
+    					continue
+					}
+					testResult += i
+				}
+
+			`,
+			expected: 3,
+		},
+		{
+			name: "For loop with break",
+			input: `
+				var testResult = 0
+				for (var i = 1; i < 10; i = i + 1) {
+					if (i == 3){
+						break
+					}
+					testResult += i
+				}
+			`,
+			expected: 3,
+		},
+		{
+			name: "For loop with brak and continue",
+			input: `
+				var testResult = 0
+				for (var i = 0; i < 10; i = i + 1) {
+					if (i == 3) {
+						continue
+					}
+					if (i == 6) {
+						break
+					}
+					testResult += i
+				}
+			`,
+			expected: 12,
 		},
 	}
 

@@ -32,6 +32,12 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#throwStmt.
 	VisitThrowStmt(ctx *ThrowStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#breakStmt.
+	VisitBreakStmt(ctx *BreakStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#continueStmt.
+	VisitContinueStmt(ctx *ContinueStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 
