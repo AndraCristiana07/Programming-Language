@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build:
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ./testing
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - name: Run Unit Tests
+        run: go test
