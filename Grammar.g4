@@ -13,6 +13,8 @@ statement   : (varDecl
             | forStmt
             | blockStmt 
             | postfixStmt
+            | tryCatchStmt
+            | throwStmt
             | returnStmt) terminator?
             ;
 
@@ -20,6 +22,8 @@ returnStmt  : RETURN expr? ;
 terminator   : SEMICOLON | NL ;
 funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
 exprStmt    : expr ;
+tryCatchStmt : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
+throwStmt    : THROW expr ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt         : expr EQUALS expr ;
@@ -67,6 +71,9 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
 
 mapEntry : expr ':' expr ;
 
+TRY             : 'try' ;
+CATCH           : 'catch' ;
+THROW           : 'throw' ;
 DOT             : '.' ;
 VAR             : 'var' ;
 EQUALS          : '=' ;

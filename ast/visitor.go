@@ -78,6 +78,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ForStmt().Accept(v)
 	} else if ctx.PostfixStmt() != nil {
 		return ctx.PostfixStmt().Accept(v)
+	} else if ctx.TryCatchStmt() != nil {
+		return ctx.TryCatchStmt().Accept(v)
+	} else if ctx.ThrowStmt() != nil {
+		return ctx.ThrowStmt().Accept(v)
 	} else if ctx.ReturnStmt() != nil {
 		return ctx.ReturnStmt().Accept(v)
 	}
@@ -879,6 +883,48 @@ func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
 
 func (f *RuntimeFunction) NrArgs() int {
 	return len(f.Parameters)
+}
+
+func (v *Visitor) VisitTryCatchStmt(ctx *parser.TryCatchStmtContext) any {
+	// anonymous function for defer/recover
+	panicked, errMsg := func() (isPanic bool, caughtMsg string) {
+		defer func() {
+			if r := recover(); r != nil {
+				isPanic = true
+				caughtMsg = fmt.Sprintf("%v", r)
+			}
+		}()
+
+		// run try block
+		ctx.GetTryBody().Accept(v)
+
+		// no panics
+		return false, ""
+	}()
+
+	// error caught -> route flow directly into catch scope
+	if panicked {
+		catchVarName := ctx.IDENTIFIER().GetText()
+
+		// env scope for catch block block
+		previousEnv := v.currEnv
+		v.currEnv = NewScope(previousEnv)
+
+		v.currEnv.Define(catchVarName, errMsg)
+
+		ctx.GetCatchBody().Accept(v)
+
+		// restore original parent environment context
+		v.currEnv = previousEnv
+	}
+
+	return nil
+}
+func (v *Visitor) VisitThrowStmt(ctx *parser.ThrowStmtContext) any {
+	// eval the expression thrown
+	thrownVal := ctx.Expr().Accept(v)
+
+	panic(cleanStringRepr(thrownVal))
 }
 
 func power(base, exp int) int {

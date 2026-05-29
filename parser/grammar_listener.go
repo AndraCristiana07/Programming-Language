@@ -26,6 +26,12 @@ type GrammarListener interface {
 	// EnterExprStmt is called when entering the exprStmt production.
 	EnterExprStmt(c *ExprStmtContext)
 
+	// EnterTryCatchStmt is called when entering the tryCatchStmt production.
+	EnterTryCatchStmt(c *TryCatchStmtContext)
+
+	// EnterThrowStmt is called when entering the throwStmt production.
+	EnterThrowStmt(c *ThrowStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -148,6 +154,12 @@ type GrammarListener interface {
 
 	// ExitExprStmt is called when exiting the exprStmt production.
 	ExitExprStmt(c *ExprStmtContext)
+
+	// ExitTryCatchStmt is called when exiting the tryCatchStmt production.
+	ExitTryCatchStmt(c *TryCatchStmtContext)
+
+	// ExitThrowStmt is called when exiting the throwStmt production.
+	ExitThrowStmt(c *ThrowStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

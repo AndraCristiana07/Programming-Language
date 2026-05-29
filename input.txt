@@ -235,3 +235,28 @@ print map2
 
 map2.there = [1,4]
 print map2
+
+var recoveryFlag = "untouched"
+var errorMessage = "none"
+
+try {
+    var user = {"name": "Alice"}
+    var triggerError = user.name + 10 
+} catch (err) {
+    recoveryFlag = "recovered"
+    errorMessage = err
+    
+    print "Caught a system error: " + err
+}
+
+var customFlag = "safe"
+try {
+    throw "Authorization Failed!"
+} catch (customErr) {
+    customFlag = customErr
+    
+    print "Caught a manual throw: " + customErr
+}
+
+print "Final recovery flag: " + recoveryFlag
+print "Final custom flag: " + customFlag
