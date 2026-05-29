@@ -38,6 +38,15 @@ type GrammarListener interface {
 	// EnterContinueStmt is called when entering the continueStmt production.
 	EnterContinueStmt(c *ContinueStmtContext)
 
+	// EnterSwitchStmt is called when entering the switchStmt production.
+	EnterSwitchStmt(c *SwitchStmtContext)
+
+	// EnterCaseBlock is called when entering the caseBlock production.
+	EnterCaseBlock(c *CaseBlockContext)
+
+	// EnterDefaultBlock is called when entering the defaultBlock production.
+	EnterDefaultBlock(c *DefaultBlockContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -172,6 +181,15 @@ type GrammarListener interface {
 
 	// ExitContinueStmt is called when exiting the continueStmt production.
 	ExitContinueStmt(c *ContinueStmtContext)
+
+	// ExitSwitchStmt is called when exiting the switchStmt production.
+	ExitSwitchStmt(c *SwitchStmtContext)
+
+	// ExitCaseBlock is called when exiting the caseBlock production.
+	ExitCaseBlock(c *CaseBlockContext)
+
+	// ExitDefaultBlock is called when exiting the defaultBlock production.
+	ExitDefaultBlock(c *DefaultBlockContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

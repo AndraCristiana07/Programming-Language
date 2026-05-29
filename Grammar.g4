@@ -10,6 +10,7 @@ statement   : (varDecl
             | printStmt   
             | ifStmt 
             | whileStmt
+            | switchStmt
             | forStmt
             | blockStmt 
             | postfixStmt
@@ -20,14 +21,20 @@ statement   : (varDecl
             | continueStmt) terminator?
             ;
 
-returnStmt  : RETURN expr? ;
-terminator   : SEMICOLON | NL ;
-funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
-exprStmt    : expr ;
-tryCatchStmt : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
-throwStmt    : THROW expr ;
-breakStmt    : BREAK;
-continueStmt : CONTINUE;
+returnStmt      : RETURN expr? ;
+terminator      : SEMICOLON | NL ;
+funcStmt        : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+exprStmt        : expr ;
+tryCatchStmt    : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
+throwStmt       : THROW expr ;
+breakStmt       : BREAK;
+continueStmt    : CONTINUE;
+switchStmt      : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* defaultBlock?terminator* RBRACE ;
+
+caseBlock       : CASE expr COLON (statement | terminator)* ;
+defaultBlock    : DEFAULT COLON (statement | terminator)* ;
+
+
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt         : expr EQUALS expr ;
@@ -73,12 +80,16 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | LPAREN expr RPAREN                                # Parentheses
             ;
 
-mapEntry : expr ':' expr ;
+mapEntry : expr COLON expr ;
 
+SWITCH          : 'switch' ;
+CASE            : 'case' ;
+DEFAULT         : 'default' ;
 TRY             : 'try' ;
 CATCH           : 'catch' ;
 THROW           : 'throw' ;
 DOT             : '.' ;
+COLON           : ':' ;
 VAR             : 'var' ;
 EQUALS          : '=' ;
 PLUS            : '+' ;

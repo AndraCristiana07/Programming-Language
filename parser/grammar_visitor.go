@@ -38,6 +38,15 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#continueStmt.
 	VisitContinueStmt(ctx *ContinueStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#switchStmt.
+	VisitSwitchStmt(ctx *SwitchStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#caseBlock.
+	VisitCaseBlock(ctx *CaseBlockContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#defaultBlock.
+	VisitDefaultBlock(ctx *DefaultBlockContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 

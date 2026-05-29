@@ -81,6 +81,24 @@ func (s *BaseGrammarListener) EnterContinueStmt(ctx *ContinueStmtContext) {}
 // ExitContinueStmt is called when production continueStmt is exited.
 func (s *BaseGrammarListener) ExitContinueStmt(ctx *ContinueStmtContext) {}
 
+// EnterSwitchStmt is called when production switchStmt is entered.
+func (s *BaseGrammarListener) EnterSwitchStmt(ctx *SwitchStmtContext) {}
+
+// ExitSwitchStmt is called when production switchStmt is exited.
+func (s *BaseGrammarListener) ExitSwitchStmt(ctx *SwitchStmtContext) {}
+
+// EnterCaseBlock is called when production caseBlock is entered.
+func (s *BaseGrammarListener) EnterCaseBlock(ctx *CaseBlockContext) {}
+
+// ExitCaseBlock is called when production caseBlock is exited.
+func (s *BaseGrammarListener) ExitCaseBlock(ctx *CaseBlockContext) {}
+
+// EnterDefaultBlock is called when production defaultBlock is entered.
+func (s *BaseGrammarListener) EnterDefaultBlock(ctx *DefaultBlockContext) {}
+
+// ExitDefaultBlock is called when production defaultBlock is exited.
+func (s *BaseGrammarListener) ExitDefaultBlock(ctx *DefaultBlockContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 

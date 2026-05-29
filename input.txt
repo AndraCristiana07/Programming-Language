@@ -290,3 +290,20 @@ while (i < 10) {
 }
 
 print "result after while: " + newRes
+
+
+var switchTar = 3
+switch (switchTar) {
+case 1:
+    switchTar = 30
+case 2:
+    switchTar = 60
+case 3: 
+    switchTar = 10
+default:
+    switchTar = 5
+}
+
+
+print "After switch case the result is:" + switchTar
+

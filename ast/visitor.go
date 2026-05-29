@@ -77,6 +77,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.IfStmt().Accept(v)
 	} else if ctx.WhileStmt() != nil {
 		return ctx.WhileStmt().Accept(v)
+	} else if ctx.SwitchStmt() != nil {
+		return ctx.SwitchStmt().Accept(v)
 	} else if ctx.ForStmt() != nil {
 		return ctx.ForStmt().Accept(v)
 	} else if ctx.PostfixStmt() != nil {
@@ -514,6 +516,46 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 		}
 	}
 
+	return nil
+}
+
+func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {
+	// eval switch expt
+	switchExpr := ctx.Expr().Accept(v)
+
+	match := false
+
+	// loop through cases
+	for _, caseCtx := range ctx.AllCaseBlock() {
+		if !match {
+			caseValue := caseCtx.Expr().Accept(v)
+
+			if switchExpr == caseValue {
+				match = true
+			}
+		}
+		// execute stmt if there;s a match
+		if match {
+			for _, stmt := range caseCtx.AllStatement() {
+				res := stmt.Accept(v)
+				// break hit
+				if _, ok := res.(BreakSignal); ok {
+					return nil
+				}
+			}
+		}
+	}
+	// default block
+	if !match && ctx.DefaultBlock() != nil {
+		defaultCtx := ctx.DefaultBlock()
+		for _, stmt := range defaultCtx.AllStatement() {
+			res := stmt.Accept(v)
+			// break hit
+			if _, ok := res.(BreakSignal); ok {
+				return nil
+			}
+		}
+	}
 	return nil
 }
 

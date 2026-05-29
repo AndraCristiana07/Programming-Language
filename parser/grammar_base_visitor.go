@@ -48,6 +48,18 @@ func (v *BaseGrammarVisitor) VisitContinueStmt(ctx *ContinueStmtContext) interfa
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitSwitchStmt(ctx *SwitchStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitCaseBlock(ctx *CaseBlockContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitDefaultBlock(ctx *DefaultBlockContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }
