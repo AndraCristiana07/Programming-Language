@@ -80,6 +80,10 @@ func (v *BaseGrammarVisitor) VisitPostfixStmt(ctx *PostfixStmtContext) interface
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitNull(ctx *NullContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -113,6 +117,10 @@ func (v *BaseGrammarVisitor) VisitArrayIndex(ctx *ArrayIndexContext) interface{}
 }
 
 func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -152,6 +160,14 @@ func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitFieldAccess(ctx *FieldAccessContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMapEntry(ctx *MapEntryContext) interface{} {
 	return v.VisitChildren(ctx)
 }

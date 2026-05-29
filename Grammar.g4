@@ -22,9 +22,9 @@ funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN bl
 exprStmt    : expr ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
-assignStmt  : IDENTIFIER EQUALS expr ;
+assignStmt         : expr EQUALS expr ;
 arrayAssignStmt : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
-compoundAssignStmt : IDENTIFIER op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
+compoundAssignStmt : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
 printStmt   : PRINT expr ;
 ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
 whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
@@ -39,11 +39,12 @@ forPost   : assignStmt
             | postfixStmt
             ;
             
-postfixStmt : IDENTIFIER op=(INC | DEC) ;
+postfixStmt        : expr op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
+            | expr DOT IDENTIFIER                               # FieldAccess
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
-            | op=(NOT | BITNOT | MINUS) expr                       # Unary
+            | op=(NOT | BITNOT | MINUS) expr                    # Unary
             | expr op=EXPONENTIAL expr                          # Exponential
             | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
             | expr op=(PLUS | MINUS) expr                       # AddSub
@@ -55,14 +56,18 @@ expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
             | expr op=AND expr                                  # And
             | expr op=OR expr                                   # Or
             | LBRACKET (expr (COMMA expr)*)? RBRACKET           # ArrayLiteral
+            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE       # MapLiteral                              
             | IDENTIFIER                                        # Identifier          
             | NUMBER                                            # Number     
             | val=(TRUE | FALSE)                                # Boolean
             | STRING                                            # String
+            | 'null'                                            # Null
             | LPAREN expr RPAREN                                # Parentheses
             ;
 
+mapEntry : expr ':' expr ;
 
+DOT             : '.' ;
 VAR             : 'var' ;
 EQUALS          : '=' ;
 PLUS            : '+' ;
@@ -128,5 +133,12 @@ NOT             : 'not' ;
 IDENTIFIER      : [a-zA-Z_][a-zA-Z0-9_]* ;
 NUMBER          : [0-9]+ ('.' [0-9]+)? ;
 STRING          : '"' (~["] | '""')* '"' ;
+LINE_COMMENT
+    : '//' ~[\r\n]* -> skip
+    ;
+
+BLOCK_COMMENT
+    : '/*' .*? '*/' -> skip
+    ;
 NL              : [\r\n]+ ;
 WS              : [ \t]+ -> skip ;

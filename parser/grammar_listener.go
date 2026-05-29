@@ -62,6 +62,9 @@ type GrammarListener interface {
 	// EnterPostfixStmt is called when entering the postfixStmt production.
 	EnterPostfixStmt(c *PostfixStmtContext)
 
+	// EnterNull is called when entering the Null production.
+	EnterNull(c *NullContext)
+
 	// EnterBitOr is called when entering the BitOr production.
 	EnterBitOr(c *BitOrContext)
 
@@ -88,6 +91,9 @@ type GrammarListener interface {
 
 	// EnterUnary is called when entering the Unary production.
 	EnterUnary(c *UnaryContext)
+
+	// EnterMapLiteral is called when entering the MapLiteral production.
+	EnterMapLiteral(c *MapLiteralContext)
 
 	// EnterMulDivMod is called when entering the MulDivMod production.
 	EnterMulDivMod(c *MulDivModContext)
@@ -116,8 +122,14 @@ type GrammarListener interface {
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
 
+	// EnterFieldAccess is called when entering the FieldAccess production.
+	EnterFieldAccess(c *FieldAccessContext)
+
 	// EnterParentheses is called when entering the Parentheses production.
 	EnterParentheses(c *ParenthesesContext)
+
+	// EnterMapEntry is called when entering the mapEntry production.
+	EnterMapEntry(c *MapEntryContext)
 
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
@@ -173,6 +185,9 @@ type GrammarListener interface {
 	// ExitPostfixStmt is called when exiting the postfixStmt production.
 	ExitPostfixStmt(c *PostfixStmtContext)
 
+	// ExitNull is called when exiting the Null production.
+	ExitNull(c *NullContext)
+
 	// ExitBitOr is called when exiting the BitOr production.
 	ExitBitOr(c *BitOrContext)
 
@@ -199,6 +214,9 @@ type GrammarListener interface {
 
 	// ExitUnary is called when exiting the Unary production.
 	ExitUnary(c *UnaryContext)
+
+	// ExitMapLiteral is called when exiting the MapLiteral production.
+	ExitMapLiteral(c *MapLiteralContext)
 
 	// ExitMulDivMod is called when exiting the MulDivMod production.
 	ExitMulDivMod(c *MulDivModContext)
@@ -227,6 +245,12 @@ type GrammarListener interface {
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)
 
+	// ExitFieldAccess is called when exiting the FieldAccess production.
+	ExitFieldAccess(c *FieldAccessContext)
+
 	// ExitParentheses is called when exiting the Parentheses production.
 	ExitParentheses(c *ParenthesesContext)
+
+	// ExitMapEntry is called when exiting the mapEntry production.
+	ExitMapEntry(c *MapEntryContext)
 }

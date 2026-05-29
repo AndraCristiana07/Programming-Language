@@ -1376,5 +1376,52 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("keys", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			mPtr, ok := args[0].(*map[string]any)
+			if !ok {
+				panic("TypeError: keys() expects a map pointer")
+			}
+
+			m := *mPtr
+			res := make([]any, 0, len(m))
+			for k := range m {
+				res = append(res, k)
+			}
+			return &res
+		},
+	})
+
+	globals.Define("values", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			mPtr, ok := args[0].(*map[string]any)
+			if !ok {
+				panic("TypeError: values() expects a map pointer")
+			}
+
+			m := *mPtr
+			res := make([]any, 0, len(m))
+			for _, val := range m {
+				res = append(res, val)
+			}
+			return &res
+		},
+	})
+
+	globals.Define("clear", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			mPtr, ok := args[0].(*map[string]any)
+			if !ok {
+				panic("TypeError: clear() expects a map pointer")
+			}
+
+			*mPtr = make(map[string]any)
+			return nil
+		},
+	})
+
 	return globals
 }

@@ -129,6 +129,12 @@ func (s *BaseGrammarListener) EnterPostfixStmt(ctx *PostfixStmtContext) {}
 // ExitPostfixStmt is called when production postfixStmt is exited.
 func (s *BaseGrammarListener) ExitPostfixStmt(ctx *PostfixStmtContext) {}
 
+// EnterNull is called when production Null is entered.
+func (s *BaseGrammarListener) EnterNull(ctx *NullContext) {}
+
+// ExitNull is called when production Null is exited.
+func (s *BaseGrammarListener) ExitNull(ctx *NullContext) {}
+
 // EnterBitOr is called when production BitOr is entered.
 func (s *BaseGrammarListener) EnterBitOr(ctx *BitOrContext) {}
 
@@ -182,6 +188,12 @@ func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
 
 // ExitUnary is called when production Unary is exited.
 func (s *BaseGrammarListener) ExitUnary(ctx *UnaryContext) {}
+
+// EnterMapLiteral is called when production MapLiteral is entered.
+func (s *BaseGrammarListener) EnterMapLiteral(ctx *MapLiteralContext) {}
+
+// ExitMapLiteral is called when production MapLiteral is exited.
+func (s *BaseGrammarListener) ExitMapLiteral(ctx *MapLiteralContext) {}
 
 // EnterMulDivMod is called when production MulDivMod is entered.
 func (s *BaseGrammarListener) EnterMulDivMod(ctx *MulDivModContext) {}
@@ -237,8 +249,20 @@ func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}
 // ExitBoolean is called when production Boolean is exited.
 func (s *BaseGrammarListener) ExitBoolean(ctx *BooleanContext) {}
 
+// EnterFieldAccess is called when production FieldAccess is entered.
+func (s *BaseGrammarListener) EnterFieldAccess(ctx *FieldAccessContext) {}
+
+// ExitFieldAccess is called when production FieldAccess is exited.
+func (s *BaseGrammarListener) ExitFieldAccess(ctx *FieldAccessContext) {}
+
 // EnterParentheses is called when production Parentheses is entered.
 func (s *BaseGrammarListener) EnterParentheses(ctx *ParenthesesContext) {}
 
 // ExitParentheses is called when production Parentheses is exited.
 func (s *BaseGrammarListener) ExitParentheses(ctx *ParenthesesContext) {}
+
+// EnterMapEntry is called when production mapEntry is entered.
+func (s *BaseGrammarListener) EnterMapEntry(ctx *MapEntryContext) {}
+
+// ExitMapEntry is called when production mapEntry is exited.
+func (s *BaseGrammarListener) ExitMapEntry(ctx *MapEntryContext) {}
