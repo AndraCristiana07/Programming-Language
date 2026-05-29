@@ -851,53 +851,62 @@ func (v *Visitor) VisitReturnStmt(ctx *parser.ReturnStmtContext) any {
 }
 
 func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
-	//eval left side object
 	obj := ctx.Expr().Accept(v)
-	// get field name
-	fieldName := ctx.IDENTIFIER().GetText()
 
-	switch container := obj.(type) {
+	propName := ctx.IDENTIFIER().GetText()
+
+	if obj == nil {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of null", propName), ctx))
+	}
+
+	switch target := obj.(type) {
+
 	case *map[string]any:
-		val, exists := (*container)[fieldName]
-		if !exists {
-			return nil
+		m := *target
+		if val, exists := m[propName]; exists {
+			return val
 		}
-		return val
+		return nil
+
+	case map[string]any:
+		if val, exists := target[propName]; exists {
+			return val
+		}
+		return nil
+
 	default:
-		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of type %T", fieldName, obj), ctx))
+		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of type %T", propName, obj), ctx))
 	}
 }
-
 func (f *RuntimeFunction) NrArgs() int {
 	return len(f.Parameters)
 }
 
 func (v *Visitor) VisitTryCatchStmt(ctx *parser.TryCatchStmtContext) any {
-	// anonymous function for defer/recover
-	panicked, errMsg := func() (isPanic bool, caughtMsg string) {
+	// return type from string to any to keep the raw map pointer
+	panicked, caughtErrorObj := func() (isPanic bool, rawErr any) {
 		defer func() {
 			if r := recover(); r != nil {
 				isPanic = true
-				caughtMsg = fmt.Sprintf("%v", r)
+				rawErr = r
 			}
 		}()
 
 		// run try block
 		ctx.GetTryBody().Accept(v)
-
 		// no panics
-		return false, ""
+		return false, nil
 	}()
 
 	// error caught -> route flow directly into catch scope
 	if panicked {
 		catchVarName := ctx.IDENTIFIER().GetText()
 
-		// env scope for catch block block
+		// env scope for catch block
 		previousEnv := v.currEnv
 		v.currEnv = NewScope(previousEnv)
 
-		v.currEnv.Define(catchVarName, errMsg)
+		v.currEnv.Define(catchVarName, caughtErrorObj)
 
 		ctx.GetCatchBody().Accept(v)
 

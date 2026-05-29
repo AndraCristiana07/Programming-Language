@@ -260,3 +260,18 @@ try {
 
 print "Final recovery flag: " + recoveryFlag
 print "Final custom flag: " + customFlag
+
+
+func greet(name, age) {
+    print "Hello " + name
+}
+
+try {
+    greet("Alice") 
+} catch (err) {
+    print "--- An Error Occurred ---"
+    
+    print "Type: "    + err.type
+    print "Message: " + err.message
+    print "Line: "    + err.line
+}
