@@ -110,7 +110,6 @@ func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
 func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
-	// v.vars[varName] = value
 	v.currEnv.Define(varName, value)
 	return nil
 }
@@ -127,24 +126,26 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 		case *[]any:
 			idx, ok := indexVal.(int)
 			if !ok {
-				panic("TypeError: Array index must be an integer")
+				panic(RuntimeError("TypeError", "Array lookup index position must resolve to an integer", ctx))
 			}
 			(*obj)[idx] = assignedValue
 		case *map[string]any:
 			keyStr := fmt.Sprintf("%v", indexVal)
 			(*obj)[keyStr] = assignedValue
 		default:
-			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot assign index to type %T", container), ctx))
 		}
 	} else {
 		// plain assign
 		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
 			name := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(name, assignedValue) {
-				panic(fmt.Sprintf("Undefined variable: %s", name))
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
+
 			}
 		} else {
-			panic("SyntaxError: Invalid assignment target")
+			panic(RuntimeError("SyntaxError", "Invalid assignment target", ctx))
+
 		}
 	}
 
@@ -159,7 +160,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 
 	intValue, ok := currentValue.(int)
 	if !ok {
-		panic("TypeError: Postfix increment/decrement target must be an integer")
+		panic(RuntimeError("TypeError", "Postfix increment/decrement target must be an integer", ctx))
 	}
 
 	switch op {
@@ -168,7 +169,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 	case "--":
 		intValue--
 	default:
-		panic("Unknown postfix operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown or unsupported operator: %s", op), ctx))
 	}
 
 	// write result to destination
@@ -180,24 +181,25 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 		case *[]any:
 			idx, ok := indexVal.(int)
 			if !ok {
-				panic("TypeError: Array index must be an integer")
+				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 			}
 			(*obj)[idx] = intValue
 		case *map[string]any:
 			keyStr := fmt.Sprintf("%v", indexVal)
 			(*obj)[keyStr] = intValue
 		default:
-			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot assign index to type %T", container), ctx))
+
 		}
 	} else {
 		// plain assign
 		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, intValue) {
-				panic("Failed to assign value to variable: " + varName)
+				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))
 			}
 		} else {
-			panic("SyntaxError: Invalid postfix statement target")
+			panic(RuntimeError("SyntaxError", "Invalid postfix statement target", ctx))
 		}
 	}
 
@@ -240,10 +242,9 @@ func (v *Visitor) VisitNull(ctx *parser.NullContext) any {
 
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
 	varName := ctx.IDENTIFIER().GetText()
-	// return v.vars[varName]
 	val, exists := v.currEnv.Lookup(varName)
 	if !exists {
-		panic("Undefined variable: " + varName)
+		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", varName), ctx))
 	}
 	return val
 }
@@ -271,14 +272,14 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 		if op == "+" {
 			return cleanStringRepr(left) + cleanStringRepr(right)
 		} else {
-			panic("Unsupported operator for strings: " + op)
+			panic(RuntimeError("SyntaxError", fmt.Sprintf("Unsupported operator for strings: %s", op), ctx))
 		}
 	}
 
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for operator: " + op)
+		panic(RuntimeError("TypeError", fmt.Sprintf("Both operands must be integers for operator: %s", op), ctx))
 	}
 
 	switch op {
@@ -287,7 +288,7 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	case "-":
 		return lVal - rVal
 	default:
-		panic("Unknown operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
 
@@ -296,8 +297,11 @@ func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 	right := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
 
-	if left == nil || right == nil {
-		panic("Undefined variable used in expression")
+	if left == nil {
+		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", left), ctx))
+	}
+	if right == nil {
+		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", right), ctx))
 	}
 
 	switch op {
@@ -305,16 +309,17 @@ func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 		return left.(int) * right.(int)
 	case "/":
 		if right.(int) == 0 {
-			panic("Division by zero")
+			panic(RuntimeError("ZeroDivisionError", "Cannot divide a number by zero", ctx))
 		}
 		return left.(int) / right.(int)
 	case "%":
 		if right.(int) == 0 {
-			panic("Modulo by zero")
+			panic(RuntimeError("ZeroModuloError", "Cannot modulo by zero", ctx))
 		}
 		return left.(int) % right.(int)
 	default:
-		panic("Unknown operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
+
 	}
 }
 
@@ -325,7 +330,7 @@ func (v *Visitor) VisitExponential(ctx *parser.ExponentialContext) any {
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for operator: **")
+		panic(RuntimeError("TypeError", "Both operands must be integers for operator: **", ctx))
 	}
 
 	return power(lVal, rVal)
@@ -355,30 +360,34 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		if lOk && rOk {
 			return lVal < rVal
 		}
-		panic("Comparison operator '<' requires integer operands")
+		panic(RuntimeError("TypeError", "Comparison operator '<' requires integer operands", ctx))
+
 	case ">":
 		lVal, lOk := left.(int)
 		rVal, rOk := right.(int)
 		if lOk && rOk {
 			return lVal > rVal
 		}
-		panic("Comparison operator '>' requires integer operands")
+		panic(RuntimeError("TypeError", "Comparison operator '>' requires integer operands", ctx))
+
 	case "<=":
 		lVal, lOk := left.(int)
 		rVal, rOk := right.(int)
 		if lOk && rOk {
 			return lVal <= rVal
 		}
-		panic("Comparison operator '<=' requires integer operands")
+		panic(RuntimeError("TypeError", "Comparison operator '<=' requires integer operands", ctx))
+
 	case ">=":
 		lVal, lOk := left.(int)
 		rVal, rOk := right.(int)
 		if lOk && rOk {
 			return lVal >= rVal
 		}
-		panic("Comparison operator '>=' requires integer operands")
+		panic(RuntimeError("TypeError", "Comparison operator '>=' requires integer operands", ctx))
+
 	default:
-		panic("Unknown operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
 
@@ -409,7 +418,7 @@ func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
 	condition := ctx.Expr().Accept(v)
 	conditionBool, ok := condition.(bool)
 	if !ok {
-		panic("Condition in if statement must be boolean")
+		panic(RuntimeError("TypeError", "Condition in if statement must be boolean", ctx))
 	}
 
 	if conditionBool {
@@ -426,7 +435,7 @@ func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
 		condition := ctx.Expr().Accept(v)
 		conditionBool, ok := condition.(bool)
 		if !ok {
-			panic("Condition in while statement must be boolean")
+			panic(RuntimeError("TypeError", "Condition in while statement must be boolean", ctx))
 		}
 
 		if !conditionBool {
@@ -447,7 +456,7 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 			condition := ctx.GetCond().Accept(v)
 			conditionBool, ok := condition.(bool)
 			if !ok {
-				panic("For loop condition must evaluate to a boolean expression")
+				panic(RuntimeError("TypeError", "For loop condition must evaluate to a boolean expression", ctx))
 			}
 			if !conditionBool {
 				break
@@ -484,12 +493,12 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	if result == nil {
 		intCurrentValue, ok := currentValue.(int)
 		if !ok {
-			panic("TypeError: Left-hand side of compound assignment must evaluate to an integer or string")
+			panic(RuntimeError("TypeError", "Left-hand side of compound assignment must evaluate to an integer or string", ctx))
 		}
 
 		intValue, ok := value.(int)
 		if !ok {
-			panic("TypeError: Right-hand side of compound assignment must be an integer")
+			panic(RuntimeError("TypeError", "Right-hand side of compound assignment must be an integer", ctx))
 		}
 
 		switch op {
@@ -501,12 +510,12 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 			result = intCurrentValue * intValue
 		case "/=":
 			if intValue == 0 {
-				panic("ZeroDivisionError: Division by zero in compound assignment")
+				panic(RuntimeError("ZeroDivisionError", "Cannot divide a number by zero", ctx))
 			}
 			result = intCurrentValue / intValue
 		case "%=":
 			if intValue == 0 {
-				panic("ZeroDivisionError: Modulo by zero in compound assignment")
+				panic(RuntimeError("ZeroDivisionError", "Cannot modulo by zero", ctx))
 			}
 			result = intCurrentValue % intValue
 		case "**=":
@@ -522,7 +531,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		case ">>=":
 			result = intCurrentValue >> intValue
 		default:
-			panic("Unknown compound assignment operator: " + op)
+			panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown compound assignment operator: %s", op), ctx))
 		}
 	}
 
@@ -535,24 +544,25 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		case *[]any:
 			idx, ok := indexVal.(int)
 			if !ok {
-				panic("TypeError: Array index must be an integer")
+				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 			}
+
 			(*obj)[idx] = result
 		case *map[string]any:
 			keyStr := fmt.Sprintf("%v", indexVal)
 			(*obj)[keyStr] = result
 		default:
-			panic(fmt.Sprintf("TypeError: Cannot assign index to type %T", container))
+			panic(RuntimeError("TypeError", fmt.Sprintf("Cannot assign index to type %T", container), ctx))
 		}
 	} else {
 		// plain assign
 		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, result) {
-				panic("Failed to assign value to variable: " + varName)
+				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))
 			}
 		} else {
-			panic("SyntaxError: Invalid compound assignment target")
+			panic(RuntimeError("SyntaxError", "Invalid compound assignment target", ctx))
 		}
 	}
 
@@ -570,23 +580,24 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 	case "not":
 		boolVal, ok := value.(bool)
 		if !ok {
-			panic("Operand of 'not' must be boolean")
+			panic(RuntimeError("TypeError", "Operand of 'not' must be boolean", ctx))
 		}
 		return !boolVal
 	case "~":
 		intVal, ok := value.(int)
 		if !ok {
-			panic("Operand of '~' must be an integer")
+			panic(RuntimeError("TypeError", "Operand of '~' must be boolean", ctx))
 		}
 		return ^intVal
 	case "-":
 		intVal, ok := value.(int)
 		if !ok {
-			panic("TypeError: Unary minus operator can only be applied to an integer")
+			panic(RuntimeError("TypeError", "Unary minus operator can only be applied to an integer", ctx))
+
 		}
 		return -intVal
 	default:
-		panic("Unknown unary operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown unary operator: %s", op), ctx))
 	}
 }
 
@@ -598,7 +609,7 @@ func (v *Visitor) VisitBitShift(ctx *parser.BitShiftContext) any {
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for bit shift operators")
+		panic(RuntimeError("TypeError", "Both operands must be integers for bit shift operators", ctx))
 	}
 
 	switch op {
@@ -607,7 +618,8 @@ func (v *Visitor) VisitBitShift(ctx *parser.BitShiftContext) any {
 	case ">>":
 		return lVal >> rVal
 	default:
-		panic("Unknown bit shift operator: " + op)
+		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown bit shift operator: %s", op), ctx))
+
 	}
 }
 
@@ -618,7 +630,7 @@ func (v *Visitor) VisitBitAnd(ctx *parser.BitAndContext) any {
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for bitwise AND operator")
+		panic(RuntimeError("TypeError", "Both operands must be integers for bitwise AND operator", ctx))
 	}
 
 	return lVal & rVal
@@ -631,7 +643,7 @@ func (v *Visitor) VisitBitXor(ctx *parser.BitXorContext) any {
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for bitwise XOR operator")
+		panic(RuntimeError("TypeError", "Both operands must be integers for bitwise XOR operator", ctx))
 	}
 
 	return lVal ^ rVal
@@ -644,7 +656,7 @@ func (v *Visitor) VisitBitOr(ctx *parser.BitOrContext) any {
 	lVal, lOk := left.(int)
 	rVal, rOk := right.(int)
 	if !lOk || !rOk {
-		panic("Both operands must be integers for bitwise OR operator")
+		panic(RuntimeError("TypeError", "Both operands must be integers for bitwise OR operator", ctx))
 	}
 
 	return lVal | rVal
@@ -656,7 +668,8 @@ func (v *Visitor) VisitAnd(ctx *parser.AndContext) any {
 	leftBool, leftOk := left.(bool)
 	rightBool, rightOk := right.(bool)
 	if !leftOk || !rightOk {
-		panic("Operands of 'and' must be boolean")
+		panic(RuntimeError("TypeError", "Operands of 'and' must be boolean", ctx))
+
 	}
 	return leftBool && rightBool
 }
@@ -667,7 +680,7 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 	leftBool, leftOk := left.(bool)
 	rightBool, rightOk := right.(bool)
 	if !leftOk || !rightOk {
-		panic("Operands of 'or' must be boolean")
+		panic(RuntimeError("TypeError", "Operands of 'or' must be boolean", ctx))
 	}
 	return leftBool || rightBool
 }
@@ -688,7 +701,7 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	// expect pointer to the slice (*[]any)
 	arrPtr, ok := array.(*[]any)
 	if !ok {
-		panic("Attempting to index a non-array value")
+		panic(RuntimeError("TypeError", "Attempting to index a non-array value", ctx))
 	}
 
 	// dereference it locally to perform size checks and lookups safely
@@ -696,11 +709,11 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 
 	idx, ok := index.(int)
 	if !ok {
-		panic("Array index must be an integer")
+		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 	}
 
 	if idx < 0 || idx >= len(arr) {
-		panic("Array index out of bounds")
+		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
 	}
 
 	return arr[idx]
@@ -711,12 +724,13 @@ func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 
 	val, exists := v.currEnv.Lookup(arrayName)
 	if !exists {
-		panic("Undefined variable: " + arrayName)
+		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", arrayName), ctx))
+
 	}
 
 	arrPtr, ok := val.(*[]any)
 	if !ok {
-		panic("Attempting to index a non-array variable: " + arrayName) // 👈 This is where your panic came from!
+		panic(RuntimeError("TypeError", fmt.Sprintf("Attempting to index a non-array variable: %s", arrayName), ctx))
 	}
 
 	indexVal := ctx.Expr(0).Accept(v)
@@ -724,46 +738,18 @@ func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 
 	idx, ok := indexVal.(int)
 	if !ok {
-		panic("Array index must be an integer")
+		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 	}
 
 	arr := *arrPtr
 	if idx < 0 || idx >= len(arr) {
-		panic("Array index out of bounds")
+		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
 	}
 
 	(*arrPtr)[idx] = newVal
 
 	return newVal
 }
-
-// func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
-// 	varName := ctx.IDENTIFIER().GetText()
-// 	index := ctx.Expr(0).Accept(v)
-// 	value := ctx.Expr(1).Accept(v)
-
-// 	target, ok := v.currEnv.Lookup(varName)
-// 	if !ok {
-// 		panic("Undefined variable: " + varName)
-// 	}
-
-// 	arr, ok := target.([]any)
-// 	if !ok {
-// 		panic("Attempting to index a non-array variable: " + varName)
-// 	}
-
-// 	idx, ok := index.(int)
-// 	if !ok {
-// 		panic("Array index must be an integer")
-// 	}
-
-// 	if idx < 0 || idx >= len(arr) {
-// 		panic("Array index out of bounds")
-// 	}
-
-// 	arr[idx] = value
-// 	return nil
-// }
 
 func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	funcName := ctx.IDENTIFIER(0).GetText()
@@ -833,12 +819,13 @@ func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 	// pull the entity out of the environment stack
 	fn, exists := v.currEnv.Lookup(funcName)
 	if !exists {
-		panic("Undefined function: " + funcName)
+		panic(RuntimeError("ReferenceError", fmt.Sprintf("Function '%s' is not defined", funcName), ctx))
+
 	}
 
 	callable, ok := fn.(Callable)
 	if !ok {
-		panic(funcName + " is not a callable function")
+		panic(RuntimeError("TypeError", fmt.Sprintf("'%s' is not a callable function", funcName), ctx))
 	}
 
 	// evaluate the call arguments at the caller's execution environment line
@@ -849,7 +836,7 @@ func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 
 	// validate input count parameters
 	if callable.NrArgs() != -1 && len(argValues) != callable.NrArgs() {
-		panic(fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)))
+		panic(RuntimeError("TypeError", fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)), ctx))
 	}
 
 	return callable.Call(v, argValues)
@@ -877,7 +864,7 @@ func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
 		}
 		return val
 	default:
-		panic(fmt.Sprintf("TypeError: Cannot read property '%s' of type %T", fieldName, obj))
+		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of type %T", fieldName, obj), ctx))
 	}
 }
 
@@ -925,6 +912,23 @@ func (v *Visitor) VisitThrowStmt(ctx *parser.ThrowStmtContext) any {
 	thrownVal := ctx.Expr().Accept(v)
 
 	panic(cleanStringRepr(thrownVal))
+}
+
+func RuntimeError(errorType string, message string, ctx antlr.ParserRuleContext) *map[string]any {
+	line := 0
+	if ctx != nil && ctx.GetStart() != nil {
+		line = ctx.GetStart().GetLine()
+	}
+
+	// map for the Error Object
+	errObj := map[string]any{
+		"type":    errorType,
+		"message": message,
+		"line":    line,
+		"text":    fmt.Sprintf("[%s Layer Rule] Line %d: %s", errorType, line, message),
+	}
+
+	return &errObj
 }
 
 func power(base, exp int) int {
@@ -1008,7 +1012,8 @@ func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 			name := identCtx.IDENTIFIER().GetText()
 			container, exists := v.currEnv.Lookup(name)
 			if !exists {
-				panic("Undefined variable: " + name)
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), leftCtx))
+
 			}
 			return container, indexVal
 		}
@@ -1034,7 +1039,8 @@ func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 			name := identCtx.IDENTIFIER().GetText()
 			container, exists := v.currEnv.Lookup(name)
 			if !exists {
-				panic("Undefined variable: " + name)
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), leftCtx))
+
 			}
 			return container, fieldName
 		}
@@ -1050,6 +1056,6 @@ func (v *Visitor) unwrapContainer(parentContainer any, parentIndex any) any {
 	case *map[string]any:
 		return (*obj)[fmt.Sprintf("%v", parentIndex)]
 	default:
-		panic(fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer))
+		panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer), nil))
 	}
 }
