@@ -237,6 +237,12 @@ func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
 // ExitUnary is called when production Unary is exited.
 func (s *BaseGrammarListener) ExitUnary(ctx *UnaryContext) {}
 
+// EnterTernaryOp is called when production TernaryOp is entered.
+func (s *BaseGrammarListener) EnterTernaryOp(ctx *TernaryOpContext) {}
+
+// ExitTernaryOp is called when production TernaryOp is exited.
+func (s *BaseGrammarListener) ExitTernaryOp(ctx *TernaryOpContext) {}
+
 // EnterMapLiteral is called when production MapLiteral is entered.
 func (s *BaseGrammarListener) EnterMapLiteral(ctx *MapLiteralContext) {}
 

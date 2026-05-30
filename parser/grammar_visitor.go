@@ -116,6 +116,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Unary.
 	VisitUnary(ctx *UnaryContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#TernaryOp.
+	VisitTernaryOp(ctx *TernaryOpContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#MapLiteral.
 	VisitMapLiteral(ctx *MapLiteralContext) interface{}
 

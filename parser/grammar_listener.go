@@ -116,6 +116,9 @@ type GrammarListener interface {
 	// EnterUnary is called when entering the Unary production.
 	EnterUnary(c *UnaryContext)
 
+	// EnterTernaryOp is called when entering the TernaryOp production.
+	EnterTernaryOp(c *TernaryOpContext)
+
 	// EnterMapLiteral is called when entering the MapLiteral production.
 	EnterMapLiteral(c *MapLiteralContext)
 
@@ -262,6 +265,9 @@ type GrammarListener interface {
 
 	// ExitUnary is called when exiting the Unary production.
 	ExitUnary(c *UnaryContext)
+
+	// ExitTernaryOp is called when exiting the TernaryOp production.
+	ExitTernaryOp(c *TernaryOpContext)
 
 	// ExitMapLiteral is called when exiting the MapLiteral production.
 	ExitMapLiteral(c *MapLiteralContext)

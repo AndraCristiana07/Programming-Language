@@ -152,6 +152,10 @@ func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitTernaryOp(ctx *TernaryOpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }

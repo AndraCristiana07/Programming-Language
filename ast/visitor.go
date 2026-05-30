@@ -441,6 +441,17 @@ func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
 	return nil
 }
 
+func (v *Visitor) VisitTernaryOp(ctx *parser.TernaryOpContext) any {
+	condition := ctx.GetCondExpr().Accept(v)
+
+	if condCheck(condition) {
+		return ctx.GetTrueExpr().Accept(v)
+	} else {
+		return ctx.GetFalseExpr().Accept(v)
+	}
+
+}
+
 func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
 	condition := ctx.Expr(0).Accept(v)
 
@@ -907,29 +918,90 @@ func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
 	return &elements
 }
 
+// func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
+// 	array := ctx.Expr(0).Accept(v)
+// 	index := ctx.Expr(1).Accept(v)
+
+// 	// expect pointer to the slice (*[]any)
+// 	arrPtr, ok := array.(*[]any)
+// 	if !ok {
+// 		panic(RuntimeError("TypeError", "Attempting to index a non-array value", ctx))
+// 	}
+
+// 	// dereference it locally to perform size checks and lookups safely
+// 	arr := *arrPtr
+
+// 	idx, ok := index.(int)
+// 	if !ok {
+// 		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
+// 	}
+
+// 	if idx < 0 || idx >= len(arr) {
+// 		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
+// 	}
+
+// 	return arr[idx]
+// }
+
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
-	array := ctx.Expr(0).Accept(v)
-	index := ctx.Expr(1).Accept(v)
+	collection := ctx.Expr(0).Accept(v)
+	indexKey := ctx.Expr(1).Accept(v)
 
 	// expect pointer to the slice (*[]any)
-	arrPtr, ok := array.(*[]any)
-	if !ok {
-		panic(RuntimeError("TypeError", "Attempting to index a non-array value", ctx))
+	if arrPtr, ok := collection.(*[]any); ok && arrPtr != nil {
+		// dereference it locally to perform size checks and lookups safely
+		arr := *arrPtr
+
+		idx, ok := indexKey.(int)
+		if !ok {
+			// try converting to int
+			if f, ok := indexKey.(float64); ok {
+				idx = int(f)
+			} else {
+				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
+			}
+		}
+
+		if idx < 0 || idx >= len(arr) {
+			panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
+		}
+
+		return arr[idx]
 	}
 
-	// dereference it locally to perform size checks and lookups safely
-	arr := *arrPtr
+	// dict/map
+	if mapPtr, ok := collection.(*map[string]any); ok && mapPtr != nil {
+		targetMap := *mapPtr
 
-	idx, ok := index.(int)
-	if !ok {
-		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
+		// indexKey into string for map lookup
+		var lookupKey string
+		switch k := indexKey.(type) {
+		case string:
+			lookupKey = k
+		case bool:
+			// true -> "true", false -> "false"
+			if k {
+				lookupKey = "true"
+			} else {
+				lookupKey = "false"
+			}
+		case int:
+			lookupKey = strconv.Itoa(k)
+		case float64:
+			lookupKey = strconv.FormatFloat(k, 'f', -1, 64)
+		default:
+			lookupKey = fmt.Sprintf("%v", indexKey)
+		}
+
+		// lookup inside map
+		if val, exists := targetMap[lookupKey]; exists {
+			return val
+		}
+
+		return nil
 	}
 
-	if idx < 0 || idx >= len(arr) {
-		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
-	}
-
-	return arr[idx]
+	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read properties of type %T using brackets [...]", collection), ctx))
 }
 
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {

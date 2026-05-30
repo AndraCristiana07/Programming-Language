@@ -349,3 +349,15 @@ if (cond == 10){
     t =100
 }
 print "t on elif: " + t
+
+var ternaryOp = 3 if (t>10) else 5
+print ternaryOp
+
+ternaryOp = 3 if (t<10) else 5
+print ternaryOp
+
+
+var a1 = 10
+var b1 = 20
+var m1 = {true: a1, false: b1}[a1 > b1]
+print(m1)

@@ -154,6 +154,30 @@ func TestIf(t *testing.T) {
 			`,
 			expected: 0,
 		},
+		{
+			name: "Ternary operation falling on if",
+			input: `
+				var cond = true
+				var testResult = 10 if cond else 5
+			`,
+			expected: 10,
+		},
+		{
+			name: "Ternary operation falling on else",
+			input: `
+				var cond = false
+				var testResult = 10 if cond else 5
+			`,
+			expected: 5,
+		},
+		{
+			name: "Nested ternary operation",
+			input: `
+				var num = -5
+				var testResult = "Positive" if num > 0 else "Negative" if num < 0 else "Zero"
+			`,
+			expected: "Negative",
+		},
 	}
 
 	for _, tc := range tests {
