@@ -32,6 +32,10 @@ type RuntimeFunction struct {
 type BreakSignal struct{}
 type ContinueSignal struct{}
 
+type NullValue struct{}
+
+var LanguageNull = &NullValue{}
+
 func NewVisitor() *Visitor {
 	return &Visitor{
 		currEnv: NewGlobalEnvironment(),
@@ -255,7 +259,7 @@ func (v *Visitor) VisitMapLiteral(ctx *parser.MapLiteralContext) any {
 }
 
 func (v *Visitor) VisitNull(ctx *parser.NullContext) any {
-	return nil
+	return LanguageNull
 }
 
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
@@ -490,7 +494,34 @@ func (v *Visitor) VisitTernaryOp(ctx *parser.TernaryOpContext) any {
 
 }
 
+func (v *Visitor) VisitIfInit(ctx *parser.IfInitContext) any {
+	if ctx.VarDecl() != nil {
+		return ctx.VarDecl().Accept(v)
+	}
+	if ctx.AssignStmt() != nil {
+		return ctx.AssignStmt().Accept(v)
+	}
+	return nil
+}
+
 func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
+	originalEnv := v.currEnv
+
+	// if init exists, make new scope
+	if ctx.GetInit() != nil {
+		v.currEnv = NewScope(originalEnv)
+	}
+
+	// ensure scope is restored
+	defer func() {
+		v.currEnv = originalEnv
+	}()
+
+	// execute the init stmt
+	if ctx.GetInit() != nil {
+		ctx.GetInit().Accept(v)
+	}
+
 	condition := ctx.Expr(0).Accept(v)
 
 	// check if cond is true
@@ -1310,7 +1341,7 @@ func power(base, exp int) int {
 
 // helper for standard print outputs
 func cleanStringRepr(val any) string {
-	if val == nil {
+	if val == nil || val == LanguageNull {
 		return "null"
 	}
 

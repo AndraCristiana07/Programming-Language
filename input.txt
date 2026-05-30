@@ -371,3 +371,9 @@ var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
 var newlist = [x for x in fruits if "a" in x]
 
 print newlist
+
+if (var newScore = 95; newScore > 90) {
+    print "Your score is: " + newScore; 
+} else {
+    print "Score " + newScore + " oops"; 
+}

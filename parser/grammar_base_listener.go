@@ -159,6 +159,12 @@ func (s *BaseGrammarListener) EnterBlockStmt(ctx *BlockStmtContext) {}
 // ExitBlockStmt is called when production blockStmt is exited.
 func (s *BaseGrammarListener) ExitBlockStmt(ctx *BlockStmtContext) {}
 
+// EnterIfInit is called when production ifInit is entered.
+func (s *BaseGrammarListener) EnterIfInit(ctx *IfInitContext) {}
+
+// ExitIfInit is called when production ifInit is exited.
+func (s *BaseGrammarListener) ExitIfInit(ctx *IfInitContext) {}
+
 // EnterForInit is called when production forInit is entered.
 func (s *BaseGrammarListener) EnterForInit(ctx *ForInitContext) {}
 

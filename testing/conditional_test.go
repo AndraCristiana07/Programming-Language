@@ -178,6 +178,18 @@ func TestIf(t *testing.T) {
 			`,
 			expected: "Negative",
 		},
+		{
+			name: "Direct variable initialization in if condition",
+			input: `
+				var testResult = 0
+				if (var t = 95; t > 90) {
+					testResult += t
+				} else {
+					testResult = 0
+				}
+			`,
+			expected: 95,
+		},
 	}
 
 	for _, tc := range tests {

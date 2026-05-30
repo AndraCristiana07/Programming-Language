@@ -42,10 +42,14 @@ assignStmt          : expr EQUALS expr ;
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
 printStmt           : PRINT expr ;
-ifStmt              : IF LPAREN expr RPAREN thenBranch=blockStmt (ELIF LPAREN elifCond+=expr RPAREN elifBranch+=blockStmt)* (ELSE elseBranch=blockStmt)? ;
+ifStmt              : IF LPAREN (init=ifInit SEMICOLON)? expr RPAREN thenBranch=blockStmt (ELIF LPAREN elifCond+=expr RPAREN elifBranch+=blockStmt)* (ELSE elseBranch=blockStmt)? ;
 whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
 blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+
+ifInit : varDecl
+       | assignStmt
+       ;
 
 forInit     : varDecl
             | assignStmt

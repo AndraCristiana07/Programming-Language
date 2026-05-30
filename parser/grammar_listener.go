@@ -77,6 +77,9 @@ type GrammarListener interface {
 	// EnterBlockStmt is called when entering the blockStmt production.
 	EnterBlockStmt(c *BlockStmtContext)
 
+	// EnterIfInit is called when entering the ifInit production.
+	EnterIfInit(c *IfInitContext)
+
 	// EnterForInit is called when entering the forInit production.
 	EnterForInit(c *ForInitContext)
 
@@ -235,6 +238,9 @@ type GrammarListener interface {
 
 	// ExitBlockStmt is called when exiting the blockStmt production.
 	ExitBlockStmt(c *BlockStmtContext)
+
+	// ExitIfInit is called when exiting the ifInit production.
+	ExitIfInit(c *IfInitContext)
 
 	// ExitForInit is called when exiting the forInit production.
 	ExitForInit(c *ForInitContext)

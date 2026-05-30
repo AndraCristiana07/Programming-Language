@@ -77,6 +77,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#blockStmt.
 	VisitBlockStmt(ctx *BlockStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#ifInit.
+	VisitIfInit(ctx *IfInitContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#forInit.
 	VisitForInit(ctx *ForInitContext) interface{}
 

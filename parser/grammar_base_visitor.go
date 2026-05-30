@@ -100,6 +100,10 @@ func (v *BaseGrammarVisitor) VisitBlockStmt(ctx *BlockStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitIfInit(ctx *IfInitContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitForInit(ctx *ForInitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
