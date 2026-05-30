@@ -143,6 +143,9 @@ type GrammarListener interface {
 	// EnterBitAnd is called when entering the BitAnd production.
 	EnterBitAnd(c *BitAndContext)
 
+	// EnterMembership is called when entering the Membership production.
+	EnterMembership(c *MembershipContext)
+
 	// EnterFunctionCall is called when entering the FunctionCall production.
 	EnterFunctionCall(c *FunctionCallContext)
 
@@ -298,6 +301,9 @@ type GrammarListener interface {
 
 	// ExitBitAnd is called when exiting the BitAnd production.
 	ExitBitAnd(c *BitAndContext)
+
+	// ExitMembership is called when exiting the Membership production.
+	ExitMembership(c *MembershipContext)
 
 	// ExitFunctionCall is called when exiting the FunctionCall production.
 	ExitFunctionCall(c *FunctionCallContext)

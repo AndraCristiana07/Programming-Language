@@ -365,3 +365,9 @@ print m1
 var nums = [1, 2, 3, 4]
 var doubled = [x * 2 for x in nums]
 print doubled
+
+
+var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+var newlist = [x for x in fruits if "a" in x]
+
+print newlist

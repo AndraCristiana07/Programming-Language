@@ -296,6 +296,36 @@ func TestListComprehension(t *testing.T) {
 			`,
 			expected: &[]any{2, 4, 6, 8},
 		},
+		{
+			name: "List comprehension with if",
+			input: `
+				var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+				var testResult = [x for x in fruits if "a" in x]
+			`,
+			expected: &[]any{"apple", "banana", "mango"},
+		},
+		{
+			name: "List comprehension with in range",
+			input: `
+				var testResult = [x for x in range(5)]
+			`,
+			expected: &[]any{0, 1, 2, 3, 4},
+		},
+		{
+			name: "List comprehension with in range and if cond",
+			input: `
+				var testResult = [x for x in range(10) if x < 5]
+			`,
+			expected: &[]any{0, 1, 2, 3, 4},
+		},
+		{
+			name: "List comprehension with in range and if cond",
+			input: `
+				var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+				var testResult = [x if x != "banana" else "orange" for x in fruits]
+			`,
+			expected: &[]any{"apple", "orange", "cherry", "kiwi", "mango"},
+		},
 	}
 
 	for _, tc := range tests {

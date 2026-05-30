@@ -291,6 +291,12 @@ func (s *BaseGrammarListener) EnterBitAnd(ctx *BitAndContext) {}
 // ExitBitAnd is called when production BitAnd is exited.
 func (s *BaseGrammarListener) ExitBitAnd(ctx *BitAndContext) {}
 
+// EnterMembership is called when production Membership is entered.
+func (s *BaseGrammarListener) EnterMembership(ctx *MembershipContext) {}
+
+// ExitMembership is called when production Membership is exited.
+func (s *BaseGrammarListener) ExitMembership(ctx *MembershipContext) {}
+
 // EnterFunctionCall is called when production FunctionCall is entered.
 func (s *BaseGrammarListener) EnterFunctionCall(ctx *FunctionCallContext) {}
 

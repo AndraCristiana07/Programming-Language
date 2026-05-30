@@ -143,6 +143,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#BitAnd.
 	VisitBitAnd(ctx *BitAndContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#Membership.
+	VisitMembership(ctx *MembershipContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#FunctionCall.
 	VisitFunctionCall(ctx *FunctionCallContext) interface{}
 

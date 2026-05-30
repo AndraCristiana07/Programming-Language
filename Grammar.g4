@@ -69,6 +69,7 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | expr op=BITXOR expr                                   # BitXor
             | expr op=BITOR expr                                    # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
+            | leftExpr=expr IN rightExpr=expr                       # Membership
             | expr op=AND expr                                      # And
             | expr op=OR expr                                       # Or
             | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
@@ -85,7 +86,7 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
 mapEntry : expr COLON expr ;
 arrayLit
     : LBRACKET (expr (COMMA expr)*)? RBRACKET                                   # StandardArray
-    | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr RBRACKET    # ListComprehension
+    | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
     ;
 
 SWITCH          : 'switch' ;
