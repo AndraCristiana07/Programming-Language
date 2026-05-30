@@ -910,6 +910,10 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 }
 
 func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
+	return ctx.ArrayLit().Accept(v)
+}
+
+func (v *Visitor) VisitStandardArray(ctx *parser.StandardArrayContext) any {
 	var elements []any
 	for _, expr := range ctx.AllExpr() {
 		elements = append(elements, expr.Accept(v))
@@ -918,30 +922,53 @@ func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
 	return &elements
 }
 
-// func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
-// 	array := ctx.Expr(0).Accept(v)
-// 	index := ctx.Expr(1).Accept(v)
+func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) any {
+	sourceCollection := ctx.GetSrcExpr().Accept(v)
 
-// 	// expect pointer to the slice (*[]any)
-// 	arrPtr, ok := array.(*[]any)
-// 	if !ok {
-// 		panic(RuntimeError("TypeError", "Attempting to index a non-array value", ctx))
-// 	}
+	// loop iterator variable name
+	varName := ctx.IDENTIFIER().GetText()
 
-// 	// dereference it locally to perform size checks and lookups safely
-// 	arr := *arrPtr
+	// new slice that will hold results
+	resultSlice := make([]any, 0)
 
-// 	idx, ok := index.(int)
-// 	if !ok {
-// 		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
-// 	}
+	previousEnv := v.currEnv
+	v.currEnv = NewScope(previousEnv)
 
-// 	if idx < 0 || idx >= len(arr) {
-// 		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
-// 	}
+	defer func() {
+		v.currEnv = previousEnv
+	}()
 
-// 	return arr[idx]
-// }
+	processElement := func(element any) {
+		// assigncurrent item to the loop variable
+		v.currEnv.Define(varName, element)
+
+		// eval expression
+		transformedValue := ctx.GetTransformExpr().Accept(v)
+
+		// append it to result
+		resultSlice = append(resultSlice, transformedValue)
+	}
+
+	// loop over the source
+	if arrPtr, ok := sourceCollection.(*[]any); ok && arrPtr != nil {
+		for _, value := range *arrPtr {
+			processElement(value)
+		}
+	} else if str, ok := sourceCollection.(string); ok {
+		// if string -> clean and process
+		cleanedStr := str
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+		for _, runeVal := range cleanedStr {
+			processElement(string(runeVal))
+		}
+	} else {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot perform list comprehension over type %T", sourceCollection), ctx))
+	}
+
+	return &resultSlice
+}
 
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	collection := ctx.Expr(0).Accept(v)

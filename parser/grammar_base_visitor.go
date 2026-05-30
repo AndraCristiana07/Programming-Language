@@ -207,3 +207,11 @@ func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface
 func (v *BaseGrammarVisitor) VisitMapEntry(ctx *MapEntryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
+
+func (v *BaseGrammarVisitor) VisitStandardArray(ctx *StandardArrayContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitListComprehension(ctx *ListComprehensionContext) interface{} {
+	return v.VisitChildren(ctx)
+}

@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -275,6 +276,38 @@ func TestForLoop(t *testing.T) {
 			if result != tc.expected {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
+			}
+		})
+	}
+}
+
+func TestListComprehension(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected any
+	}{
+
+		{
+			name: "Simple list comprehension",
+			input: `
+				var nums = [1, 2, 3, 4]
+				var testResult = [x * 2 for x in nums]
+			`,
+			expected: &[]any{2, 4, 6, 8},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			env := runInterpreter(tc.input)
+			result, ok := env.Lookup("testResult")
+			if !ok {
+				t.Fatalf("Variable 'testResult' missing")
+			}
+
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
 			}
 		})
 	}

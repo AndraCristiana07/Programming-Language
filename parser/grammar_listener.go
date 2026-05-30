@@ -158,6 +158,12 @@ type GrammarListener interface {
 	// EnterMapEntry is called when entering the mapEntry production.
 	EnterMapEntry(c *MapEntryContext)
 
+	// EnterStandardArray is called when entering the StandardArray production.
+	EnterStandardArray(c *StandardArrayContext)
+
+	// EnterListComprehension is called when entering the ListComprehension production.
+	EnterListComprehension(c *ListComprehensionContext)
+
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
 
@@ -307,4 +313,10 @@ type GrammarListener interface {
 
 	// ExitMapEntry is called when exiting the mapEntry production.
 	ExitMapEntry(c *MapEntryContext)
+
+	// ExitStandardArray is called when exiting the StandardArray production.
+	ExitStandardArray(c *StandardArrayContext)
+
+	// ExitListComprehension is called when exiting the ListComprehension production.
+	ExitListComprehension(c *ListComprehensionContext)
 }

@@ -360,4 +360,8 @@ print ternaryOp
 var a1 = 10
 var b1 = 20
 var m1 = {true: a1, false: b1}[a1 > b1]
-print(m1)
+print m1
+
+var nums = [1, 2, 3, 4]
+var doubled = [x * 2 for x in nums]
+print doubled

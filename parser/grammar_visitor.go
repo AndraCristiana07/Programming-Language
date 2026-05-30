@@ -157,4 +157,10 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#mapEntry.
 	VisitMapEntry(ctx *MapEntryContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#StandardArray.
+	VisitStandardArray(ctx *StandardArrayContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#ListComprehension.
+	VisitListComprehension(ctx *ListComprehensionContext) interface{}
 }

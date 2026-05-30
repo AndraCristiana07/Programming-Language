@@ -72,7 +72,7 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | expr op=AND expr                                      # And
             | expr op=OR expr                                       # Or
             | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
-            | LBRACKET (expr (COMMA expr)*)? RBRACKET               # ArrayLiteral
+            | arrayLit                                              # ArrayLiteral
             | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE           # MapLiteral                              
             | IDENTIFIER                                            # Identifier          
             | NUMBER                                                # Number     
@@ -83,6 +83,10 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             ;
 
 mapEntry : expr COLON expr ;
+arrayLit
+    : LBRACKET (expr (COMMA expr)*)? RBRACKET                                   # StandardArray
+    | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr RBRACKET    # ListComprehension
+    ;
 
 SWITCH          : 'switch' ;
 CASE            : 'case' ;

@@ -320,3 +320,15 @@ func (s *BaseGrammarListener) EnterMapEntry(ctx *MapEntryContext) {}
 
 // ExitMapEntry is called when production mapEntry is exited.
 func (s *BaseGrammarListener) ExitMapEntry(ctx *MapEntryContext) {}
+
+// EnterStandardArray is called when production StandardArray is entered.
+func (s *BaseGrammarListener) EnterStandardArray(ctx *StandardArrayContext) {}
+
+// ExitStandardArray is called when production StandardArray is exited.
+func (s *BaseGrammarListener) ExitStandardArray(ctx *StandardArrayContext) {}
+
+// EnterListComprehension is called when production ListComprehension is entered.
+func (s *BaseGrammarListener) EnterListComprehension(ctx *ListComprehensionContext) {}
+
+// ExitListComprehension is called when production ListComprehension is exited.
+func (s *BaseGrammarListener) ExitListComprehension(ctx *ListComprehensionContext) {}
