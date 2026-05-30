@@ -47,6 +47,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#defaultBlock.
 	VisitDefaultBlock(ctx *DefaultBlockContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#forInStmt.
+	VisitForInStmt(ctx *ForInStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 

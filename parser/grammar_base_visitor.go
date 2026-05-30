@@ -60,6 +60,10 @@ func (v *BaseGrammarVisitor) VisitDefaultBlock(ctx *DefaultBlockContext) interfa
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitForInStmt(ctx *ForInStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }

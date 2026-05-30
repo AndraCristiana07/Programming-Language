@@ -307,3 +307,30 @@ default:
 
 print "After switch case the result is:" + switchTar
 
+var myNumbers = [1, 2, 3, 4, 5]
+var inNrs = 0
+
+for (var num in myNumbers) {
+    if (num == 3) {
+        continue
+    }
+    inNrs += num
+}
+
+print "forin nr: " + inNrs
+
+var strV = "hello"
+
+for (var ru in strV) {
+    print ru
+}
+
+var strA = "hello"
+var testResult = ""
+for (ch in strA) {
+    if (ch == "l"){
+        continue
+    }
+    testResult += ch
+}
+print testResult

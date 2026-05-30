@@ -47,6 +47,9 @@ type GrammarListener interface {
 	// EnterDefaultBlock is called when entering the defaultBlock production.
 	EnterDefaultBlock(c *DefaultBlockContext)
 
+	// EnterForInStmt is called when entering the forInStmt production.
+	EnterForInStmt(c *ForInStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -190,6 +193,9 @@ type GrammarListener interface {
 
 	// ExitDefaultBlock is called when exiting the defaultBlock production.
 	ExitDefaultBlock(c *DefaultBlockContext)
+
+	// ExitForInStmt is called when exiting the forInStmt production.
+	ExitForInStmt(c *ForInStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

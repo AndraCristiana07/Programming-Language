@@ -11,6 +11,7 @@ statement   : (varDecl
             | ifStmt 
             | whileStmt
             | switchStmt
+            | forInStmt
             | forStmt
             | blockStmt 
             | postfixStmt
@@ -34,7 +35,7 @@ switchStmt      : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* defaul
 caseBlock       : CASE expr COLON (statement | terminator)* ;
 defaultBlock    : DEFAULT COLON (statement | terminator)* ;
 
-
+forInStmt   : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
 
 varDecl     : VAR IDENTIFIER EQUALS expr ;
 assignStmt         : expr EQUALS expr ;
@@ -88,6 +89,7 @@ DEFAULT         : 'default' ;
 TRY             : 'try' ;
 CATCH           : 'catch' ;
 THROW           : 'throw' ;
+IN              : 'in' ;
 DOT             : '.' ;
 COLON           : ':' ;
 VAR             : 'var' ;

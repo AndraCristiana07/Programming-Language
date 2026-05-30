@@ -99,6 +99,12 @@ func (s *BaseGrammarListener) EnterDefaultBlock(ctx *DefaultBlockContext) {}
 // ExitDefaultBlock is called when production defaultBlock is exited.
 func (s *BaseGrammarListener) ExitDefaultBlock(ctx *DefaultBlockContext) {}
 
+// EnterForInStmt is called when production forInStmt is entered.
+func (s *BaseGrammarListener) EnterForInStmt(ctx *ForInStmtContext) {}
+
+// ExitForInStmt is called when production forInStmt is exited.
+func (s *BaseGrammarListener) ExitForInStmt(ctx *ForInStmtContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 

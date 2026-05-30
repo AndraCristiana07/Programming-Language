@@ -79,6 +79,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.WhileStmt().Accept(v)
 	} else if ctx.SwitchStmt() != nil {
 		return ctx.SwitchStmt().Accept(v)
+	} else if ctx.ForInStmt() != nil {
+		return ctx.ForInStmt().Accept(v)
 	} else if ctx.ForStmt() != nil {
 		return ctx.ForStmt().Accept(v)
 	} else if ctx.PostfixStmt() != nil {
@@ -517,6 +519,103 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 	}
 
 	return nil
+}
+
+func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
+	collection := ctx.Expr().Accept(v)
+
+	varName := ctx.IDENTIFIER().GetText()
+
+	// check if 'var' exixsts in assign
+	hasVarKeyword := ctx.VAR() != nil
+
+	previousEnv := v.currEnv
+	v.currEnv = NewScope(previousEnv)
+	defer func() {
+		v.currEnv = previousEnv
+	}()
+
+	assignLoopVar := func(val any) {
+		if hasVarKeyword {
+			// for (var x in arr)
+			v.currEnv.Define(varName, val)
+		} else {
+			// for (x in arr)
+			if success := v.currEnv.Assign(varName, val); !success {
+				v.currEnv.Define(varName, val)
+			}
+		}
+	}
+
+	executeBody := func() bool {
+		// execute block body
+		res := ctx.BlockStmt().Accept(v)
+		if _, ok := res.(BreakSignal); ok {
+			return false // break out of the loop
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			return true // skip to next iteration
+		}
+		return true
+	}
+
+	if targetPtr, ok := collection.(*[]any); ok && targetPtr != nil {
+		// dereference the pointer
+		for _, value := range *targetPtr {
+			assignLoopVar(value)
+
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	//string iteration
+	if str, ok := collection.(string); ok {
+		// clean up quotes
+		cleanedStr := str
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+
+		// loop through the string by rune
+		for _, runeVal := range cleanedStr {
+			// convert rune back into single-character string
+			charStr := string(runeVal)
+
+			assignLoopVar(charStr)
+
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	//if non-pointer slice
+	if targetSlice, ok := collection.([]any); ok {
+		for _, value := range targetSlice {
+			assignLoopVar(value)
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	// dictionary/map values
+	if targetMap, ok := collection.(*map[string]any); ok && targetMap != nil {
+		for _, value := range *targetMap {
+			assignLoopVar(value)
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	panic(fmt.Sprintf("TypeError: Cannot iterate over type %T using for...in", collection))
 }
 
 func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {

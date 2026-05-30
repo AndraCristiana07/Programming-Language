@@ -225,6 +225,42 @@ func TestForLoop(t *testing.T) {
 			`,
 			expected: 12,
 		},
+		{
+			name: "For... in loop on array with var",
+			input: `
+				var arr = [1,3,4,2]
+				var testResult = 0
+				for (var num in arr) {
+					testResult += num
+				}
+			`,
+			expected: 10,
+		},
+		{
+			name: "For... in loop on array",
+			input: `
+				var arr = [1,3,4,2]
+				var testResult = 0
+				for (num in arr) {
+					testResult += num
+				}
+			`,
+			expected: 10,
+		},
+		{
+			name: "For...in loop on string and continue",
+			input: `
+				var strA = "hello"
+				var testResult = ""
+				for (ch in strA) {
+					if (ch == "l"){
+						continue
+					}
+					testResult += ch
+				}
+			`,
+			expected: "heo",
+		},
 	}
 
 	for _, tc := range tests {
