@@ -442,19 +442,48 @@ func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
 }
 
 func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
-	condition := ctx.Expr().Accept(v)
-	conditionBool, ok := condition.(bool)
-	if !ok {
-		panic(RuntimeError("TypeError", "Condition in if statement must be boolean", ctx))
+	condition := ctx.Expr(0).Accept(v)
+
+	// check if cond is true
+	if condCheck(condition) {
+		return ctx.GetThenBranch().Accept(v)
 	}
 
-	if conditionBool {
-		return ctx.GetThenBranch().Accept(v)
-	} else if ctx.GetElseBranch() != nil {
+	elifConditions := ctx.GetElifCond()
+	elifBranches := ctx.GetElifBranch()
+
+	// elif branches
+	for i := 0; i < len(elifConditions); i++ {
+		elifCondVal := elifConditions[i].Accept(v)
+
+		if condCheck(elifCondVal) {
+			return elifBranches[i].Accept(v)
+		}
+	}
+
+	// else branch
+	if ctx.GetElseBranch() != nil {
 		return ctx.GetElseBranch().Accept(v)
 	}
 
 	return nil
+}
+
+func condCheck(val any) bool {
+	if val == nil {
+		return false
+	}
+	if b, ok := val.(bool); ok {
+		return b
+	}
+	if f, ok := val.(float64); ok {
+		return f != 0
+	}
+	// check if empty string
+	if s, ok := val.(string); ok {
+		return s != "" && s != "\"\""
+	}
+	return true
 }
 
 func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {

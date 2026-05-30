@@ -44,6 +44,116 @@ func TestIf(t *testing.T) {
             `,
 			expected: 3,
 		},
+		{
+			name: "if elif else falling on elif",
+			input: `
+				var cond = 20
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				} else {
+					testResult =100
+				}
+			`,
+			expected: 11,
+		},
+		{
+			name: "if elif else falling on else",
+			input: `
+				var cond = 1
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				} else {
+					testResult =100
+				}
+			`,
+			expected: 100,
+		},
+		{
+			name: "if elif else falling on if",
+			input: `
+				var cond = 10
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				} else {
+					testResult =100
+				}
+			`,
+			expected: 10,
+		},
+		{
+			name: "if elif else falling on first elif",
+			input: `
+				var cond = 6
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				} else {
+					testResult =100
+				}
+			`,
+			expected: 123,
+		},
+		{
+			name: "if elif falling on elif",
+			input: `
+				var cond = 6
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				}
+			`,
+			expected: 123,
+		},
+		{
+			name: "if elif falling on none",
+			input: `
+				var cond = 100
+				var testResult = 0
+				if (cond == 10){
+					testResult = 10
+				} elif (cond == 6) {
+					testResult = 123
+				} elif (cond == 20) {
+					testResult = 11
+				} elif (cond == 120) {
+					testResult = 111
+				}
+			`,
+			expected: 0,
+		},
 	}
 
 	for _, tc := range tests {

@@ -334,3 +334,18 @@ for (ch in strA) {
     testResult += ch
 }
 print testResult
+
+var cond = 20
+var t = 0
+if (cond == 10){
+    t = 10
+} elif (cond == 6) {
+    t = 123
+} elif (cond == 20) {
+    t = 11
+} elif (cond == 120) {
+    t = 111
+} else {
+    t =100
+}
+print "t on elif: " + t

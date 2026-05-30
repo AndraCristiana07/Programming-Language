@@ -22,30 +22,30 @@ statement   : (varDecl
             | continueStmt) terminator?
             ;
 
-returnStmt      : RETURN expr? ;
-terminator      : SEMICOLON | NL ;
-funcStmt        : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
-exprStmt        : expr ;
-tryCatchStmt    : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
-throwStmt       : THROW expr ;
-breakStmt       : BREAK;
-continueStmt    : CONTINUE;
-switchStmt      : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* defaultBlock?terminator* RBRACE ;
+returnStmt          : RETURN expr? ;
+terminator          : SEMICOLON | NL ;
+funcStmt            : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+exprStmt            : expr ;
+tryCatchStmt        : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
+throwStmt           : THROW expr ;
+breakStmt           : BREAK;
+continueStmt        : CONTINUE;
+switchStmt          : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* defaultBlock?terminator* RBRACE ;
 
-caseBlock       : CASE expr COLON (statement | terminator)* ;
-defaultBlock    : DEFAULT COLON (statement | terminator)* ;
+caseBlock           : CASE expr COLON (statement | terminator)* ;
+defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 
-forInStmt   : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
+forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
 
-varDecl     : VAR IDENTIFIER EQUALS expr ;
-assignStmt         : expr EQUALS expr ;
-arrayAssignStmt : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
-compoundAssignStmt : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
-printStmt   : PRINT expr ;
-ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
-whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
-forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
-blockStmt   : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+varDecl             : VAR IDENTIFIER EQUALS expr ;
+assignStmt          : expr EQUALS expr ;
+arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
+compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
+printStmt           : PRINT expr ;
+ifStmt              : IF LPAREN expr RPAREN thenBranch=blockStmt (ELIF LPAREN elifCond+=expr RPAREN elifBranch+=blockStmt)* (ELSE elseBranch=blockStmt)? ;
+whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
+forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
+blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
 
 forInit     : varDecl
             | assignStmt
@@ -114,6 +114,7 @@ RBRACKET        : ']' ;
 
 IF              : 'if' ;
 ELSE            : 'else' ;
+ELIF            : 'elif' ;
 WHILE           : 'while' ;
 FOR             : 'for' ;
 BREAK           : 'break' ;
