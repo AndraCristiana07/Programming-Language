@@ -69,6 +69,42 @@ func (s *BaseGrammarListener) EnterThrowStmt(ctx *ThrowStmtContext) {}
 // ExitThrowStmt is called when production throwStmt is exited.
 func (s *BaseGrammarListener) ExitThrowStmt(ctx *ThrowStmtContext) {}
 
+// EnterBreakStmt is called when production breakStmt is entered.
+func (s *BaseGrammarListener) EnterBreakStmt(ctx *BreakStmtContext) {}
+
+// ExitBreakStmt is called when production breakStmt is exited.
+func (s *BaseGrammarListener) ExitBreakStmt(ctx *BreakStmtContext) {}
+
+// EnterContinueStmt is called when production continueStmt is entered.
+func (s *BaseGrammarListener) EnterContinueStmt(ctx *ContinueStmtContext) {}
+
+// ExitContinueStmt is called when production continueStmt is exited.
+func (s *BaseGrammarListener) ExitContinueStmt(ctx *ContinueStmtContext) {}
+
+// EnterSwitchStmt is called when production switchStmt is entered.
+func (s *BaseGrammarListener) EnterSwitchStmt(ctx *SwitchStmtContext) {}
+
+// ExitSwitchStmt is called when production switchStmt is exited.
+func (s *BaseGrammarListener) ExitSwitchStmt(ctx *SwitchStmtContext) {}
+
+// EnterCaseBlock is called when production caseBlock is entered.
+func (s *BaseGrammarListener) EnterCaseBlock(ctx *CaseBlockContext) {}
+
+// ExitCaseBlock is called when production caseBlock is exited.
+func (s *BaseGrammarListener) ExitCaseBlock(ctx *CaseBlockContext) {}
+
+// EnterDefaultBlock is called when production defaultBlock is entered.
+func (s *BaseGrammarListener) EnterDefaultBlock(ctx *DefaultBlockContext) {}
+
+// ExitDefaultBlock is called when production defaultBlock is exited.
+func (s *BaseGrammarListener) ExitDefaultBlock(ctx *DefaultBlockContext) {}
+
+// EnterForInStmt is called when production forInStmt is entered.
+func (s *BaseGrammarListener) EnterForInStmt(ctx *ForInStmtContext) {}
+
+// ExitForInStmt is called when production forInStmt is exited.
+func (s *BaseGrammarListener) ExitForInStmt(ctx *ForInStmtContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 
@@ -122,6 +158,12 @@ func (s *BaseGrammarListener) EnterBlockStmt(ctx *BlockStmtContext) {}
 
 // ExitBlockStmt is called when production blockStmt is exited.
 func (s *BaseGrammarListener) ExitBlockStmt(ctx *BlockStmtContext) {}
+
+// EnterIfInit is called when production ifInit is entered.
+func (s *BaseGrammarListener) EnterIfInit(ctx *IfInitContext) {}
+
+// ExitIfInit is called when production ifInit is exited.
+func (s *BaseGrammarListener) ExitIfInit(ctx *IfInitContext) {}
 
 // EnterForInit is called when production forInit is entered.
 func (s *BaseGrammarListener) EnterForInit(ctx *ForInitContext) {}
@@ -201,6 +243,12 @@ func (s *BaseGrammarListener) EnterUnary(ctx *UnaryContext) {}
 // ExitUnary is called when production Unary is exited.
 func (s *BaseGrammarListener) ExitUnary(ctx *UnaryContext) {}
 
+// EnterTernaryOp is called when production TernaryOp is entered.
+func (s *BaseGrammarListener) EnterTernaryOp(ctx *TernaryOpContext) {}
+
+// ExitTernaryOp is called when production TernaryOp is exited.
+func (s *BaseGrammarListener) ExitTernaryOp(ctx *TernaryOpContext) {}
+
 // EnterMapLiteral is called when production MapLiteral is entered.
 func (s *BaseGrammarListener) EnterMapLiteral(ctx *MapLiteralContext) {}
 
@@ -249,6 +297,12 @@ func (s *BaseGrammarListener) EnterBitAnd(ctx *BitAndContext) {}
 // ExitBitAnd is called when production BitAnd is exited.
 func (s *BaseGrammarListener) ExitBitAnd(ctx *BitAndContext) {}
 
+// EnterMembership is called when production Membership is entered.
+func (s *BaseGrammarListener) EnterMembership(ctx *MembershipContext) {}
+
+// ExitMembership is called when production Membership is exited.
+func (s *BaseGrammarListener) ExitMembership(ctx *MembershipContext) {}
+
 // EnterFunctionCall is called when production FunctionCall is entered.
 func (s *BaseGrammarListener) EnterFunctionCall(ctx *FunctionCallContext) {}
 
@@ -278,3 +332,21 @@ func (s *BaseGrammarListener) EnterMapEntry(ctx *MapEntryContext) {}
 
 // ExitMapEntry is called when production mapEntry is exited.
 func (s *BaseGrammarListener) ExitMapEntry(ctx *MapEntryContext) {}
+
+// EnterMembershipOp is called when production membershipOp is entered.
+func (s *BaseGrammarListener) EnterMembershipOp(ctx *MembershipOpContext) {}
+
+// ExitMembershipOp is called when production membershipOp is exited.
+func (s *BaseGrammarListener) ExitMembershipOp(ctx *MembershipOpContext) {}
+
+// EnterStandardArray is called when production StandardArray is entered.
+func (s *BaseGrammarListener) EnterStandardArray(ctx *StandardArrayContext) {}
+
+// ExitStandardArray is called when production StandardArray is exited.
+func (s *BaseGrammarListener) ExitStandardArray(ctx *StandardArrayContext) {}
+
+// EnterListComprehension is called when production ListComprehension is entered.
+func (s *BaseGrammarListener) EnterListComprehension(ctx *ListComprehensionContext) {}
+
+// ExitListComprehension is called when production ListComprehension is exited.
+func (s *BaseGrammarListener) ExitListComprehension(ctx *ListComprehensionContext) {}

@@ -275,3 +275,109 @@ try {
     print "Message: " + err.message
     print "Line: "    + err.line
 }
+
+var newRes = 0;
+var i = 0;
+while (i < 10) {
+    i = i + 1;
+    if (i == 3) {
+        continue
+    }
+    if (i == 6) {
+        break
+    }
+    newRes = newRes + i;
+}
+
+print "result after while: " + newRes
+
+
+var switchTar = 3
+switch (switchTar) {
+case 1:
+    switchTar = 30
+case 2:
+    switchTar = 60
+case 3: 
+    switchTar = 10
+default:
+    switchTar = 5
+}
+
+
+print "After switch case the result is:" + switchTar
+
+var myNumbers = [1, 2, 3, 4, 5]
+var inNrs = 0
+
+for (var num in myNumbers) {
+    if (num == 3) {
+        continue
+    }
+    inNrs += num
+}
+
+print "forin nr: " + inNrs
+
+var strV = "hello"
+
+for (var ru in strV) {
+    print ru
+}
+
+var strA = "hello"
+var testResult = ""
+for (ch in strA) {
+    if (ch == "l"){
+        continue
+    }
+    testResult += ch
+}
+print testResult
+
+var cond = 20
+var t = 0
+if (cond == 10){
+    t = 10
+} elif (cond == 6) {
+    t = 123
+} elif (cond == 20) {
+    t = 11
+} elif (cond == 120) {
+    t = 111
+} else {
+    t =100
+}
+print "t on elif: " + t
+
+var ternaryOp = 3 if (t>10) else 5
+print ternaryOp
+
+ternaryOp = 3 if (t<10) else 5
+print ternaryOp
+
+
+var a1 = 10
+var b1 = 20
+var m1 = {true: a1, false: b1}[a1 > b1]
+print m1
+
+var nums = [1, 2, 3, 4]
+var doubled = [x * 2 for x in nums]
+print doubled
+
+
+var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+var newlist = [x for x in fruits if "a" in x]
+
+print newlist
+
+if (var newScore = 95; newScore > 90) {
+    print "Your score is: " + newScore; 
+} else {
+    print "Score " + newScore + " oops"; 
+}
+
+var newlist1 = [x for x in fruits if "a" not in x]
+
+print newlist1

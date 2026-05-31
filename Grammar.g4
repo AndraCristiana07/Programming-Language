@@ -10,71 +10,102 @@ statement   : (varDecl
             | printStmt   
             | ifStmt 
             | whileStmt
+            | switchStmt
+            | forInStmt
             | forStmt
             | blockStmt 
             | postfixStmt
             | tryCatchStmt
             | throwStmt
-            | returnStmt) terminator?
+            | returnStmt
+            | breakStmt        
+            | continueStmt) terminator?
             ;
 
-returnStmt  : RETURN expr? ;
-terminator   : SEMICOLON | NL ;
-funcStmt    : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
-exprStmt    : expr ;
-tryCatchStmt : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
-throwStmt    : THROW expr ;
+returnStmt          : RETURN expr? ;
+terminator          : SEMICOLON | NL ;
+funcStmt            : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+exprStmt            : expr ;
+tryCatchStmt        : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
+throwStmt           : THROW expr ;
+breakStmt           : BREAK;
+continueStmt        : CONTINUE;
+switchStmt          : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* defaultBlock?terminator* RBRACE ;
 
-varDecl     : VAR IDENTIFIER EQUALS expr ;
-assignStmt         : expr EQUALS expr ;
-arrayAssignStmt : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
-compoundAssignStmt : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
-printStmt   : PRINT expr ;
-ifStmt      : IF LPAREN expr RPAREN thenBranch=blockStmt (ELSE elseBranch=blockStmt)? ;
-whileStmt   : WHILE LPAREN expr RPAREN body=blockStmt ;
-forStmt     : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
-blockStmt   : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+caseBlock           : CASE expr COLON (statement | terminator)* ;
+defaultBlock        : DEFAULT COLON (statement | terminator)* ;
+
+forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
+
+varDecl             : VAR IDENTIFIER EQUALS expr ;
+assignStmt          : expr EQUALS expr ;
+arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
+compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
+printStmt           : PRINT expr ;
+ifStmt              : IF LPAREN (init=ifInit SEMICOLON)? expr RPAREN thenBranch=blockStmt (ELIF LPAREN elifCond+=expr RPAREN elifBranch+=blockStmt)* (ELSE elseBranch=blockStmt)? ;
+whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
+forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
+blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+
+ifInit      : varDecl
+            | assignStmt
+            ;
 
 forInit     : varDecl
             | assignStmt
             ;
 
-forPost   : assignStmt
-            | postfixStmt
-            ;
+forPost         : assignStmt
+                | postfixStmt
+                ;
             
-postfixStmt        : expr op=(INC | DEC) ;
+postfixStmt     : expr op=(INC | DEC) ;
 
-expr        : expr LBRACKET expr RBRACKET                       # ArrayIndex
-            | expr DOT IDENTIFIER                               # FieldAccess
-            | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN    # FunctionCall
-            | op=(NOT | BITNOT | MINUS) expr                    # Unary
-            | expr op=EXPONENTIAL expr                          # Exponential
-            | expr op=(STAR | SLASH | MODULO) expr              # MulDivMod
-            | expr op=(PLUS | MINUS) expr                       # AddSub
-            | expr op=(BITLSHIFT | BITRSHIFT) expr              # BitShift
-            | expr op=BITAND expr                               # BitAnd
-            | expr op=BITXOR expr                               # BitXor
-            | expr op=BITOR expr                                # BitOr
+expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
+            | expr DOT IDENTIFIER                                   # FieldAccess
+            | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN        # FunctionCall
+            | op=(NOT | BITNOT | MINUS) expr                        # Unary
+            | expr op=EXPONENTIAL expr                              # Exponential
+            | expr op=(STAR | SLASH | MODULO) expr                  # MulDivMod
+            | expr op=(PLUS | MINUS) expr                           # AddSub
+            | expr op=(BITLSHIFT | BITRSHIFT) expr                  # BitShift
+            | expr op=BITAND expr                                   # BitAnd
+            | expr op=BITXOR expr                                   # BitXor
+            | expr op=BITOR expr                                    # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
-            | expr op=AND expr                                  # And
-            | expr op=OR expr                                   # Or
-            | LBRACKET (expr (COMMA expr)*)? RBRACKET           # ArrayLiteral
-            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE       # MapLiteral                              
-            | IDENTIFIER                                        # Identifier          
-            | NUMBER                                            # Number     
-            | val=(TRUE | FALSE)                                # Boolean
-            | STRING                                            # String
-            | 'null'                                            # Null
-            | LPAREN expr RPAREN                                # Parentheses
+            | leftExpr=expr op=membershipOp rightExpr=expr          # Membership
+            | expr op=AND expr                                      # And
+            | expr op=OR expr                                       # Or
+            | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
+            | arrayLit                                              # ArrayLiteral
+            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE           # MapLiteral                              
+            | IDENTIFIER                                            # Identifier          
+            | NUMBER                                                # Number     
+            | val=(TRUE | FALSE)                                    # Boolean
+            | STRING                                                # String
+            | 'null'                                                # Null
+            | LPAREN expr RPAREN                                    # Parentheses
             ;
 
-mapEntry : expr ':' expr ;
+mapEntry : expr COLON expr ;
+membershipOp
+    : IN
+    | NOT IN
+    ;
+arrayLit
+    : LBRACKET (expr (COMMA expr)*)? RBRACKET                                   # StandardArray
+    | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
+    ;
 
+SWITCH          : 'switch' ;
+CASE            : 'case' ;
+DEFAULT         : 'default' ;
 TRY             : 'try' ;
 CATCH           : 'catch' ;
 THROW           : 'throw' ;
+IN              : 'in' ;
 DOT             : '.' ;
+COLON           : ':' ;
 VAR             : 'var' ;
 EQUALS          : '=' ;
 PLUS            : '+' ;
@@ -97,8 +128,11 @@ RBRACKET        : ']' ;
 
 IF              : 'if' ;
 ELSE            : 'else' ;
+ELIF            : 'elif' ;
 WHILE           : 'while' ;
 FOR             : 'for' ;
+BREAK           : 'break' ;
+CONTINUE        : 'continue' ;
 
 SEMICOLON       : ';' ;
 COMMA           : ',' ;

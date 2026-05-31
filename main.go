@@ -36,6 +36,26 @@ func main() {
 	fmt.Println("--- Parse Tree ---")
 	fmt.Println(tree.ToStringTree(nil, p))
 
+	defer func() {
+		if r := recover(); r != nil {
+			// catch custom error
+			if errObjPtr, ok := r.(*map[string]any); ok && errObjPtr != nil {
+				errObj := *errObjPtr
+
+				if errorText, exists := errObj["text"].(string); exists {
+					fmt.Fprintf(os.Stderr, "\n Runtime Panic: %s\n", errorText)
+				} else {
+					fmt.Fprintf(os.Stderr, "\n Runtime Panic [%v]: %v (Line %v)\n", errObj["type"], errObj["message"], errObj["line"])
+				}
+				os.Exit(1)
+			}
+
+			// fallback to standard Go compiler bugs
+			fmt.Fprintf(os.Stderr, "\n Internal Interpreter Crash: %v\n", r)
+			os.Exit(1)
+		}
+	}()
+
 	eval := ast.NewVisitor()
 	tree.Accept(eval)
 

@@ -32,6 +32,24 @@ type GrammarListener interface {
 	// EnterThrowStmt is called when entering the throwStmt production.
 	EnterThrowStmt(c *ThrowStmtContext)
 
+	// EnterBreakStmt is called when entering the breakStmt production.
+	EnterBreakStmt(c *BreakStmtContext)
+
+	// EnterContinueStmt is called when entering the continueStmt production.
+	EnterContinueStmt(c *ContinueStmtContext)
+
+	// EnterSwitchStmt is called when entering the switchStmt production.
+	EnterSwitchStmt(c *SwitchStmtContext)
+
+	// EnterCaseBlock is called when entering the caseBlock production.
+	EnterCaseBlock(c *CaseBlockContext)
+
+	// EnterDefaultBlock is called when entering the defaultBlock production.
+	EnterDefaultBlock(c *DefaultBlockContext)
+
+	// EnterForInStmt is called when entering the forInStmt production.
+	EnterForInStmt(c *ForInStmtContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -58,6 +76,9 @@ type GrammarListener interface {
 
 	// EnterBlockStmt is called when entering the blockStmt production.
 	EnterBlockStmt(c *BlockStmtContext)
+
+	// EnterIfInit is called when entering the ifInit production.
+	EnterIfInit(c *IfInitContext)
 
 	// EnterForInit is called when entering the forInit production.
 	EnterForInit(c *ForInitContext)
@@ -98,6 +119,9 @@ type GrammarListener interface {
 	// EnterUnary is called when entering the Unary production.
 	EnterUnary(c *UnaryContext)
 
+	// EnterTernaryOp is called when entering the TernaryOp production.
+	EnterTernaryOp(c *TernaryOpContext)
+
 	// EnterMapLiteral is called when entering the MapLiteral production.
 	EnterMapLiteral(c *MapLiteralContext)
 
@@ -122,6 +146,9 @@ type GrammarListener interface {
 	// EnterBitAnd is called when entering the BitAnd production.
 	EnterBitAnd(c *BitAndContext)
 
+	// EnterMembership is called when entering the Membership production.
+	EnterMembership(c *MembershipContext)
+
 	// EnterFunctionCall is called when entering the FunctionCall production.
 	EnterFunctionCall(c *FunctionCallContext)
 
@@ -136,6 +163,15 @@ type GrammarListener interface {
 
 	// EnterMapEntry is called when entering the mapEntry production.
 	EnterMapEntry(c *MapEntryContext)
+
+	// EnterMembershipOp is called when entering the membershipOp production.
+	EnterMembershipOp(c *MembershipOpContext)
+
+	// EnterStandardArray is called when entering the StandardArray production.
+	EnterStandardArray(c *StandardArrayContext)
+
+	// EnterListComprehension is called when entering the ListComprehension production.
+	EnterListComprehension(c *ListComprehensionContext)
 
 	// ExitProgram is called when exiting the program production.
 	ExitProgram(c *ProgramContext)
@@ -160,6 +196,24 @@ type GrammarListener interface {
 
 	// ExitThrowStmt is called when exiting the throwStmt production.
 	ExitThrowStmt(c *ThrowStmtContext)
+
+	// ExitBreakStmt is called when exiting the breakStmt production.
+	ExitBreakStmt(c *BreakStmtContext)
+
+	// ExitContinueStmt is called when exiting the continueStmt production.
+	ExitContinueStmt(c *ContinueStmtContext)
+
+	// ExitSwitchStmt is called when exiting the switchStmt production.
+	ExitSwitchStmt(c *SwitchStmtContext)
+
+	// ExitCaseBlock is called when exiting the caseBlock production.
+	ExitCaseBlock(c *CaseBlockContext)
+
+	// ExitDefaultBlock is called when exiting the defaultBlock production.
+	ExitDefaultBlock(c *DefaultBlockContext)
+
+	// ExitForInStmt is called when exiting the forInStmt production.
+	ExitForInStmt(c *ForInStmtContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)
@@ -187,6 +241,9 @@ type GrammarListener interface {
 
 	// ExitBlockStmt is called when exiting the blockStmt production.
 	ExitBlockStmt(c *BlockStmtContext)
+
+	// ExitIfInit is called when exiting the ifInit production.
+	ExitIfInit(c *IfInitContext)
 
 	// ExitForInit is called when exiting the forInit production.
 	ExitForInit(c *ForInitContext)
@@ -227,6 +284,9 @@ type GrammarListener interface {
 	// ExitUnary is called when exiting the Unary production.
 	ExitUnary(c *UnaryContext)
 
+	// ExitTernaryOp is called when exiting the TernaryOp production.
+	ExitTernaryOp(c *TernaryOpContext)
+
 	// ExitMapLiteral is called when exiting the MapLiteral production.
 	ExitMapLiteral(c *MapLiteralContext)
 
@@ -251,6 +311,9 @@ type GrammarListener interface {
 	// ExitBitAnd is called when exiting the BitAnd production.
 	ExitBitAnd(c *BitAndContext)
 
+	// ExitMembership is called when exiting the Membership production.
+	ExitMembership(c *MembershipContext)
+
 	// ExitFunctionCall is called when exiting the FunctionCall production.
 	ExitFunctionCall(c *FunctionCallContext)
 
@@ -265,4 +328,13 @@ type GrammarListener interface {
 
 	// ExitMapEntry is called when exiting the mapEntry production.
 	ExitMapEntry(c *MapEntryContext)
+
+	// ExitMembershipOp is called when exiting the membershipOp production.
+	ExitMembershipOp(c *MembershipOpContext)
+
+	// ExitStandardArray is called when exiting the StandardArray production.
+	ExitStandardArray(c *StandardArrayContext)
+
+	// ExitListComprehension is called when exiting the ListComprehension production.
+	ExitListComprehension(c *ListComprehensionContext)
 }

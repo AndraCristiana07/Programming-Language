@@ -40,6 +40,30 @@ func (v *BaseGrammarVisitor) VisitThrowStmt(ctx *ThrowStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitBreakStmt(ctx *BreakStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitContinueStmt(ctx *ContinueStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitSwitchStmt(ctx *SwitchStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitCaseBlock(ctx *CaseBlockContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitDefaultBlock(ctx *DefaultBlockContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitForInStmt(ctx *ForInStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -73,6 +97,10 @@ func (v *BaseGrammarVisitor) VisitForStmt(ctx *ForStmtContext) interface{} {
 }
 
 func (v *BaseGrammarVisitor) VisitBlockStmt(ctx *BlockStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitIfInit(ctx *IfInitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -128,6 +156,10 @@ func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitTernaryOp(ctx *TernaryOpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -160,6 +192,10 @@ func (v *BaseGrammarVisitor) VisitBitAnd(ctx *BitAndContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitMembership(ctx *MembershipContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitFunctionCall(ctx *FunctionCallContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -177,5 +213,17 @@ func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface
 }
 
 func (v *BaseGrammarVisitor) VisitMapEntry(ctx *MapEntryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMembershipOp(ctx *MembershipOpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitStandardArray(ctx *StandardArrayContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitListComprehension(ctx *ListComprehensionContext) interface{} {
 	return v.VisitChildren(ctx)
 }

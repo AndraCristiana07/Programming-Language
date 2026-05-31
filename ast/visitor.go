@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"my_language/parser"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -28,6 +29,13 @@ type RuntimeFunction struct {
 	Body       *parser.BlockStmtContext
 	Env        *Environment
 }
+
+type BreakSignal struct{}
+type ContinueSignal struct{}
+
+type NullValue struct{}
+
+var LanguageNull = &NullValue{}
 
 func NewVisitor() *Visitor {
 	return &Visitor{
@@ -74,6 +82,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.IfStmt().Accept(v)
 	} else if ctx.WhileStmt() != nil {
 		return ctx.WhileStmt().Accept(v)
+	} else if ctx.SwitchStmt() != nil {
+		return ctx.SwitchStmt().Accept(v)
+	} else if ctx.ForInStmt() != nil {
+		return ctx.ForInStmt().Accept(v)
 	} else if ctx.ForStmt() != nil {
 		return ctx.ForStmt().Accept(v)
 	} else if ctx.PostfixStmt() != nil {
@@ -84,6 +96,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.ThrowStmt().Accept(v)
 	} else if ctx.ReturnStmt() != nil {
 		return ctx.ReturnStmt().Accept(v)
+	} else if ctx.BreakStmt() != nil {
+		return ctx.BreakStmt().Accept(v)
+	} else if ctx.ContinueStmt() != nil {
+		return ctx.ContinueStmt().Accept(v)
 	}
 
 	return nil
@@ -96,6 +112,13 @@ func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {
 		return ctx.AssignStmt().Accept(v)
 	}
 	return nil
+}
+func (v *Visitor) VisitBreakStmt(ctx *parser.BreakStmtContext) any {
+	return BreakSignal{}
+}
+
+func (v *Visitor) VisitContinueStmt(ctx *parser.ContinueStmtContext) any {
+	return ContinueSignal{}
 }
 
 func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
@@ -237,7 +260,7 @@ func (v *Visitor) VisitMapLiteral(ctx *parser.MapLiteralContext) any {
 }
 
 func (v *Visitor) VisitNull(ctx *parser.NullContext) any {
-	return nil
+	return LanguageNull
 }
 
 func (v *Visitor) VisitIdentifier(ctx *parser.IdentifierContext) any {
@@ -344,6 +367,48 @@ func (v *Visitor) VisitBoolean(ctx *parser.BooleanContext) any {
 	return false
 }
 
+func (v *Visitor) VisitMembership(ctx *parser.MembershipContext) any {
+	left := ctx.GetLeftExpr().Accept(v)
+	right := ctx.GetRightExpr().Accept(v)
+
+	op := ctx.GetOp().GetText()
+
+	found := false
+
+	// substring (string in string)
+	if leftStr, okL := left.(string); okL {
+		if rightStr, okR := right.(string); okR {
+			lClean := strings.Trim(leftStr, "\"")
+			rClean := strings.Trim(rightStr, "\"")
+			found = strings.Contains(rClean, lClean)
+		}
+	}
+
+	// element in array
+	if arrPtr, ok := right.(*[]any); ok && arrPtr != nil {
+		if slices.Contains(*arrPtr, left) {
+			found = true
+		}
+	}
+
+	// key lookup inside a dict/map
+	if mapPtr, ok := right.(*map[string]any); ok && mapPtr != nil {
+		keyStr := fmt.Sprintf("%v", left)
+		if s, ok := left.(string); ok {
+			keyStr = strings.Trim(s, "\"")
+		}
+		_, exists := (*mapPtr)[keyStr]
+		found = exists
+	}
+
+	// check if contains "not"
+	if strings.Contains(op, "not") {
+		return !found
+	}
+
+	return found
+}
+
 func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)
@@ -401,33 +466,109 @@ func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 
 func (v *Visitor) VisitBlockStmt(ctx *parser.BlockStmtContext) any {
 	for _, child := range ctx.GetChildren() {
+		var res any
+
 		if stmt, ok := child.(*parser.StatementContext); ok {
 			if stmt != nil {
-				stmt.Accept(v)
+				res = stmt.Accept(v)
 			}
 		} else if fn, ok := child.(*parser.FuncStmtContext); ok {
 			if fn != nil {
-				fn.Accept(v)
+				res = fn.Accept(v)
 			}
+		}
+
+		if _, ok := res.(BreakSignal); ok {
+			return BreakSignal{}
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			return ContinueSignal{}
 		}
 	}
 	return nil
 }
 
-func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
-	condition := ctx.Expr().Accept(v)
-	conditionBool, ok := condition.(bool)
-	if !ok {
-		panic(RuntimeError("TypeError", "Condition in if statement must be boolean", ctx))
+func (v *Visitor) VisitTernaryOp(ctx *parser.TernaryOpContext) any {
+	condition := ctx.GetCondExpr().Accept(v)
+
+	if condCheck(condition) {
+		return ctx.GetTrueExpr().Accept(v)
+	} else {
+		return ctx.GetFalseExpr().Accept(v)
 	}
 
-	if conditionBool {
-		ctx.GetThenBranch().Accept(v)
-	} else if ctx.GetElseBranch() != nil {
-		ctx.GetElseBranch().Accept(v)
+}
+
+func (v *Visitor) VisitIfInit(ctx *parser.IfInitContext) any {
+	if ctx.VarDecl() != nil {
+		return ctx.VarDecl().Accept(v)
+	}
+	if ctx.AssignStmt() != nil {
+		return ctx.AssignStmt().Accept(v)
+	}
+	return nil
+}
+
+func (v *Visitor) VisitIfStmt(ctx *parser.IfStmtContext) any {
+	originalEnv := v.currEnv
+
+	// if init exists, make new scope
+	if ctx.GetInit() != nil {
+		v.currEnv = NewScope(originalEnv)
+	}
+
+	// ensure scope is restored
+	defer func() {
+		v.currEnv = originalEnv
+	}()
+
+	// execute the init stmt
+	if ctx.GetInit() != nil {
+		ctx.GetInit().Accept(v)
+	}
+
+	condition := ctx.Expr(0).Accept(v)
+
+	// check if cond is true
+	if condCheck(condition) {
+		return ctx.GetThenBranch().Accept(v)
+	}
+
+	elifConditions := ctx.GetElifCond()
+	elifBranches := ctx.GetElifBranch()
+
+	// elif branches
+	for i := 0; i < len(elifConditions); i++ {
+		elifCondVal := elifConditions[i].Accept(v)
+
+		if condCheck(elifCondVal) {
+			return elifBranches[i].Accept(v)
+		}
+	}
+
+	// else branch
+	if ctx.GetElseBranch() != nil {
+		return ctx.GetElseBranch().Accept(v)
 	}
 
 	return nil
+}
+
+func condCheck(val any) bool {
+	if val == nil {
+		return false
+	}
+	if b, ok := val.(bool); ok {
+		return b
+	}
+	if f, ok := val.(float64); ok {
+		return f != 0
+	}
+	// check if empty string
+	if s, ok := val.(string); ok {
+		return s != "" && s != "\"\""
+	}
+	return true
 }
 
 func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
@@ -441,7 +582,15 @@ func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
 		if !conditionBool {
 			break
 		}
-		ctx.GetBody().Accept(v)
+
+		res := ctx.GetBody().Accept(v)
+
+		if _, ok := res.(BreakSignal); ok {
+			break // exit while loop
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			continue // jump to the next condition evaluation
+		}
 	}
 	return nil
 }
@@ -462,15 +611,164 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 				break
 			}
 		}
+
+		var res any
 		if ctx.GetBody() != nil {
-			ctx.GetBody().Accept(v)
+			res = ctx.GetBody().Accept(v)
 		}
 
+		if _, ok := res.(BreakSignal); ok {
+			break // exit the loop entirely
+		}
+
+		// execute post statement
 		if ctx.GetPost() != nil {
 			ctx.GetPost().Accept(v)
 		}
+
+		// handle continue after the post statement has run
+		if _, ok := res.(ContinueSignal); ok {
+			continue
+		}
 	}
 
+	return nil
+}
+
+func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
+	collection := ctx.Expr().Accept(v)
+
+	varName := ctx.IDENTIFIER().GetText()
+
+	// check if 'var' exixsts in assign
+	hasVarKeyword := ctx.VAR() != nil
+
+	previousEnv := v.currEnv
+	v.currEnv = NewScope(previousEnv)
+	defer func() {
+		v.currEnv = previousEnv
+	}()
+
+	assignLoopVar := func(val any) {
+		if hasVarKeyword {
+			// for (var x in arr)
+			v.currEnv.Define(varName, val)
+		} else {
+			// for (x in arr)
+			if success := v.currEnv.Assign(varName, val); !success {
+				v.currEnv.Define(varName, val)
+			}
+		}
+	}
+
+	executeBody := func() bool {
+		// execute block body
+		res := ctx.BlockStmt().Accept(v)
+		if _, ok := res.(BreakSignal); ok {
+			return false // break out of the loop
+		}
+		if _, ok := res.(ContinueSignal); ok {
+			return true // skip to next iteration
+		}
+		return true
+	}
+
+	if targetPtr, ok := collection.(*[]any); ok && targetPtr != nil {
+		// dereference the pointer
+		for _, value := range *targetPtr {
+			assignLoopVar(value)
+
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	//string iteration
+	if str, ok := collection.(string); ok {
+		// clean up quotes
+		cleanedStr := str
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+
+		// loop through the string by rune
+		for _, runeVal := range cleanedStr {
+			// convert rune back into single-character string
+			charStr := string(runeVal)
+
+			assignLoopVar(charStr)
+
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	//if non-pointer slice
+	if targetSlice, ok := collection.([]any); ok {
+		for _, value := range targetSlice {
+			assignLoopVar(value)
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	// dictionary/map values
+	if targetMap, ok := collection.(*map[string]any); ok && targetMap != nil {
+		for _, value := range *targetMap {
+			assignLoopVar(value)
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
+	panic(fmt.Sprintf("TypeError: Cannot iterate over type %T using for...in", collection))
+}
+
+func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {
+	// eval switch expt
+	switchExpr := ctx.Expr().Accept(v)
+
+	match := false
+
+	// loop through cases
+	for _, caseCtx := range ctx.AllCaseBlock() {
+		if !match {
+			caseValue := caseCtx.Expr().Accept(v)
+
+			if switchExpr == caseValue {
+				match = true
+			}
+		}
+		// execute stmt if there;s a match
+		if match {
+			for _, stmt := range caseCtx.AllStatement() {
+				res := stmt.Accept(v)
+				// break hit
+				if _, ok := res.(BreakSignal); ok {
+					return nil
+				}
+			}
+		}
+	}
+	// default block
+	if !match && ctx.DefaultBlock() != nil {
+		defaultCtx := ctx.DefaultBlock()
+		for _, stmt := range defaultCtx.AllStatement() {
+			res := stmt.Accept(v)
+			// break hit
+			if _, ok := res.(BreakSignal); ok {
+				return nil
+			}
+		}
+	}
 	return nil
 }
 
@@ -686,6 +984,10 @@ func (v *Visitor) VisitOr(ctx *parser.OrContext) any {
 }
 
 func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
+	return ctx.ArrayLit().Accept(v)
+}
+
+func (v *Visitor) VisitStandardArray(ctx *parser.StandardArrayContext) any {
 	var elements []any
 	for _, expr := range ctx.AllExpr() {
 		elements = append(elements, expr.Accept(v))
@@ -694,29 +996,120 @@ func (v *Visitor) VisitArrayLiteral(ctx *parser.ArrayLiteralContext) any {
 	return &elements
 }
 
+func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) any {
+	sourceCollection := ctx.GetSrcExpr().Accept(v)
+
+	// loop iterator variable name
+	varName := ctx.IDENTIFIER().GetText()
+
+	// new slice that will hold results
+	resultSlice := make([]any, 0)
+
+	previousEnv := v.currEnv
+	v.currEnv = NewScope(previousEnv)
+
+	defer func() {
+		v.currEnv = previousEnv
+	}()
+
+	processElement := func(element any) {
+		// assigncurrent item to the loop variable
+		v.currEnv.Define(varName, element)
+
+		// check for if
+		if ctx.GetFilterExpr() != nil {
+			conditionValue := ctx.GetFilterExpr().Accept(v)
+			if !condCheck(conditionValue) {
+				return
+			}
+		}
+
+		// eval expression
+		transformedValue := ctx.GetTransformExpr().Accept(v)
+		// append it to result
+		resultSlice = append(resultSlice, transformedValue)
+	}
+
+	// loop over the source
+	if arrPtr, ok := sourceCollection.(*[]any); ok && arrPtr != nil {
+		for _, value := range *arrPtr {
+			processElement(value)
+		}
+	} else if str, ok := sourceCollection.(string); ok {
+		// if string -> clean and process
+		cleanedStr := str
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+		for _, runeVal := range cleanedStr {
+			processElement(string(runeVal))
+		}
+	} else {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot perform list comprehension over type %T", sourceCollection), ctx))
+	}
+
+	return &resultSlice
+}
+
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
-	array := ctx.Expr(0).Accept(v)
-	index := ctx.Expr(1).Accept(v)
+	collection := ctx.Expr(0).Accept(v)
+	indexKey := ctx.Expr(1).Accept(v)
 
 	// expect pointer to the slice (*[]any)
-	arrPtr, ok := array.(*[]any)
-	if !ok {
-		panic(RuntimeError("TypeError", "Attempting to index a non-array value", ctx))
+	if arrPtr, ok := collection.(*[]any); ok && arrPtr != nil {
+		// dereference it locally to perform size checks and lookups safely
+		arr := *arrPtr
+
+		idx, ok := indexKey.(int)
+		if !ok {
+			// try converting to int
+			if f, ok := indexKey.(float64); ok {
+				idx = int(f)
+			} else {
+				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
+			}
+		}
+
+		if idx < 0 || idx >= len(arr) {
+			panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
+		}
+
+		return arr[idx]
 	}
 
-	// dereference it locally to perform size checks and lookups safely
-	arr := *arrPtr
+	// dict/map
+	if mapPtr, ok := collection.(*map[string]any); ok && mapPtr != nil {
+		targetMap := *mapPtr
 
-	idx, ok := index.(int)
-	if !ok {
-		panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
+		// indexKey into string for map lookup
+		var lookupKey string
+		switch k := indexKey.(type) {
+		case string:
+			lookupKey = k
+		case bool:
+			// true -> "true", false -> "false"
+			if k {
+				lookupKey = "true"
+			} else {
+				lookupKey = "false"
+			}
+		case int:
+			lookupKey = strconv.Itoa(k)
+		case float64:
+			lookupKey = strconv.FormatFloat(k, 'f', -1, 64)
+		default:
+			lookupKey = fmt.Sprintf("%v", indexKey)
+		}
+
+		// lookup inside map
+		if val, exists := targetMap[lookupKey]; exists {
+			return val
+		}
+
+		return nil
 	}
 
-	if idx < 0 || idx >= len(arr) {
-		panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
-	}
-
-	return arr[idx]
+	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read properties of type %T using brackets [...]", collection), ctx))
 }
 
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
@@ -953,7 +1346,7 @@ func power(base, exp int) int {
 
 // helper for standard print outputs
 func cleanStringRepr(val any) string {
-	if val == nil {
+	if val == nil || val == LanguageNull {
 		return "null"
 	}
 

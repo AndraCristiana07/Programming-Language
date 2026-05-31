@@ -32,6 +32,24 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#throwStmt.
 	VisitThrowStmt(ctx *ThrowStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#breakStmt.
+	VisitBreakStmt(ctx *BreakStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#continueStmt.
+	VisitContinueStmt(ctx *ContinueStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#switchStmt.
+	VisitSwitchStmt(ctx *SwitchStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#caseBlock.
+	VisitCaseBlock(ctx *CaseBlockContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#defaultBlock.
+	VisitDefaultBlock(ctx *DefaultBlockContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#forInStmt.
+	VisitForInStmt(ctx *ForInStmtContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 
@@ -58,6 +76,9 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#blockStmt.
 	VisitBlockStmt(ctx *BlockStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#ifInit.
+	VisitIfInit(ctx *IfInitContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#forInit.
 	VisitForInit(ctx *ForInitContext) interface{}
@@ -98,6 +119,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Unary.
 	VisitUnary(ctx *UnaryContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#TernaryOp.
+	VisitTernaryOp(ctx *TernaryOpContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#MapLiteral.
 	VisitMapLiteral(ctx *MapLiteralContext) interface{}
 
@@ -122,6 +146,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#BitAnd.
 	VisitBitAnd(ctx *BitAndContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#Membership.
+	VisitMembership(ctx *MembershipContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#FunctionCall.
 	VisitFunctionCall(ctx *FunctionCallContext) interface{}
 
@@ -136,4 +163,13 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#mapEntry.
 	VisitMapEntry(ctx *MapEntryContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#membershipOp.
+	VisitMembershipOp(ctx *MembershipOpContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#StandardArray.
+	VisitStandardArray(ctx *StandardArrayContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#ListComprehension.
+	VisitListComprehension(ctx *ListComprehensionContext) interface{}
 }
