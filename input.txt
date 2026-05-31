@@ -381,3 +381,5 @@ if (var newScore = 95; newScore > 90) {
 var newlist1 = [x for x in fruits if "a" not in x]
 
 print newlist1
+
+

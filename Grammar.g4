@@ -4,6 +4,7 @@ program    : (statement | funcStmt | terminator)* EOF ;
 
 statement   : (varDecl      
             | assignStmt   
+            | structStmt     
             | arrayAssignStmt
             | compoundAssignStmt
             | exprStmt
@@ -18,7 +19,7 @@ statement   : (varDecl
             | tryCatchStmt
             | throwStmt
             | returnStmt
-            | breakStmt        
+            | breakStmt   
             | continueStmt) terminator?
             ;
 
@@ -46,6 +47,9 @@ ifStmt              : IF LPAREN (init=ifInit SEMICOLON)? expr RPAREN thenBranch=
 whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
 blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+structStmt          : STRUCT id=IDENTIFIER LBRACE terminator* (structField (terminator+ structField)* terminator*)? RBRACE ;
+
+structField         : IDENTIFIER ;
 
 ifInit      : varDecl
             | assignStmt
@@ -78,6 +82,7 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | expr op=OR expr                                       # Or
             | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
             | arrayLit                                              # ArrayLiteral
+            | structLiteral                                         # Struct
             | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE           # MapLiteral                              
             | IDENTIFIER                                            # Identifier          
             | NUMBER                                                # Number     
@@ -86,6 +91,8 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | 'null'                                                # Null
             | LPAREN expr RPAREN                                    # Parentheses
             ;
+
+structLiteral : structName=IDENTIFIER LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE ;
 
 mapEntry : expr COLON expr ;
 membershipOp
@@ -97,6 +104,7 @@ arrayLit
     | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
     ;
 
+STRUCT          : 'struct' ;
 SWITCH          : 'switch' ;
 CASE            : 'case' ;
 DEFAULT         : 'default' ;
