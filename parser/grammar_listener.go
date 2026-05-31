@@ -23,6 +23,9 @@ type GrammarListener interface {
 	// EnterFuncStmt is called when entering the funcStmt production.
 	EnterFuncStmt(c *FuncStmtContext)
 
+	// EnterReceiver is called when entering the receiver production.
+	EnterReceiver(c *ReceiverContext)
+
 	// EnterExprStmt is called when entering the exprStmt production.
 	EnterExprStmt(c *ExprStmtContext)
 
@@ -109,6 +112,9 @@ type GrammarListener interface {
 
 	// EnterArrayIndex is called when entering the ArrayIndex production.
 	EnterArrayIndex(c *ArrayIndexContext)
+
+	// EnterMethodCall is called when entering the MethodCall production.
+	EnterMethodCall(c *MethodCallContext)
 
 	// EnterStruct is called when entering the Struct production.
 	EnterStruct(c *StructContext)
@@ -200,6 +206,9 @@ type GrammarListener interface {
 	// ExitFuncStmt is called when exiting the funcStmt production.
 	ExitFuncStmt(c *FuncStmtContext)
 
+	// ExitReceiver is called when exiting the receiver production.
+	ExitReceiver(c *ReceiverContext)
+
 	// ExitExprStmt is called when exiting the exprStmt production.
 	ExitExprStmt(c *ExprStmtContext)
 
@@ -286,6 +295,9 @@ type GrammarListener interface {
 
 	// ExitArrayIndex is called when exiting the ArrayIndex production.
 	ExitArrayIndex(c *ArrayIndexContext)
+
+	// ExitMethodCall is called when exiting the MethodCall production.
+	ExitMethodCall(c *MethodCallContext)
 
 	// ExitStruct is called when exiting the Struct production.
 	ExitStruct(c *StructContext)

@@ -51,6 +51,12 @@ func (s *BaseGrammarListener) EnterFuncStmt(ctx *FuncStmtContext) {}
 // ExitFuncStmt is called when production funcStmt is exited.
 func (s *BaseGrammarListener) ExitFuncStmt(ctx *FuncStmtContext) {}
 
+// EnterReceiver is called when production receiver is entered.
+func (s *BaseGrammarListener) EnterReceiver(ctx *ReceiverContext) {}
+
+// ExitReceiver is called when production receiver is exited.
+func (s *BaseGrammarListener) ExitReceiver(ctx *ReceiverContext) {}
+
 // EnterExprStmt is called when production exprStmt is entered.
 func (s *BaseGrammarListener) EnterExprStmt(ctx *ExprStmtContext) {}
 
@@ -224,6 +230,12 @@ func (s *BaseGrammarListener) EnterArrayIndex(ctx *ArrayIndexContext) {}
 
 // ExitArrayIndex is called when production ArrayIndex is exited.
 func (s *BaseGrammarListener) ExitArrayIndex(ctx *ArrayIndexContext) {}
+
+// EnterMethodCall is called when production MethodCall is entered.
+func (s *BaseGrammarListener) EnterMethodCall(ctx *MethodCallContext) {}
+
+// ExitMethodCall is called when production MethodCall is exited.
+func (s *BaseGrammarListener) ExitMethodCall(ctx *MethodCallContext) {}
 
 // EnterStruct is called when production Struct is entered.
 func (s *BaseGrammarListener) EnterStruct(ctx *StructContext) {}

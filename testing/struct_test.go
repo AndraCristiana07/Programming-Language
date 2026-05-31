@@ -61,6 +61,21 @@ func TestStruct(t *testing.T) {
 			`,
 			expectError: true,
 		},
+		{
+			name: "Struct Receiver Member Methods",
+			input: `
+                struct User { name; age; }
+                
+                func (u User) greet() {
+                    return "Hello, my name is " + u.name;
+                }
+                
+                var player = User { name: "Hunter", age: 24 }
+                var testResult = player.greet();
+            `,
+			expectedOutput: "Hello, my name is Hunter",
+			expectError:    false,
+		},
 	}
 
 	for _, tc := range tests {

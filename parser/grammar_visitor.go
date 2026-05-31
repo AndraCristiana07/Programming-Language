@@ -23,6 +23,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#funcStmt.
 	VisitFuncStmt(ctx *FuncStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#receiver.
+	VisitReceiver(ctx *ReceiverContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#exprStmt.
 	VisitExprStmt(ctx *ExprStmtContext) interface{}
 
@@ -109,6 +112,9 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#ArrayIndex.
 	VisitArrayIndex(ctx *ArrayIndexContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#MethodCall.
+	VisitMethodCall(ctx *MethodCallContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Struct.
 	VisitStruct(ctx *StructContext) interface{}

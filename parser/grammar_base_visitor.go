@@ -28,6 +28,10 @@ func (v *BaseGrammarVisitor) VisitFuncStmt(ctx *FuncStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitReceiver(ctx *ReceiverContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitExprStmt(ctx *ExprStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -141,6 +145,10 @@ func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
 }
 
 func (v *BaseGrammarVisitor) VisitArrayIndex(ctx *ArrayIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMethodCall(ctx *MethodCallContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
