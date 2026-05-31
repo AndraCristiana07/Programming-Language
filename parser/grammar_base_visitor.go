@@ -216,6 +216,10 @@ func (v *BaseGrammarVisitor) VisitMapEntry(ctx *MapEntryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitMembershipOp(ctx *MembershipOpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitStandardArray(ctx *StandardArrayContext) interface{} {
 	return v.VisitChildren(ctx)
 }

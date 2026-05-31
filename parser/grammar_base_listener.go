@@ -333,6 +333,12 @@ func (s *BaseGrammarListener) EnterMapEntry(ctx *MapEntryContext) {}
 // ExitMapEntry is called when production mapEntry is exited.
 func (s *BaseGrammarListener) ExitMapEntry(ctx *MapEntryContext) {}
 
+// EnterMembershipOp is called when production membershipOp is entered.
+func (s *BaseGrammarListener) EnterMembershipOp(ctx *MembershipOpContext) {}
+
+// ExitMembershipOp is called when production membershipOp is exited.
+func (s *BaseGrammarListener) ExitMembershipOp(ctx *MembershipOpContext) {}
+
 // EnterStandardArray is called when production StandardArray is entered.
 func (s *BaseGrammarListener) EnterStandardArray(ctx *StandardArrayContext) {}
 

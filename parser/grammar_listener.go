@@ -164,6 +164,9 @@ type GrammarListener interface {
 	// EnterMapEntry is called when entering the mapEntry production.
 	EnterMapEntry(c *MapEntryContext)
 
+	// EnterMembershipOp is called when entering the membershipOp production.
+	EnterMembershipOp(c *MembershipOpContext)
+
 	// EnterStandardArray is called when entering the StandardArray production.
 	EnterStandardArray(c *StandardArrayContext)
 
@@ -325,6 +328,9 @@ type GrammarListener interface {
 
 	// ExitMapEntry is called when exiting the mapEntry production.
 	ExitMapEntry(c *MapEntryContext)
+
+	// ExitMembershipOp is called when exiting the membershipOp production.
+	ExitMembershipOp(c *MembershipOpContext)
 
 	// ExitStandardArray is called when exiting the StandardArray production.
 	ExitStandardArray(c *StandardArrayContext)

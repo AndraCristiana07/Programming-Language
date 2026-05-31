@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"my_language/parser"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -370,38 +371,42 @@ func (v *Visitor) VisitMembership(ctx *parser.MembershipContext) any {
 	left := ctx.GetLeftExpr().Accept(v)
 	right := ctx.GetRightExpr().Accept(v)
 
+	op := ctx.GetOp().GetText()
+
+	found := false
+
 	// substring (string in string)
 	if leftStr, okL := left.(string); okL {
 		if rightStr, okR := right.(string); okR {
-			//  clean quotes
 			lClean := strings.Trim(leftStr, "\"")
 			rClean := strings.Trim(rightStr, "\"")
-			return strings.Contains(rClean, lClean)
+			found = strings.Contains(rClean, lClean)
 		}
 	}
 
 	// element in array
 	if arrPtr, ok := right.(*[]any); ok && arrPtr != nil {
-		for _, item := range *arrPtr {
-			if item == left {
-				return true
-			}
+		if slices.Contains(*arrPtr, left) {
+			found = true
 		}
-		return false
 	}
 
 	// key lookup inside a dict/map
 	if mapPtr, ok := right.(*map[string]any); ok && mapPtr != nil {
-		// left value -> string
 		keyStr := fmt.Sprintf("%v", left)
 		if s, ok := left.(string); ok {
 			keyStr = strings.Trim(s, "\"")
 		}
 		_, exists := (*mapPtr)[keyStr]
-		return exists
+		found = exists
 	}
 
-	return false
+	// check if contains "not"
+	if strings.Contains(op, "not") {
+		return !found
+	}
+
+	return found
 }
 
 func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {

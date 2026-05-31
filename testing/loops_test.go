@@ -326,6 +326,14 @@ func TestListComprehension(t *testing.T) {
 			`,
 			expected: &[]any{"apple", "orange", "cherry", "kiwi", "mango"},
 		},
+		{
+			name: "List comprehension with if not in",
+			input: `
+				var fruits = ["apple", "banana", "cherry", "kiwi", "mango"]
+				var testResult = [x for x in fruits if "a" not in x]
+			`,
+			expected: &[]any{"cherry", "kiwi"},
+		},
 	}
 
 	for _, tc := range tests {

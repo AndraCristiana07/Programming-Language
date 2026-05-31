@@ -47,19 +47,19 @@ whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
 blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
 
-ifInit : varDecl
-       | assignStmt
-       ;
+ifInit      : varDecl
+            | assignStmt
+            ;
 
 forInit     : varDecl
             | assignStmt
             ;
 
-forPost   : assignStmt
-            | postfixStmt
-            ;
+forPost         : assignStmt
+                | postfixStmt
+                ;
             
-postfixStmt        : expr op=(INC | DEC) ;
+postfixStmt     : expr op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | expr DOT IDENTIFIER                                   # FieldAccess
@@ -73,7 +73,7 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             | expr op=BITXOR expr                                   # BitXor
             | expr op=BITOR expr                                    # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
-            | leftExpr=expr IN rightExpr=expr                       # Membership
+            | leftExpr=expr op=membershipOp rightExpr=expr          # Membership
             | expr op=AND expr                                      # And
             | expr op=OR expr                                       # Or
             | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
@@ -88,6 +88,10 @@ expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
             ;
 
 mapEntry : expr COLON expr ;
+membershipOp
+    : IN
+    | NOT IN
+    ;
 arrayLit
     : LBRACKET (expr (COMMA expr)*)? RBRACKET                                   # StandardArray
     | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
