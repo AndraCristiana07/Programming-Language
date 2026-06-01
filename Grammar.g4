@@ -4,7 +4,8 @@ program    : (statement | funcStmt | terminator)* EOF ;
 
 statement   : (varDecl      
             | assignStmt   
-            | structStmt     
+            | structStmt    
+            | interfaceStmt 
             | arrayAssignStmt
             | compoundAssignStmt
             | exprStmt
@@ -28,6 +29,9 @@ terminator          : SEMICOLON | NL ;
 funcStmt            : FUNC receiver? IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
 receiver            : LPAREN id=IDENTIFIER structType=IDENTIFIER RPAREN ;
 
+interfaceStmt       : INTERFACE IDENTIFIER LBRACE terminator* (method (terminator+ method)* terminator*)? RBRACE ;
+method              : IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN SEMICOLON ;
+
 exprStmt            : expr ;
 tryCatchStmt        : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
 throwStmt           : THROW expr ;
@@ -41,6 +45,7 @@ defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
 
 varDecl             : VAR IDENTIFIER EQUALS expr ;
+
 assignStmt          : expr EQUALS expr ;
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
@@ -107,6 +112,7 @@ arrayLit
     | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
     ;
 
+INTERFACE       : 'interface' ;
 STRUCT          : 'struct' ;
 SWITCH          : 'switch' ;
 CASE            : 'case' ;

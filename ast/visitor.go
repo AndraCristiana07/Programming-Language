@@ -18,9 +18,15 @@ type Callable interface {
 
 type Visitor struct {
 	parser.BaseGrammarVisitor
-	currEnv        *Environment
-	StructRegistry map[string][]string
-	MethodRegistry map[string]map[string]*parser.FuncStmtContext // for member methods
+	currEnv           *Environment
+	StructRegistry    map[string][]string
+	MethodRegistry    map[string]map[string]*parser.FuncStmtContext // for member methods
+	InterfaceRegistry map[string]Interface
+}
+
+type Interface struct {
+	Name    string
+	Methods map[string]int // map methodName -> expectedArgCount
 }
 
 type ReturnValueSignal struct {
@@ -42,9 +48,10 @@ var LanguageNull = &NullValue{}
 
 func NewVisitor() *Visitor {
 	return &Visitor{
-		currEnv:        NewGlobalEnvironment(),
-		StructRegistry: make(map[string][]string),
-		MethodRegistry: make(map[string]map[string]*parser.FuncStmtContext),
+		currEnv:           NewGlobalEnvironment(),
+		StructRegistry:    make(map[string][]string),
+		MethodRegistry:    make(map[string]map[string]*parser.FuncStmtContext),
+		InterfaceRegistry: make(map[string]Interface),
 	}
 }
 
@@ -75,6 +82,8 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.AssignStmt().Accept(v)
 	} else if ctx.StructStmt() != nil {
 		return ctx.StructStmt().Accept(v)
+	} else if ctx.InterfaceStmt() != nil {
+		return ctx.InterfaceStmt().Accept(v)
 	} else if ctx.ArrayAssignStmt() != nil {
 		return ctx.ArrayAssignStmt().Accept(v)
 	} else if ctx.CompoundAssignStmt() != nil {
@@ -167,6 +176,27 @@ func (v *Visitor) VisitStruct(ctx *parser.StructContext) any {
 	}
 
 	return &instance
+}
+
+func (v *Visitor) VisitInterfaceStmt(ctx *parser.InterfaceStmtContext) any {
+	interfaceName := ctx.IDENTIFIER().GetText()
+
+	interf := Interface{
+		Name:    interfaceName,
+		Methods: make(map[string]int),
+	}
+
+	for _, method := range ctx.AllMethod() {
+		methodCtx := method.(*parser.MethodContext)
+		methodName := methodCtx.IDENTIFIER(0).GetText() // extract the method identifier name
+
+		paramCount := len(methodCtx.AllIDENTIFIER()) - 1
+		interf.Methods[methodName] = paramCount
+	}
+
+	v.InterfaceRegistry[interfaceName] = interf
+
+	return LanguageNull
 }
 
 func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {

@@ -26,6 +26,12 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#receiver.
 	VisitReceiver(ctx *ReceiverContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#interfaceStmt.
+	VisitInterfaceStmt(ctx *InterfaceStmtContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#method.
+	VisitMethod(ctx *MethodContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#exprStmt.
 	VisitExprStmt(ctx *ExprStmtContext) interface{}
 

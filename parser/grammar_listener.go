@@ -26,6 +26,12 @@ type GrammarListener interface {
 	// EnterReceiver is called when entering the receiver production.
 	EnterReceiver(c *ReceiverContext)
 
+	// EnterInterfaceStmt is called when entering the interfaceStmt production.
+	EnterInterfaceStmt(c *InterfaceStmtContext)
+
+	// EnterMethod is called when entering the method production.
+	EnterMethod(c *MethodContext)
+
 	// EnterExprStmt is called when entering the exprStmt production.
 	EnterExprStmt(c *ExprStmtContext)
 
@@ -208,6 +214,12 @@ type GrammarListener interface {
 
 	// ExitReceiver is called when exiting the receiver production.
 	ExitReceiver(c *ReceiverContext)
+
+	// ExitInterfaceStmt is called when exiting the interfaceStmt production.
+	ExitInterfaceStmt(c *InterfaceStmtContext)
+
+	// ExitMethod is called when exiting the method production.
+	ExitMethod(c *MethodContext)
 
 	// ExitExprStmt is called when exiting the exprStmt production.
 	ExitExprStmt(c *ExprStmtContext)

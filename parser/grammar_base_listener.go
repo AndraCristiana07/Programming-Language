@@ -57,6 +57,18 @@ func (s *BaseGrammarListener) EnterReceiver(ctx *ReceiverContext) {}
 // ExitReceiver is called when production receiver is exited.
 func (s *BaseGrammarListener) ExitReceiver(ctx *ReceiverContext) {}
 
+// EnterInterfaceStmt is called when production interfaceStmt is entered.
+func (s *BaseGrammarListener) EnterInterfaceStmt(ctx *InterfaceStmtContext) {}
+
+// ExitInterfaceStmt is called when production interfaceStmt is exited.
+func (s *BaseGrammarListener) ExitInterfaceStmt(ctx *InterfaceStmtContext) {}
+
+// EnterMethod is called when production method is entered.
+func (s *BaseGrammarListener) EnterMethod(ctx *MethodContext) {}
+
+// ExitMethod is called when production method is exited.
+func (s *BaseGrammarListener) ExitMethod(ctx *MethodContext) {}
+
 // EnterExprStmt is called when production exprStmt is entered.
 func (s *BaseGrammarListener) EnterExprStmt(ctx *ExprStmtContext) {}
 
