@@ -208,6 +208,10 @@ func (v *BaseGrammarVisitor) VisitBitShift(ctx *BitShiftContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitLambdaExpr(ctx *LambdaExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitArrayLiteral(ctx *ArrayLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }

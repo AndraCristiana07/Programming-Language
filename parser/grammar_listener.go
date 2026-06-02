@@ -158,6 +158,9 @@ type GrammarListener interface {
 	// EnterBitShift is called when entering the BitShift production.
 	EnterBitShift(c *BitShiftContext)
 
+	// EnterLambdaExpr is called when entering the LambdaExpr production.
+	EnterLambdaExpr(c *LambdaExprContext)
+
 	// EnterArrayLiteral is called when entering the ArrayLiteral production.
 	EnterArrayLiteral(c *ArrayLiteralContext)
 
@@ -346,6 +349,9 @@ type GrammarListener interface {
 
 	// ExitBitShift is called when exiting the BitShift production.
 	ExitBitShift(c *BitShiftContext)
+
+	// ExitLambdaExpr is called when exiting the LambdaExpr production.
+	ExitLambdaExpr(c *LambdaExprContext)
 
 	// ExitArrayLiteral is called when exiting the ArrayLiteral production.
 	ExitArrayLiteral(c *ArrayLiteralContext)

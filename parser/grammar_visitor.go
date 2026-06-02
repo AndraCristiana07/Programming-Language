@@ -158,6 +158,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#BitShift.
 	VisitBitShift(ctx *BitShiftContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#LambdaExpr.
+	VisitLambdaExpr(ctx *LambdaExprContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#ArrayLiteral.
 	VisitArrayLiteral(ctx *ArrayLiteralContext) interface{}
 

@@ -92,6 +92,7 @@ expr        : expr LBRACKET expr RBRACKET                               # ArrayI
             | arrayLit                                                  # ArrayLiteral
             | structLiteral                                             # Struct
             | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE               # MapLiteral                              
+            | LAMBDA (IDENTIFIER (COMMA IDENTIFIER)*)? COLON expr       # LambdaExpr
             | IDENTIFIER                                                # Identifier          
             | NUMBER                                                    # Number     
             | val=(TRUE | FALSE)                                        # Boolean
@@ -178,6 +179,7 @@ BITXOREQAUL     : '^=' ;
 BITLSHIFTEQUAL  : '<<=' ;
 BITRSHIFTEQUAL  : '>>=' ;
 
+LAMBDA          : 'lambda' ; 
 FUNC            : 'func' ;
 RETURN          : 'return' ;
 PRINT           : 'print' ;

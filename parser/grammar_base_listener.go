@@ -321,6 +321,12 @@ func (s *BaseGrammarListener) EnterBitShift(ctx *BitShiftContext) {}
 // ExitBitShift is called when production BitShift is exited.
 func (s *BaseGrammarListener) ExitBitShift(ctx *BitShiftContext) {}
 
+// EnterLambdaExpr is called when production LambdaExpr is entered.
+func (s *BaseGrammarListener) EnterLambdaExpr(ctx *LambdaExprContext) {}
+
+// ExitLambdaExpr is called when production LambdaExpr is exited.
+func (s *BaseGrammarListener) ExitLambdaExpr(ctx *LambdaExprContext) {}
+
 // EnterArrayLiteral is called when production ArrayLiteral is entered.
 func (s *BaseGrammarListener) EnterArrayLiteral(ctx *ArrayLiteralContext) {}
 

@@ -604,7 +604,7 @@ func NewGlobalEnvironment() *Environment {
 
 			mappedElements := make([]any, len(*arrPtr))
 			for i, item := range *arrPtr {
-				mappedElements[i] = transform.Call(nil, []any{item})
+				mappedElements[i] = transform.Call(v, []any{item})
 			}
 
 			return &mappedElements

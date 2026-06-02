@@ -39,6 +39,12 @@ type RuntimeFunction struct {
 	Env        *Environment
 }
 
+type Lambda struct {
+	Parameters []string
+	BodyExpr   parser.IExprContext
+	ClosureEnv *Environment
+}
+
 type BreakSignal struct{}
 type ContinueSignal struct{}
 
@@ -119,6 +125,42 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 	}
 
 	return nil
+}
+
+func (l *Lambda) NrArgs() int {
+	return len(l.Parameters)
+}
+
+func (l *Lambda) Call(v *Visitor, args []any) any {
+	activationRecord := NewScope(l.ClosureEnv)
+
+	for i, paramName := range l.Parameters {
+		activationRecord.Define(paramName, args[i])
+	}
+
+	previousEnv := v.currEnv
+	v.currEnv = activationRecord
+
+	defer func() {
+		v.currEnv = previousEnv
+	}()
+
+	return l.BodyExpr.Accept(v)
+}
+
+func (v *Visitor) VisitLambdaExpr(ctx *parser.LambdaExprContext) any {
+	params := make([]string, 0)
+
+	// parameter name string
+	for _, idCtx := range ctx.AllIDENTIFIER() {
+		params = append(params, idCtx.GetText())
+	}
+
+	return &Lambda{
+		Parameters: params,
+		BodyExpr:   ctx.Expr(),
+		ClosureEnv: v.currEnv,
+	}
 }
 
 func (v *Visitor) VisitStructStmt(ctx *parser.StructStmtContext) any {
@@ -415,28 +457,61 @@ func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 	op := ctx.GetOp().GetText()
 
 	if left == nil {
-		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", left), ctx))
+		panic(RuntimeError("ReferenceError", "Left operand is not defined", ctx))
 	}
 	if right == nil {
-		panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", right), ctx))
+		panic(RuntimeError("ReferenceError", "Right operand is not defined", ctx))
 	}
+
+	toFloat := func(val any) (float64, bool) {
+		switch n := val.(type) {
+		case int:
+			return float64(n), true
+		case float64:
+			return n, true
+		default:
+			return 0, false
+		}
+	}
+
+	leftNum, okL := toFloat(left)
+	rightNum, okR := toFloat(right)
+
+	if !okL || !okR {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Unsupported operand types for %s: %T and %T", op, left, right), ctx))
+	}
+
+	_, leftIsInt := left.(int)
+	_, rightIsInt := right.(int)
+	bothInts := leftIsInt && rightIsInt
 
 	switch op {
 	case "*":
-		return left.(int) * right.(int)
+		if bothInts {
+			return left.(int) * right.(int)
+		}
+		return leftNum * rightNum
+
 	case "/":
-		if right.(int) == 0 {
+		if rightNum == 0 {
 			panic(RuntimeError("ZeroDivisionError", "Cannot divide a number by zero", ctx))
 		}
-		return left.(int) / right.(int)
+		if bothInts {
+			return left.(int) / right.(int)
+		}
+		return leftNum / rightNum
+
 	case "%":
-		if right.(int) == 0 {
+		if rightNum == 0 {
 			panic(RuntimeError("ZeroModuloError", "Cannot modulo by zero", ctx))
 		}
-		return left.(int) % right.(int)
+		if bothInts {
+			return left.(int) % right.(int)
+		}
+		return int(leftNum) % int(rightNum)
+
 	default:
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
-
 	}
 }
 
