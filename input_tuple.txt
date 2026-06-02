@@ -59,3 +59,13 @@ while (i < len(tuple6)){
   print(thistuple[i])
   i = i + 1
 }
+
+var tuple7 = ("a", "b" , "c")
+var tuple8 = (1, 2, 3)
+
+var mixed = tuple7 + tuple8
+print mixed 
+
+var tuple9 = ("apple", "banana")
+var mulTpl = tuple9 * 3
+print mulTpl

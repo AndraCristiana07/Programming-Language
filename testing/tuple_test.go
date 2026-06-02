@@ -49,6 +49,42 @@ func TestTuple(t *testing.T) {
             `,
 			expected: &ast.Tuple{Elements: []any{"apple", "kiwi", "cherry"}},
 		},
+		{
+			name: "Tuple concatenation",
+			input: `
+				var tuple1 = ("apple", "banana", "cherry")
+				var tuple2 = (1,3,5)
+				var testResult = tuple1 + tuple2
+            `,
+			expected: &ast.Tuple{Elements: []any{"apple", "banana", "cherry", 1, 3, 5}},
+		},
+		{
+			name: "Tuple multiply",
+			input: `
+				var tuple1 = ("apple", 2)
+				var testResult = tuple1 * 3
+
+			`,
+			expected: &ast.Tuple{Elements: []any{"apple", 2, "apple", 2, "apple", 2}},
+		},
+		{
+			name: "Tuple concatenation multiplied",
+			input: `
+				var tuple1 = ("apple", "pear")
+				var tuple2 = (true, false)
+				var testResult = (tuple1 + tuple2) * 2
+			`,
+			expected: &ast.Tuple{Elements: []any{"apple", "pear", true, false, "apple", "pear", true, false}},
+		},
+		{
+			name: "Tuple multiply and concatenation after",
+			input: `
+				var tuple1 = ("apple", "pear")
+				var tuple2 = (true, false)
+				var testResult = tuple1 * 2 + tuple2
+			`,
+			expected: &ast.Tuple{Elements: []any{"apple", "pear", "apple", "pear", true, false}},
+		},
 	}
 
 	for _, tc := range tests {

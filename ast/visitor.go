@@ -500,9 +500,9 @@ func (v *Visitor) VisitString(ctx *parser.StringContext) any {
 	}
 
 	// remove the surrounding quotes
-
 	return rawStr[1 : len(rawStr)-1]
 }
+
 func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)
@@ -517,6 +517,24 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 		} else {
 			panic(RuntimeError("SyntaxError", fmt.Sprintf("Unsupported operator for strings: %s", op), ctx))
 		}
+	}
+
+	leftTuple, leftIsTuple := left.(*Tuple)
+	rightTuple, rightIsTuple := right.(*Tuple)
+
+	if leftIsTuple && rightIsTuple {
+		if op == "+" {
+			// new slice with size of both combined
+			combinedElements := make([]any, 0, len(leftTuple.Elements)+len(rightTuple.Elements))
+			combinedElements = append(combinedElements, leftTuple.Elements...)
+			combinedElements = append(combinedElements, rightTuple.Elements...)
+
+			return &Tuple{Elements: combinedElements}
+		} else {
+			panic(RuntimeError("TypeError", fmt.Sprintf("Unsupported operator for tuples: %s", op), ctx))
+		}
+	} else if leftIsTuple || rightIsTuple {
+		panic(RuntimeError("TypeError", "Can only concatenate tuple (not to other types) to tuple", ctx))
 	}
 
 	lVal, lOk := left.(int)
@@ -556,6 +574,39 @@ func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 		default:
 			return 0, false
 		}
+	}
+
+	leftTuple, leftIsTuple := left.(*Tuple)
+	rightTuple, rightIsTuple := right.(*Tuple)
+
+	if (leftIsTuple || rightIsTuple) && op == "*" {
+		var targetTuple *Tuple
+		var repeatCount int
+		var ok bool
+
+		// take which side is tuple and which is mul
+		if leftIsTuple {
+			targetTuple = leftTuple
+			repeatCount, ok = right.(int)
+		} else {
+			targetTuple = rightTuple
+			repeatCount, ok = left.(int)
+		}
+
+		if !ok {
+			panic(RuntimeError("TypeError", "Tuple can only be multiplied by an integer", ctx))
+		}
+
+		if repeatCount <= 0 {
+			return &Tuple{Elements: make([]any, 0)}
+		}
+
+		repeatedElements := make([]any, 0, len(targetTuple.Elements)*repeatCount)
+		for i := 0; i < repeatCount; i++ {
+			repeatedElements = append(repeatedElements, targetTuple.Elements...)
+		}
+
+		return &Tuple{Elements: repeatedElements}
 	}
 
 	leftNum, okL := toFloat(left)
