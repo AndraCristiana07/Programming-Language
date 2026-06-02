@@ -938,6 +938,18 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 		return nil
 	}
 
+	// tuple
+	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
+		for _, value := range tuplePtr.Elements {
+			assignLoopVar(value)
+
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
+
 	//string iteration
 	if str, ok := collection.(string); ok {
 		// clean up quotes
@@ -1286,6 +1298,11 @@ func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) a
 	// loop over the source
 	if arrPtr, ok := sourceCollection.(*[]any); ok && arrPtr != nil {
 		for _, value := range *arrPtr {
+			processElement(value)
+		}
+	} else if tuplePtr, ok := sourceCollection.(*Tuple); ok && tuplePtr != nil {
+		// if tuple
+		for _, value := range tuplePtr.Elements {
 			processElement(value)
 		}
 	} else if str, ok := sourceCollection.(string); ok {

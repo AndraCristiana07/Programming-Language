@@ -37,4 +37,25 @@ print(green)
 print(yellow)
 print(red)
 
+var tuple4 = ("a", "b", "c")
+for (tl in tuple4) {
+    print tl
+}
 
+var tuple5 = (1, 2, 3, 4, 5)
+
+var evensSquared = [x * x for x in tuple5 if x % 2 == 0]
+
+print evensSquared
+
+
+var tuple6 = ("apple", "banana", "cherry")
+for (i in range(len(tuple6))){
+    print thistuple[i]
+}
+
+var i = 0
+while (i < len(tuple6)){
+  print(thistuple[i])
+  i = i + 1
+}
