@@ -11,6 +11,9 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TODO: make range indexing possible (thistuple[2:])
+// TODO: make in tuple possible
+
 type Callable interface {
 	NrArgs() int
 	Call(v *Visitor, args []any) any
@@ -43,6 +46,10 @@ type Lambda struct {
 	Parameters []string
 	BodyExpr   parser.IExprContext
 	ClosureEnv *Environment
+}
+
+type Tuple struct {
+	Elements []any
 }
 
 type BreakSignal struct{}
@@ -161,6 +168,34 @@ func (v *Visitor) VisitLambdaExpr(ctx *parser.LambdaExprContext) any {
 		BodyExpr:   ctx.Expr(),
 		ClosureEnv: v.currEnv,
 	}
+}
+
+func (t *Tuple) String() string {
+	var sb strings.Builder
+	sb.WriteString("(")
+	strs := make([]string, len(t.Elements))
+	for i, el := range t.Elements {
+		strs[i] = fmt.Sprintf("%v", el)
+	}
+	sb.WriteString(strings.Join(strs, ", "))
+	// single element tuple -> trailing comma
+	if len(t.Elements) == 1 {
+		sb.WriteString(",")
+	}
+	sb.WriteString(")")
+	return sb.String()
+}
+
+func (v *Visitor) VisitTupleLiteral(ctx *parser.TupleLiteralContext) any {
+	elements := make([]any, 0)
+	for _, exprCtx := range ctx.AllExpr() {
+		elements = append(elements, exprCtx.Accept(v))
+	}
+	return &Tuple{Elements: elements}
+}
+
+func (v *Visitor) VisitEmptyTupleLiteral(ctx *parser.EmptyTupleLiteralContext) any {
+	return &Tuple{Elements: []any{}}
 }
 
 func (v *Visitor) VisitStructStmt(ctx *parser.StructStmtContext) any {
@@ -1221,6 +1256,7 @@ func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) a
 }
 
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
+	// TODO: make -1 indexing possible to give last elem
 	collection := ctx.Expr(0).Accept(v)
 	indexKey := ctx.Expr(1).Accept(v)
 
@@ -1244,6 +1280,24 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 		}
 
 		return arr[idx]
+	}
+
+	// tuple
+	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
+		idx, ok := indexKey.(int)
+		if !ok {
+			if f, ok := indexKey.(float64); ok {
+				idx = int(f)
+			} else {
+				panic(RuntimeError("TypeError", "Tuple index must be an integer", ctx))
+			}
+		}
+
+		if idx < 0 || idx >= len(tuplePtr.Elements) {
+			panic(RuntimeError("IndexError", fmt.Sprintf("Tuple index %d is out of bounds (length %d)", idx, len(tuplePtr.Elements)), ctx))
+		}
+
+		return tuplePtr.Elements[idx]
 	}
 
 	// dict/map
@@ -1627,9 +1681,23 @@ func cleanStringRepr(val any) string {
 		}
 		sb.WriteString("]")
 		return sb.String()
+	case *Tuple:
+		var sb strings.Builder
+		sb.WriteString("(")
+		for i, element := range v.Elements {
+			sb.WriteString(cleanStringRepr(element))
+			if i < len(v.Elements)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		// (10,)
+		if len(v.Elements) == 1 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(")")
+		return sb.String()
 	case *map[string]any:
 		m := *v
-
 		// struct
 		if typeName, isStruct := m["__type__"].(string); isStruct {
 			var sb strings.Builder

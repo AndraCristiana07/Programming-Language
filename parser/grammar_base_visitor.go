@@ -180,11 +180,19 @@ func (v *BaseGrammarVisitor) VisitComparison(ctx *ComparisonContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitTupleLiteral(ctx *TupleLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitMembership(ctx *MembershipContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseGrammarVisitor) VisitFunctionCall(ctx *FunctionCallContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitEmptyTupleLiteral(ctx *EmptyTupleLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

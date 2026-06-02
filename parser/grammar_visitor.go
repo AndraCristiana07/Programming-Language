@@ -137,11 +137,17 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#TupleLiteral.
+	VisitTupleLiteral(ctx *TupleLiteralContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Membership.
 	VisitMembership(ctx *MembershipContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#FunctionCall.
 	VisitFunctionCall(ctx *FunctionCallContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#EmptyTupleLiteral.
+	VisitEmptyTupleLiteral(ctx *EmptyTupleLiteralContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}

@@ -279,6 +279,12 @@ func (s *BaseGrammarListener) EnterComparison(ctx *ComparisonContext) {}
 // ExitComparison is called when production Comparison is exited.
 func (s *BaseGrammarListener) ExitComparison(ctx *ComparisonContext) {}
 
+// EnterTupleLiteral is called when production TupleLiteral is entered.
+func (s *BaseGrammarListener) EnterTupleLiteral(ctx *TupleLiteralContext) {}
+
+// ExitTupleLiteral is called when production TupleLiteral is exited.
+func (s *BaseGrammarListener) ExitTupleLiteral(ctx *TupleLiteralContext) {}
+
 // EnterMembership is called when production Membership is entered.
 func (s *BaseGrammarListener) EnterMembership(ctx *MembershipContext) {}
 
@@ -290,6 +296,12 @@ func (s *BaseGrammarListener) EnterFunctionCall(ctx *FunctionCallContext) {}
 
 // ExitFunctionCall is called when production FunctionCall is exited.
 func (s *BaseGrammarListener) ExitFunctionCall(ctx *FunctionCallContext) {}
+
+// EnterEmptyTupleLiteral is called when production EmptyTupleLiteral is entered.
+func (s *BaseGrammarListener) EnterEmptyTupleLiteral(ctx *EmptyTupleLiteralContext) {}
+
+// ExitEmptyTupleLiteral is called when production EmptyTupleLiteral is exited.
+func (s *BaseGrammarListener) ExitEmptyTupleLiteral(ctx *EmptyTupleLiteralContext) {}
 
 // EnterBoolean is called when production Boolean is entered.
 func (s *BaseGrammarListener) EnterBoolean(ctx *BooleanContext) {}

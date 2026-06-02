@@ -137,11 +137,17 @@ type GrammarListener interface {
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
 
+	// EnterTupleLiteral is called when entering the TupleLiteral production.
+	EnterTupleLiteral(c *TupleLiteralContext)
+
 	// EnterMembership is called when entering the Membership production.
 	EnterMembership(c *MembershipContext)
 
 	// EnterFunctionCall is called when entering the FunctionCall production.
 	EnterFunctionCall(c *FunctionCallContext)
+
+	// EnterEmptyTupleLiteral is called when entering the EmptyTupleLiteral production.
+	EnterEmptyTupleLiteral(c *EmptyTupleLiteralContext)
 
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
@@ -329,11 +335,17 @@ type GrammarListener interface {
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
 
+	// ExitTupleLiteral is called when exiting the TupleLiteral production.
+	ExitTupleLiteral(c *TupleLiteralContext)
+
 	// ExitMembership is called when exiting the Membership production.
 	ExitMembership(c *MembershipContext)
 
 	// ExitFunctionCall is called when exiting the FunctionCall production.
 	ExitFunctionCall(c *FunctionCallContext)
+
+	// ExitEmptyTupleLiteral is called when exiting the EmptyTupleLiteral production.
+	ExitEmptyTupleLiteral(c *EmptyTupleLiteralContext)
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)

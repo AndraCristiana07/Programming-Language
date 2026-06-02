@@ -1,0 +1,25 @@
+var myTuple = (10, "apple")
+var val1 = myTuple[0]
+var val2 = myTuple[1]
+print val1
+print myTuple
+
+
+var thistuple = ("apple", "banana", "cherry", "apple", "cherry")
+print thistuple
+
+
+var tuple2 = (1, 5, 7, 9, 3)
+var tuple3 = (true, false, false)
+print tuple2
+print tuple3
+
+var tuple1 = ("abc", 34, true, 40, "male")
+print tuple1
+
+print type(tuple1)
+print len(myTuple)
+
+
+
+

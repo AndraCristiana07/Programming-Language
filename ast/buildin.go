@@ -48,6 +48,10 @@ func NewGlobalEnvironment() *Environment {
 			if str, ok := args[0].(string); ok {
 				return len(str)
 			}
+			// check for tuple
+			if tpl, ok := args[0].(*Tuple); ok {
+				return len(tpl.Elements)
+			}
 			panic("InvalidArgument: len() expects an array or string type")
 		},
 	})
@@ -192,6 +196,8 @@ func NewGlobalEnvironment() *Environment {
 				return "bool"
 			case *[]any:
 				return "array"
+			case *Tuple:
+				return "tuple"
 			default:
 				if _, ok := args[0].(Callable); ok {
 					return "function"

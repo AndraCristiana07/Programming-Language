@@ -93,6 +93,8 @@ expr        : expr LBRACKET expr RBRACKET                               # ArrayI
             | structLiteral                                             # Struct
             | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE               # MapLiteral                              
             | LAMBDA (IDENTIFIER (COMMA IDENTIFIER)*)? COLON expr       # LambdaExpr
+            | LPAREN expr COMMA expr (COMMA expr)* COMMA? RPAREN        # TupleLiteral
+            | LPAREN RPAREN                                             # EmptyTupleLiteral
             | IDENTIFIER                                                # Identifier          
             | NUMBER                                                    # Number     
             | val=(TRUE | FALSE)                                        # Boolean
