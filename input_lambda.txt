@@ -1,0 +1,23 @@
+var x = lambda a : a + 10
+var res = x(5)
+print res
+
+
+func myfunc(n) {
+    return lambda a : a * n
+}
+var double = myfunc(2)
+var res2 = double(11)
+print res2
+
+struct TaxCalculator {
+    rate
+}
+
+func (t TaxCalculator) GetTaxLambda() {
+    return lambda amount : amount * t.rate
+}
+
+var calc = TaxCalculator { rate: 0.15 }
+var compute = calc.GetTaxLambda()
+print compute(100)
