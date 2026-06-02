@@ -23,6 +23,15 @@ type GrammarListener interface {
 	// EnterFuncStmt is called when entering the funcStmt production.
 	EnterFuncStmt(c *FuncStmtContext)
 
+	// EnterReceiver is called when entering the receiver production.
+	EnterReceiver(c *ReceiverContext)
+
+	// EnterInterfaceStmt is called when entering the interfaceStmt production.
+	EnterInterfaceStmt(c *InterfaceStmtContext)
+
+	// EnterMethod is called when entering the method production.
+	EnterMethod(c *MethodContext)
+
 	// EnterExprStmt is called when entering the exprStmt production.
 	EnterExprStmt(c *ExprStmtContext)
 
@@ -77,6 +86,12 @@ type GrammarListener interface {
 	// EnterBlockStmt is called when entering the blockStmt production.
 	EnterBlockStmt(c *BlockStmtContext)
 
+	// EnterStructStmt is called when entering the structStmt production.
+	EnterStructStmt(c *StructStmtContext)
+
+	// EnterStructField is called when entering the structField production.
+	EnterStructField(c *StructFieldContext)
+
 	// EnterIfInit is called when entering the ifInit production.
 	EnterIfInit(c *IfInitContext)
 
@@ -92,17 +107,8 @@ type GrammarListener interface {
 	// EnterNull is called when entering the Null production.
 	EnterNull(c *NullContext)
 
-	// EnterBitOr is called when entering the BitOr production.
-	EnterBitOr(c *BitOrContext)
-
 	// EnterOr is called when entering the Or production.
 	EnterOr(c *OrContext)
-
-	// EnterAddSub is called when entering the AddSub production.
-	EnterAddSub(c *AddSubContext)
-
-	// EnterBitShift is called when entering the BitShift production.
-	EnterBitShift(c *BitShiftContext)
 
 	// EnterExponential is called when entering the Exponential production.
 	EnterExponential(c *ExponentialContext)
@@ -110,20 +116,14 @@ type GrammarListener interface {
 	// EnterString is called when entering the String production.
 	EnterString(c *StringContext)
 
-	// EnterArrayLiteral is called when entering the ArrayLiteral production.
-	EnterArrayLiteral(c *ArrayLiteralContext)
-
 	// EnterArrayIndex is called when entering the ArrayIndex production.
 	EnterArrayIndex(c *ArrayIndexContext)
 
-	// EnterUnary is called when entering the Unary production.
-	EnterUnary(c *UnaryContext)
+	// EnterMethodCall is called when entering the MethodCall production.
+	EnterMethodCall(c *MethodCallContext)
 
-	// EnterTernaryOp is called when entering the TernaryOp production.
-	EnterTernaryOp(c *TernaryOpContext)
-
-	// EnterMapLiteral is called when entering the MapLiteral production.
-	EnterMapLiteral(c *MapLiteralContext)
+	// EnterStruct is called when entering the Struct production.
+	EnterStruct(c *StructContext)
 
 	// EnterMulDivMod is called when entering the MulDivMod production.
 	EnterMulDivMod(c *MulDivModContext)
@@ -131,20 +131,11 @@ type GrammarListener interface {
 	// EnterIdentifier is called when entering the Identifier production.
 	EnterIdentifier(c *IdentifierContext)
 
-	// EnterBitXor is called when entering the BitXor production.
-	EnterBitXor(c *BitXorContext)
-
 	// EnterNumber is called when entering the Number production.
 	EnterNumber(c *NumberContext)
 
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
-
-	// EnterAnd is called when entering the And production.
-	EnterAnd(c *AndContext)
-
-	// EnterBitAnd is called when entering the BitAnd production.
-	EnterBitAnd(c *BitAndContext)
 
 	// EnterMembership is called when entering the Membership production.
 	EnterMembership(c *MembershipContext)
@@ -155,11 +146,44 @@ type GrammarListener interface {
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
 
+	// EnterParentheses is called when entering the Parentheses production.
+	EnterParentheses(c *ParenthesesContext)
+
+	// EnterBitOr is called when entering the BitOr production.
+	EnterBitOr(c *BitOrContext)
+
+	// EnterAddSub is called when entering the AddSub production.
+	EnterAddSub(c *AddSubContext)
+
+	// EnterBitShift is called when entering the BitShift production.
+	EnterBitShift(c *BitShiftContext)
+
+	// EnterArrayLiteral is called when entering the ArrayLiteral production.
+	EnterArrayLiteral(c *ArrayLiteralContext)
+
+	// EnterUnary is called when entering the Unary production.
+	EnterUnary(c *UnaryContext)
+
+	// EnterTernaryOp is called when entering the TernaryOp production.
+	EnterTernaryOp(c *TernaryOpContext)
+
+	// EnterMapLiteral is called when entering the MapLiteral production.
+	EnterMapLiteral(c *MapLiteralContext)
+
+	// EnterBitXor is called when entering the BitXor production.
+	EnterBitXor(c *BitXorContext)
+
+	// EnterAnd is called when entering the And production.
+	EnterAnd(c *AndContext)
+
+	// EnterBitAnd is called when entering the BitAnd production.
+	EnterBitAnd(c *BitAndContext)
+
 	// EnterFieldAccess is called when entering the FieldAccess production.
 	EnterFieldAccess(c *FieldAccessContext)
 
-	// EnterParentheses is called when entering the Parentheses production.
-	EnterParentheses(c *ParenthesesContext)
+	// EnterStructLiteral is called when entering the structLiteral production.
+	EnterStructLiteral(c *StructLiteralContext)
 
 	// EnterMapEntry is called when entering the mapEntry production.
 	EnterMapEntry(c *MapEntryContext)
@@ -187,6 +211,15 @@ type GrammarListener interface {
 
 	// ExitFuncStmt is called when exiting the funcStmt production.
 	ExitFuncStmt(c *FuncStmtContext)
+
+	// ExitReceiver is called when exiting the receiver production.
+	ExitReceiver(c *ReceiverContext)
+
+	// ExitInterfaceStmt is called when exiting the interfaceStmt production.
+	ExitInterfaceStmt(c *InterfaceStmtContext)
+
+	// ExitMethod is called when exiting the method production.
+	ExitMethod(c *MethodContext)
 
 	// ExitExprStmt is called when exiting the exprStmt production.
 	ExitExprStmt(c *ExprStmtContext)
@@ -242,6 +275,12 @@ type GrammarListener interface {
 	// ExitBlockStmt is called when exiting the blockStmt production.
 	ExitBlockStmt(c *BlockStmtContext)
 
+	// ExitStructStmt is called when exiting the structStmt production.
+	ExitStructStmt(c *StructStmtContext)
+
+	// ExitStructField is called when exiting the structField production.
+	ExitStructField(c *StructFieldContext)
+
 	// ExitIfInit is called when exiting the ifInit production.
 	ExitIfInit(c *IfInitContext)
 
@@ -257,17 +296,8 @@ type GrammarListener interface {
 	// ExitNull is called when exiting the Null production.
 	ExitNull(c *NullContext)
 
-	// ExitBitOr is called when exiting the BitOr production.
-	ExitBitOr(c *BitOrContext)
-
 	// ExitOr is called when exiting the Or production.
 	ExitOr(c *OrContext)
-
-	// ExitAddSub is called when exiting the AddSub production.
-	ExitAddSub(c *AddSubContext)
-
-	// ExitBitShift is called when exiting the BitShift production.
-	ExitBitShift(c *BitShiftContext)
 
 	// ExitExponential is called when exiting the Exponential production.
 	ExitExponential(c *ExponentialContext)
@@ -275,20 +305,14 @@ type GrammarListener interface {
 	// ExitString is called when exiting the String production.
 	ExitString(c *StringContext)
 
-	// ExitArrayLiteral is called when exiting the ArrayLiteral production.
-	ExitArrayLiteral(c *ArrayLiteralContext)
-
 	// ExitArrayIndex is called when exiting the ArrayIndex production.
 	ExitArrayIndex(c *ArrayIndexContext)
 
-	// ExitUnary is called when exiting the Unary production.
-	ExitUnary(c *UnaryContext)
+	// ExitMethodCall is called when exiting the MethodCall production.
+	ExitMethodCall(c *MethodCallContext)
 
-	// ExitTernaryOp is called when exiting the TernaryOp production.
-	ExitTernaryOp(c *TernaryOpContext)
-
-	// ExitMapLiteral is called when exiting the MapLiteral production.
-	ExitMapLiteral(c *MapLiteralContext)
+	// ExitStruct is called when exiting the Struct production.
+	ExitStruct(c *StructContext)
 
 	// ExitMulDivMod is called when exiting the MulDivMod production.
 	ExitMulDivMod(c *MulDivModContext)
@@ -296,20 +320,11 @@ type GrammarListener interface {
 	// ExitIdentifier is called when exiting the Identifier production.
 	ExitIdentifier(c *IdentifierContext)
 
-	// ExitBitXor is called when exiting the BitXor production.
-	ExitBitXor(c *BitXorContext)
-
 	// ExitNumber is called when exiting the Number production.
 	ExitNumber(c *NumberContext)
 
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
-
-	// ExitAnd is called when exiting the And production.
-	ExitAnd(c *AndContext)
-
-	// ExitBitAnd is called when exiting the BitAnd production.
-	ExitBitAnd(c *BitAndContext)
 
 	// ExitMembership is called when exiting the Membership production.
 	ExitMembership(c *MembershipContext)
@@ -320,11 +335,44 @@ type GrammarListener interface {
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)
 
+	// ExitParentheses is called when exiting the Parentheses production.
+	ExitParentheses(c *ParenthesesContext)
+
+	// ExitBitOr is called when exiting the BitOr production.
+	ExitBitOr(c *BitOrContext)
+
+	// ExitAddSub is called when exiting the AddSub production.
+	ExitAddSub(c *AddSubContext)
+
+	// ExitBitShift is called when exiting the BitShift production.
+	ExitBitShift(c *BitShiftContext)
+
+	// ExitArrayLiteral is called when exiting the ArrayLiteral production.
+	ExitArrayLiteral(c *ArrayLiteralContext)
+
+	// ExitUnary is called when exiting the Unary production.
+	ExitUnary(c *UnaryContext)
+
+	// ExitTernaryOp is called when exiting the TernaryOp production.
+	ExitTernaryOp(c *TernaryOpContext)
+
+	// ExitMapLiteral is called when exiting the MapLiteral production.
+	ExitMapLiteral(c *MapLiteralContext)
+
+	// ExitBitXor is called when exiting the BitXor production.
+	ExitBitXor(c *BitXorContext)
+
+	// ExitAnd is called when exiting the And production.
+	ExitAnd(c *AndContext)
+
+	// ExitBitAnd is called when exiting the BitAnd production.
+	ExitBitAnd(c *BitAndContext)
+
 	// ExitFieldAccess is called when exiting the FieldAccess production.
 	ExitFieldAccess(c *FieldAccessContext)
 
-	// ExitParentheses is called when exiting the Parentheses production.
-	ExitParentheses(c *ParenthesesContext)
+	// ExitStructLiteral is called when exiting the structLiteral production.
+	ExitStructLiteral(c *StructLiteralContext)
 
 	// ExitMapEntry is called when exiting the mapEntry production.
 	ExitMapEntry(c *MapEntryContext)

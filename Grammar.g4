@@ -4,6 +4,8 @@ program    : (statement | funcStmt | terminator)* EOF ;
 
 statement   : (varDecl      
             | assignStmt   
+            | structStmt    
+            | interfaceStmt 
             | arrayAssignStmt
             | compoundAssignStmt
             | exprStmt
@@ -18,13 +20,18 @@ statement   : (varDecl
             | tryCatchStmt
             | throwStmt
             | returnStmt
-            | breakStmt        
+            | breakStmt   
             | continueStmt) terminator?
             ;
 
 returnStmt          : RETURN expr? ;
 terminator          : SEMICOLON | NL ;
-funcStmt            : FUNC IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+funcStmt            : FUNC receiver? IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN blockStmt ;
+receiver            : LPAREN id=IDENTIFIER structType=IDENTIFIER RPAREN ;
+
+interfaceStmt       : INTERFACE IDENTIFIER LBRACE terminator* (method (terminator+ method)* terminator*)? RBRACE ;
+method              : IDENTIFIER LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN SEMICOLON ;
+
 exprStmt            : expr ;
 tryCatchStmt        : TRY tryBody=blockStmt CATCH LPAREN IDENTIFIER RPAREN catchBody=blockStmt ;
 throwStmt           : THROW expr ;
@@ -38,6 +45,7 @@ defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
 
 varDecl             : VAR IDENTIFIER EQUALS expr ;
+
 assignStmt          : expr EQUALS expr ;
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
@@ -46,6 +54,9 @@ ifStmt              : IF LPAREN (init=ifInit SEMICOLON)? expr RPAREN thenBranch=
 whileStmt           : WHILE LPAREN expr RPAREN body=blockStmt ;
 forStmt             : FOR LPAREN init=forInit SEMICOLON cond=expr SEMICOLON post=forPost RPAREN body=blockStmt ;
 blockStmt           : LBRACE (statement | funcStmt | terminator)* RBRACE ;
+structStmt          : STRUCT id=IDENTIFIER LBRACE terminator* (structField (terminator+ structField)* terminator*)? RBRACE ;
+
+structField         : IDENTIFIER ;
 
 ifInit      : varDecl
             | assignStmt
@@ -61,31 +72,35 @@ forPost         : assignStmt
             
 postfixStmt     : expr op=(INC | DEC) ;
 
-expr        : expr LBRACKET expr RBRACKET                           # ArrayIndex
-            | expr DOT IDENTIFIER                                   # FieldAccess
-            | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN        # FunctionCall
-            | op=(NOT | BITNOT | MINUS) expr                        # Unary
-            | expr op=EXPONENTIAL expr                              # Exponential
-            | expr op=(STAR | SLASH | MODULO) expr                  # MulDivMod
-            | expr op=(PLUS | MINUS) expr                           # AddSub
-            | expr op=(BITLSHIFT | BITRSHIFT) expr                  # BitShift
-            | expr op=BITAND expr                                   # BitAnd
-            | expr op=BITXOR expr                                   # BitXor
-            | expr op=BITOR expr                                    # BitOr
+expr        : expr LBRACKET expr RBRACKET                               # ArrayIndex
+            | expr DOT IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN   # MethodCall
+            | expr DOT IDENTIFIER                                       # FieldAccess
+            | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN            # FunctionCall
+            | op=(NOT | BITNOT | MINUS) expr                            # Unary
+            | expr op=EXPONENTIAL expr                                  # Exponential
+            | expr op=(STAR | SLASH | MODULO) expr                      # MulDivMod
+            | expr op=(PLUS | MINUS) expr                               # AddSub
+            | expr op=(BITLSHIFT | BITRSHIFT) expr                      # BitShift
+            | expr op=BITAND expr                                       # BitAnd
+            | expr op=BITXOR expr                                       # BitXor
+            | expr op=BITOR expr                                        # BitOr
             | expr op=(LESS | GREATER | EQUALEQUAL | BANGEQUAL | LESSEQUAL | GREATEREQUAL) expr  # Comparison
-            | leftExpr=expr op=membershipOp rightExpr=expr          # Membership
-            | expr op=AND expr                                      # And
-            | expr op=OR expr                                       # Or
-            | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr    # TernaryOp
-            | arrayLit                                              # ArrayLiteral
-            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE           # MapLiteral                              
-            | IDENTIFIER                                            # Identifier          
-            | NUMBER                                                # Number     
-            | val=(TRUE | FALSE)                                    # Boolean
-            | STRING                                                # String
-            | 'null'                                                # Null
-            | LPAREN expr RPAREN                                    # Parentheses
+            | leftExpr=expr op=membershipOp rightExpr=expr              # Membership
+            | expr op=AND expr                                          # And
+            | expr op=OR expr                                           # Or
+            | trueExpr=expr IF condExpr=expr ELSE falseExpr=expr        # TernaryOp
+            | arrayLit                                                  # ArrayLiteral
+            | structLiteral                                             # Struct
+            | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE               # MapLiteral                              
+            | IDENTIFIER                                                # Identifier          
+            | NUMBER                                                    # Number     
+            | val=(TRUE | FALSE)                                        # Boolean
+            | STRING                                                    # String
+            | 'null'                                                    # Null
+            | LPAREN expr RPAREN                                        # Parentheses
             ;
+
+structLiteral : structName=IDENTIFIER LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE ;
 
 mapEntry : expr COLON expr ;
 membershipOp
@@ -97,6 +112,8 @@ arrayLit
     | LBRACKET transformExpr=expr FOR id=IDENTIFIER IN srcExpr=expr (IF filterExpr=expr)? RBRACKET # ListComprehension  
     ;
 
+INTERFACE       : 'interface' ;
+STRUCT          : 'struct' ;
 SWITCH          : 'switch' ;
 CASE            : 'case' ;
 DEFAULT         : 'default' ;

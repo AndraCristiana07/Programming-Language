@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"my_language/parser"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -17,7 +18,15 @@ type Callable interface {
 
 type Visitor struct {
 	parser.BaseGrammarVisitor
-	currEnv *Environment
+	currEnv           *Environment
+	StructRegistry    map[string][]string
+	MethodRegistry    map[string]map[string]*parser.FuncStmtContext // for member methods
+	InterfaceRegistry map[string]Interface
+}
+
+type Interface struct {
+	Name    string
+	Methods map[string]int // map methodName -> expectedArgCount
 }
 
 type ReturnValueSignal struct {
@@ -39,7 +48,10 @@ var LanguageNull = &NullValue{}
 
 func NewVisitor() *Visitor {
 	return &Visitor{
-		currEnv: NewGlobalEnvironment(),
+		currEnv:           NewGlobalEnvironment(),
+		StructRegistry:    make(map[string][]string),
+		MethodRegistry:    make(map[string]map[string]*parser.FuncStmtContext),
+		InterfaceRegistry: make(map[string]Interface),
 	}
 }
 
@@ -68,6 +80,10 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
+	} else if ctx.StructStmt() != nil {
+		return ctx.StructStmt().Accept(v)
+	} else if ctx.InterfaceStmt() != nil {
+		return ctx.InterfaceStmt().Accept(v)
 	} else if ctx.ArrayAssignStmt() != nil {
 		return ctx.ArrayAssignStmt().Accept(v)
 	} else if ctx.CompoundAssignStmt() != nil {
@@ -103,6 +119,84 @@ func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
 	}
 
 	return nil
+}
+
+func (v *Visitor) VisitStructStmt(ctx *parser.StructStmtContext) any {
+	structName := ctx.GetId().GetText()
+	fields := make([]string, 0)
+
+	for _, fieldCtx := range ctx.AllStructField() {
+		fieldName := fieldCtx.GetText()
+		fields = append(fields, fieldName)
+	}
+
+	if v.StructRegistry == nil {
+		v.StructRegistry = make(map[string][]string)
+	}
+	v.StructRegistry[structName] = fields
+
+	return nil
+}
+
+func (v *Visitor) VisitStructField(ctx *parser.StructFieldContext) any {
+	return ctx.IDENTIFIER().GetText()
+}
+
+func (v *Visitor) VisitStruct(ctx *parser.StructContext) any {
+	structLitCtx := ctx.StructLiteral()
+	structName := structLitCtx.GetStructName().GetText()
+
+	validFields, defined := v.StructRegistry[structName]
+	if !defined {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Struct '%s' is not defined", structName), ctx))
+	}
+
+	instance := make(map[string]any)
+	instance["__type__"] = structName
+	// initialize instance memory map with nulls
+	for _, field := range validFields {
+		instance[field] = LanguageNull
+	}
+
+	// populate field values
+	for _, entryCtx := range structLitCtx.AllMapEntry() {
+		keyStr := entryCtx.Expr(0).GetText()
+		keyStr = strings.Trim(keyStr, "\"'") // clean quotes
+
+		val := entryCtx.Expr(1).Accept(v)
+
+		// field validation check
+		isFieldValid := slices.Contains(validFields, keyStr)
+
+		if !isFieldValid {
+			panic(RuntimeError("TypeError", fmt.Sprintf("Struct '%s' has no field named '%s'", structName, keyStr), entryCtx))
+		}
+
+		instance[keyStr] = val
+	}
+
+	return &instance
+}
+
+func (v *Visitor) VisitInterfaceStmt(ctx *parser.InterfaceStmtContext) any {
+	interfaceName := ctx.IDENTIFIER().GetText()
+
+	interf := Interface{
+		Name:    interfaceName,
+		Methods: make(map[string]int),
+	}
+
+	for _, method := range ctx.AllMethod() {
+		methodCtx := method.(*parser.MethodContext)
+		methodName := methodCtx.IDENTIFIER(0).GetText() // extract the method identifier name
+
+		paramCount := len(methodCtx.AllIDENTIFIER()) - 1
+		interf.Methods[methodName] = paramCount
+	}
+
+	v.InterfaceRegistry[interfaceName] = interf
+
+	return LanguageNull
 }
 
 func (v *Visitor) VisitForInit(ctx *parser.ForInitContext) any {
@@ -1147,6 +1241,22 @@ func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	funcName := ctx.IDENTIFIER(0).GetText()
 
+	// check if it's from a struct receiver
+	if ctx.Receiver() != nil {
+		receiverCtx := ctx.Receiver().(*parser.ReceiverContext)
+		structTypeName := receiverCtx.GetStructType().GetText()
+
+		// init the inner struct method map
+		if v.MethodRegistry[structTypeName] == nil {
+			v.MethodRegistry[structTypeName] = make(map[string]*parser.FuncStmtContext)
+		}
+
+		// register the raw execution context
+		v.MethodRegistry[structTypeName][funcName] = ctx
+		return nil
+	}
+
+	// standard global function
 	var params []string
 	i := 1
 	for {
@@ -1165,6 +1275,77 @@ func (v *Visitor) VisitFuncStmt(ctx *parser.FuncStmtContext) any {
 	})
 
 	return nil
+}
+
+func (v *Visitor) VisitMethodCall(ctx *parser.MethodCallContext) any {
+	obj := ctx.Expr(0).Accept(v)
+
+	//  verify it's a modifiable struct instance
+	mapPtr, ok := obj.(*map[string]any)
+	if !ok || mapPtr == nil {
+		panic(RuntimeError("TypeError", "Cannot call method of a non-object type", ctx))
+	}
+
+	// extract the instance type tag metadata
+	structType := (*mapPtr)["__type__"].(string)
+	methodName := ctx.IDENTIFIER().GetText()
+
+	// look up the method in  Method Registry
+	structMethods, foundStruct := v.MethodRegistry[structType]
+	if !foundStruct {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Struct '%s' has no methods defined", structType), ctx))
+	}
+
+	methodCtx, foundMethod := structMethods[methodName]
+	if !foundMethod {
+		panic(RuntimeError("TypeError", fmt.Sprintf("Struct '%s' has no method named '%s'", structType, methodName), ctx))
+	}
+
+	// eval the argument values
+	args := make([]any, 0)
+	for _, exprCtx := range ctx.AllExpr() {
+		args = append(args, exprCtx.Accept(v))
+	}
+
+	previousEnv := v.currEnv
+	methodEnv := NewEnvironment()
+
+	// bind the receiver object instance to the variable name
+	receiverCtx := methodCtx.Receiver().(*parser.ReceiverContext)
+	receiverVarName := receiverCtx.GetId().GetText()
+	methodEnv.Define(receiverVarName, mapPtr)
+
+	// bind the rest of the standard arguments to parameters
+	paramIds := methodCtx.AllIDENTIFIER()
+	// skip index 0 (method name)
+	for i, paramCtx := range paramIds[1:] {
+		if i < len(args) {
+			methodEnv.Define(paramCtx.GetText(), args[i])
+		} else {
+			methodEnv.Define(paramCtx.GetText(), LanguageNull)
+		}
+	}
+
+	// execute the body block scope statement loops safely
+	v.currEnv = methodEnv
+	var methodResult any = LanguageNull
+
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				if ret, isReturn := r.(ReturnValueSignal); isReturn {
+					methodResult = ret.Value
+				} else {
+					panic(r) // bubble up normal runtime panics
+				}
+			}
+		}()
+		methodCtx.BlockStmt().Accept(v)
+	}()
+
+	//go back to previous env
+	v.currEnv = previousEnv
+	return methodResult
 }
 
 func (f *RuntimeFunction) Call(v *Visitor, args []any) any {
@@ -1248,7 +1429,7 @@ func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
 
 	propName := ctx.IDENTIFIER().GetText()
 
-	if obj == nil {
+	if obj == nil || obj == LanguageNull {
 		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of null", propName), ctx))
 	}
 
@@ -1271,6 +1452,7 @@ func (v *Visitor) VisitFieldAccess(ctx *parser.FieldAccessContext) any {
 		panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read property '%s' of type %T", propName, obj), ctx))
 	}
 }
+
 func (f *RuntimeFunction) NrArgs() int {
 	return len(f.Parameters)
 }
@@ -1371,15 +1553,38 @@ func cleanStringRepr(val any) string {
 		sb.WriteString("]")
 		return sb.String()
 	case *map[string]any:
+		m := *v
+
+		// struct
+		if typeName, isStruct := m["__type__"].(string); isStruct {
+			var sb strings.Builder
+			sb.WriteString(typeName + "{")
+
+			// get field names
+			fields := make([]string, 0)
+			for k := range m {
+				if k != "__type__" {
+					fields = append(fields, k)
+				}
+			}
+			sort.Strings(fields)
+
+			for i, key := range fields {
+				fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(m[key]))
+				if i < len(fields)-1 {
+					sb.WriteString(", ")
+				}
+			}
+			sb.WriteString("}")
+			return sb.String()
+		}
+
+		// dict/map
 		var sb strings.Builder
 		sb.WriteString("{")
-
-		m := *v
 		i := 0
 		for key, element := range m {
-			// format as key: value
 			fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(element))
-
 			if i < len(m)-1 {
 				sb.WriteString(", ")
 			}
@@ -1387,35 +1592,37 @@ func cleanStringRepr(val any) string {
 		}
 		sb.WriteString("}")
 		return sb.String()
+
 	default:
 		return fmt.Sprintf("%v", v)
+
 	}
 }
 
 func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 	// braket lookup
 	if idxCtx, ok := leftCtx.(*parser.ArrayIndexContext); ok {
-		// get inner target
 		innerTargetCtx := idxCtx.Expr(0)
 		indexVal := idxCtx.Expr(1).Accept(v)
 
-		// check if there;s another nest
+		// nested (matrix[x][y])
 		if _, isNestedIdx := innerTargetCtx.(*parser.ArrayIndexContext); isNestedIdx {
 			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
 			return v.unwrapContainer(parentContainer, parentIndex), indexVal
 		}
+
+		// nested field access (user.items[idx])
 		if _, isNestedField := innerTargetCtx.(*parser.FieldAccessContext); isNestedField {
 			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
 			return v.unwrapContainer(parentContainer, parentIndex), indexVal
 		}
 
-		// plain struct
+		// plain struct (items[idx])
 		if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
-			name := identCtx.IDENTIFIER().GetText()
+			name := identCtx.GetText()
 			container, exists := v.currEnv.Lookup(name)
 			if !exists {
 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), leftCtx))
-
 			}
 			return container, indexVal
 		}
@@ -1426,11 +1633,18 @@ func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 		innerTargetCtx := fieldCtx.Expr()
 		fieldName := fieldCtx.IDENTIFIER().GetText()
 
-		// nested
+		// prevent runtime overwrite of internal system struct metadata
+		if fieldName == "__type__" {
+			panic(RuntimeError("TypeError", "Cannot overwrite internal system metadata '__type__'", leftCtx))
+		}
+
+		// nested index field lookup (party.members[0].active)
 		if _, isNestedIdx := innerTargetCtx.(*parser.ArrayIndexContext); isNestedIdx {
 			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
 			return v.unwrapContainer(parentContainer, parentIndex), fieldName
 		}
+
+		// nested
 		if _, isNestedField := innerTargetCtx.(*parser.FieldAccessContext); isNestedField {
 			parentContainer, parentIndex := v.resolveAssignTarget(innerTargetCtx)
 			return v.unwrapContainer(parentContainer, parentIndex), fieldName
@@ -1438,11 +1652,10 @@ func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 
 		// plain case
 		if identCtx, ok := innerTargetCtx.(*parser.IdentifierContext); ok {
-			name := identCtx.IDENTIFIER().GetText()
+			name := identCtx.GetText()
 			container, exists := v.currEnv.Lookup(name)
 			if !exists {
 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), leftCtx))
-
 			}
 			return container, fieldName
 		}

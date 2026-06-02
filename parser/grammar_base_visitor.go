@@ -28,6 +28,18 @@ func (v *BaseGrammarVisitor) VisitFuncStmt(ctx *FuncStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitReceiver(ctx *ReceiverContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitInterfaceStmt(ctx *InterfaceStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMethod(ctx *MethodContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitExprStmt(ctx *ExprStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -100,6 +112,14 @@ func (v *BaseGrammarVisitor) VisitBlockStmt(ctx *BlockStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitStructStmt(ctx *StructStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitStructField(ctx *StructFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitIfInit(ctx *IfInitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -120,19 +140,7 @@ func (v *BaseGrammarVisitor) VisitNull(ctx *NullContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseGrammarVisitor) VisitOr(ctx *OrContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitBitShift(ctx *BitShiftContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -144,23 +152,15 @@ func (v *BaseGrammarVisitor) VisitString(ctx *StringContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitArrayLiteral(ctx *ArrayLiteralContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseGrammarVisitor) VisitArrayIndex(ctx *ArrayIndexContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
+func (v *BaseGrammarVisitor) VisitMethodCall(ctx *MethodCallContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitTernaryOp(ctx *TernaryOpContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
+func (v *BaseGrammarVisitor) VisitStruct(ctx *StructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -172,23 +172,11 @@ func (v *BaseGrammarVisitor) VisitIdentifier(ctx *IdentifierContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitBitXor(ctx *BitXorContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseGrammarVisitor) VisitNumber(ctx *NumberContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseGrammarVisitor) VisitComparison(ctx *ComparisonContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitAnd(ctx *AndContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseGrammarVisitor) VisitBitAnd(ctx *BitAndContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -204,11 +192,55 @@ func (v *BaseGrammarVisitor) VisitBoolean(ctx *BooleanContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitBitShift(ctx *BitShiftContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitArrayLiteral(ctx *ArrayLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitUnary(ctx *UnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitTernaryOp(ctx *TernaryOpContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitMapLiteral(ctx *MapLiteralContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitBitXor(ctx *BitXorContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitAnd(ctx *AndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitBitAnd(ctx *BitAndContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitFieldAccess(ctx *FieldAccessContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseGrammarVisitor) VisitParentheses(ctx *ParenthesesContext) interface{} {
+func (v *BaseGrammarVisitor) VisitStructLiteral(ctx *StructLiteralContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

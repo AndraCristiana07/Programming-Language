@@ -1,0 +1,33 @@
+interface Shape {
+    Area();
+    Perimeter();
+}
+
+struct Circle { 
+    radius; 
+}
+
+func (c Circle) Area() { 
+    return 3 * c.radius * c.radius
+}
+func (c Circle) Perimeter() { 
+    return 6 * c.radius 
+}
+
+struct Rectangle { 
+    length;
+    width; 
+}
+func (r Rectangle) Area() { 
+    return r.length * r.width 
+}
+func (r Rectangle) Perimeter() { 
+    return 2 * (r.length + r.width)
+}
+
+var c = Circle { radius: 5 }
+var r = Rectangle { length: 4, width: 5 }
+
+var res = c.Area() + r.Area()
+
+print "circle area and rec: " + res

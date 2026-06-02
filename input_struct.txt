@@ -1,0 +1,22 @@
+struct User { 
+    name;
+    age;
+    active; 
+}
+
+var player = User { name: "Hunter", age: 24 }
+
+print player 
+
+player.active = true
+player.age = player.age + 1;
+
+print player.name + " is now " + player.age;
+
+func (u User) greet() {
+    return "Hello, my name is " + u.name;
+}
+
+var player2 = User { name: "Anna", age: 24 }
+
+print player2.greet()
