@@ -57,6 +57,25 @@ func TestInterface(t *testing.T) {
 			expectedOutput: 95,
 			expectError:    false,
 		},
+		{
+			name: "Interface with assert",
+			input: `
+                interface Worker {
+                    DoWork();
+                }
+
+                struct Developer { name; }
+                func (d Developer) DoWork() {
+                    return d.name + " is writing code.";
+                }
+
+                var dev = Developer { name: "Pam" };
+                var verif = assert(dev, "Worker"); 
+                var testResult = verif.name;
+            `,
+			expectedOutput: "Pam",
+			expectError:    false,
+		},
 	}
 
 	for _, tc := range tests {

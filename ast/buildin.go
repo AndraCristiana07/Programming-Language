@@ -1423,5 +1423,64 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	// asert on interface
+	globals.Define("assert", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			// ensure the parameters are correct types
+			mapPtr, isStruct := args[0].(*map[string]any)
+			interfaceName, isString := args[1].(string)
+
+			if !isString {
+				panic("TypeError: assert() second argument must be an interface name string")
+			}
+
+			if !isStruct || mapPtr == nil {
+				panic(fmt.Sprintf("TypeError: Value does not satisfy interface '%s' (not a struct object)", interfaceName))
+			}
+
+			// execute the implicit structural match contract scan
+			passed, reason := v.satisfiesInterface(mapPtr, interfaceName)
+			if !passed {
+				panic(fmt.Sprintf("TypeError: Interface contract violation! %s", reason))
+			}
+
+			// return the object if it matches
+			return mapPtr
+		},
+	})
+
 	return globals
+}
+
+func (v *Visitor) satisfiesInterface(structInstanceMap *map[string]any, interfaceName string) (bool, string) {
+	contract, exists := v.InterfaceRegistry[interfaceName]
+	if !exists {
+		return false, fmt.Sprintf("Interface '%s' is not defined", interfaceName)
+	}
+
+	// extract what structural blueprint this instance belongs to
+	structType, ok := (*structInstanceMap)["__type__"].(string)
+	if !ok {
+		return false, "Value is not an instantiated struct object"
+	}
+
+	structMethods, _ := v.MethodRegistry[structType]
+
+	// check if the struct satisfies required methods
+	for reqMethod, reqArgs := range contract.Methods {
+		methodCtx, hasMethod := structMethods[reqMethod]
+		if !hasMethod {
+			return false, fmt.Sprintf("Struct '%s' is missing required method '%s()'", structType, reqMethod)
+		}
+
+		// calculate arguments on the method structure
+		actualArgs := len(methodCtx.AllIDENTIFIER()) - 1
+		if actualArgs != reqArgs {
+			return false, fmt.Sprintf("Struct '%s' method '%s' expects %d arguments, but interface '%s' requires %d",
+				structType, reqMethod, actualArgs, interfaceName, reqArgs)
+		}
+	}
+
+	return true, ""
 }
