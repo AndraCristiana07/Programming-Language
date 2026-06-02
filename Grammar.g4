@@ -44,7 +44,7 @@ defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 
 forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
 
-varDecl             : VAR IDENTIFIER EQUALS expr ;
+varDecl             : VAR (IDENTIFIER | LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN) EQUALS expr ;
 
 assignStmt          : expr EQUALS expr ;
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;

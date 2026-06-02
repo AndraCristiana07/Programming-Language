@@ -302,19 +302,70 @@ func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
 }
 
 func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
-	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
+
+	// var (a, b) =
+	if ctx.LPAREN() != nil {
+		runtimeTuple, ok := value.(*Tuple)
+		if !ok {
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T during initialization", value), ctx))
+		}
+
+		identifiers := ctx.AllIDENTIFIER()
+		if len(identifiers) != len(runtimeTuple.Elements) {
+			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: Value mismatch during unpacking: variables (%d) vs tuple elements (%d)", len(identifiers), len(runtimeTuple.Elements)), ctx))
+		}
+
+		// define each variable in the current scope
+		for i, idToken := range identifiers {
+			varName := idToken.GetText()
+			v.currEnv.Define(varName, runtimeTuple.Elements[i])
+		}
+		return nil
+	}
+
+	// simple var declaration
+	varName := ctx.IDENTIFIER(0).GetText()
 	v.currEnv.Define(varName, value)
 	return nil
 }
 
 func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
-	leftHandSide := ctx.Expr(0)
+	leftSide := ctx.Expr(0)
 	assignedValue := ctx.Expr(1).Accept(v)
 
-	// nested
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	// tuple
+	if tupleLitCtx, isTupleLit := leftSide.(*parser.TupleLiteralContext); isTupleLit {
+		runtimeTuple, ok := assignedValue.(*Tuple)
+		if !ok {
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T", assignedValue), ctx))
+		}
 
+		// pull all child variable expressions
+		childrenExprs := tupleLitCtx.AllExpr()
+
+		if len(childrenExprs) != len(runtimeTuple.Elements) {
+			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: too many or too few values to unpack (expected %d, got %d)", len(childrenExprs), len(runtimeTuple.Elements)), ctx))
+		}
+
+		// assign each element to its corresponding variable
+		for i, exprCtx := range childrenExprs {
+			identCtx, isId := exprCtx.(*parser.IdentifierContext)
+			if !isId {
+				panic(RuntimeError("SyntaxError", "SyntaxError: Left-hand side of tuple unpacking must contain valid variable names", ctx))
+			}
+
+			name := identCtx.IDENTIFIER().GetText()
+			if !v.currEnv.Assign(name, runtimeTuple.Elements[i]) {
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
+			}
+		}
+		return nil
+	}
+
+	// normal assign
+	container, indexVal := v.resolveAssignTarget(leftSide)
+	// nested
 	if container != nil {
 		switch obj := container.(type) {
 		case *[]any:
@@ -331,15 +382,13 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			name := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(name, assignedValue) {
 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
-
 			}
 		} else {
 			panic(RuntimeError("SyntaxError", "Invalid assignment target", ctx))
-
 		}
 	}
 
@@ -347,10 +396,10 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 }
 
 func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
-	leftHandSide := ctx.Expr()
+	leftSide := ctx.Expr()
 	op := ctx.GetOp().GetText()
 
-	currentValue := leftHandSide.Accept(v)
+	currentValue := leftSide.Accept(v)
 
 	intValue, ok := currentValue.(int)
 	if !ok {
@@ -367,7 +416,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 	}
 
 	// write result to destination
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	container, indexVal := v.resolveAssignTarget(leftSide)
 
 	if container != nil {
 		// nested
@@ -387,7 +436,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, intValue) {
 				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))
@@ -977,8 +1026,8 @@ func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {
 }
 
 func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext) any {
-	leftHandSide := ctx.Expr(0)
-	currentValue := leftHandSide.Accept(v)
+	leftSide := ctx.Expr(0)
+	currentValue := leftSide.Accept(v)
 	value := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
 
@@ -1038,7 +1087,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	}
 
 	// write result to destination
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	container, indexVal := v.resolveAssignTarget(leftSide)
 
 	if container != nil {
 		// nested
@@ -1058,7 +1107,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, result) {
 				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))

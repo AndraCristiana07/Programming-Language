@@ -27,5 +27,14 @@ x = tuple(y)
 
 print(x)
 
+var fruits = ("apple", "banana", "cherry")
+var green = ""
+var yellow = ""
+var red = ""
+(green, yellow, red) = fruits
+
+print(green)
+print(yellow)
+print(red)
 
 
