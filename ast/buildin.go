@@ -584,6 +584,10 @@ func NewGlobalEnvironment() *Environment {
 					result = append(result, string(r))
 				}
 				return &result
+			case *Tuple:
+				newSlice := make([]any, len(v.Elements))
+				copy(newSlice, v.Elements)
+				return &newSlice
 			case *[]any:
 				// create copy of an existing array pointer
 				result := make([]any, len(*v))
@@ -1453,6 +1457,26 @@ func NewGlobalEnvironment() *Environment {
 
 			// return the object if it matches
 			return mapPtr
+		},
+	})
+
+	globals.Define("tuple", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			switch obj := args[0].(type) {
+			case *[]any:
+				elements := make([]any, len(*obj))
+				copy(elements, *obj)
+				return &Tuple{Elements: elements}
+
+			case *Tuple:
+				elements := make([]any, len(obj.Elements))
+				copy(elements, obj.Elements)
+				return &Tuple{Elements: elements}
+
+			default:
+				panic(fmt.Sprintf("TypeError: object of type %T cannot be converted to a tuple", args[0]))
+			}
 		},
 	})
 

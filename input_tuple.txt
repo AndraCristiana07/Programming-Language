@@ -20,6 +20,12 @@ print tuple1
 print type(tuple1)
 print len(myTuple)
 
+var x = ("apple", "banana", "cherry")
+var y = list(x)
+y[1] = "kiwi"
+x = tuple(y)
+
+print(x)
 
 
 
