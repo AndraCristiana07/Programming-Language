@@ -85,6 +85,67 @@ func TestTuple(t *testing.T) {
 			`,
 			expected: &ast.Tuple{Elements: []any{"apple", "pear", "apple", "pear", true, false}},
 		},
+		{
+			name: "Tuple count",
+			input: `
+				var tuple1 = ("apple", "pear", "apple", "kiwi")
+				var testResult = count(tuple1, "apple")
+			`,
+			expected: 2,
+		},
+		{
+			name: "Tuple index",
+			input: `
+				var tuple1 = ("apple", "pear", "apple", "kiwi")
+				var testResult = index(tuple1, "pear")
+			`,
+			expected: 1,
+		},
+		{
+			name: "Tuple count after concatenation",
+			input: `
+				var tuple1 = ("apple", "pear", "apple", "kiwi")
+				var tuple2 = ("pear", "apple", "kiwi")
+				var mixed = tuple1 + tuple2
+
+				var testResult = count(mixed, "apple")
+			`,
+			expected: 3,
+		},
+		{
+			name: "Tuple count after multiplification",
+			input: `
+				var tuple1 = ("apple", "pear", "apple", "kiwi")
+				var mul = tuple1 * 2
+
+				var testResult = count(mul, "apple")
+			`,
+			expected: 4,
+		},
+		{
+			name: "Tuple min",
+			input: `
+				var numbers = (1, 2, 3, 4, 5, 6)
+				var testResult = min(numbers)
+			`,
+			expected: 1,
+		},
+		{
+			name: "Tuple max",
+			input: `
+				var numbers = (1, 2, 3, 4, 5, 6)
+				var testResult = max(numbers)
+			`,
+			expected: 6,
+		},
+		{
+			name: "Tuple sum",
+			input: `
+				var numbers = (1, 2, 3, 4, 5, 6)
+				var testResult = sum(numbers)
+			`,
+			expected: 21,
+		},
 	}
 
 	for _, tc := range tests {

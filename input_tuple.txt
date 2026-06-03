@@ -69,3 +69,30 @@ print mixed
 var tuple9 = ("apple", "banana")
 var mulTpl = tuple9 * 3
 print mulTpl
+
+var newtuple = ("apple", "banana", "cherry", "apple", "cherry")
+
+print "cherry idx: " + index(newtuple, "cherry") 
+print count(newtuple, "apple")  
+print count(newtuple, "kiwi")   
+
+print "apple appearence count: " + count(mulTpl, "apple")
+
+func isEven(n) {
+    return n % 2 == 0
+}
+
+var numbers = (1, 2, 3, 4, 5, 6)
+var evens = filter(isEven, numbers)
+
+print "filtered evens: " + evens
+print "summed: " + sum(numbers)
+
+func square(x) {
+    return x * x
+}
+print "map squares: " + map(square, numbers)
+
+
+print "min nrs: " + min(numbers)
+print "max nrs: " + max(numbers)

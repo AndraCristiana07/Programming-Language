@@ -12,7 +12,6 @@ import (
 )
 
 // TODO: make range indexing possible (thistuple[2:])
-// TODO: make in tuple possible
 
 type Callable interface {
 	NrArgs() int
