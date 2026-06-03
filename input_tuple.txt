@@ -136,7 +136,8 @@ if (tupleA == tupleB) {
 
 
 print dataMatrix[:2]
-
 print dataMatrix[0:3]
-
 print dataMatrix[-1]
+
+print "tuple slice with step " + numbers[0:6:2]  
+print "tuple reversed: " + numbers[::-1]   

@@ -205,6 +205,22 @@ func TestTuple(t *testing.T) {
 			`,
 			expected: &ast.Tuple{Elements: []any{1, 4, 7, 4}},
 		},
+		{
+			name: "Tuple with slicing and step ",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[1:5:2]
+			`,
+			expected: &ast.Tuple{Elements: []any{4, 4}},
+		},
+		{
+			name: "Tuple reverse with slicing ",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[::-1]
+			`,
+			expected: &ast.Tuple{Elements: []any{3, 7, 1, 4, 7, 4, 1}},
+		},
 	}
 
 	for _, tc := range tests {

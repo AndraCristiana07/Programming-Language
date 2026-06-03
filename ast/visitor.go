@@ -1531,12 +1531,15 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 	collection := ctx.Expr(0).Accept(v)
 
-	var startOpt, endOpt any
+	var startVal, endVal, stepVal any
 	if ctx.GetStartOpt() != nil {
-		startOpt = ctx.GetStartOpt().Accept(v)
+		startVal = ctx.GetStartOpt().Accept(v)
 	}
 	if ctx.GetEndOpt() != nil {
-		endOpt = ctx.GetEndOpt().Accept(v)
+		endVal = ctx.GetEndOpt().Accept(v)
+	}
+	if ctx.GetStepOpt() != nil {
+		stepVal = ctx.GetStepOpt().Accept(v)
 	}
 
 	switch seq := collection.(type) {
@@ -1545,18 +1548,39 @@ func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 		if seq == nil {
 			panic("NullPointerError")
 		}
-		start, end := calculateSliceBounds(startOpt, endOpt, len(*seq))
-		slicedSlice := append([]any{}, (*seq)[start:end]...)
-		return &slicedSlice
+		arr := *seq
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(arr))
+
+		sliced := []any{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				sliced = append(sliced, arr[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				sliced = append(sliced, arr[i])
+			}
+		}
+		return &sliced
 
 	// tuple
 	case *Tuple:
 		if seq == nil {
 			panic("NullPointerError")
 		}
-		start, end := calculateSliceBounds(startOpt, endOpt, len(seq.Elements))
-		slicedElements := append([]any{}, seq.Elements[start:end]...)
-		return &Tuple{Elements: slicedElements}
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(seq.Elements))
+
+		sliced := []any{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				sliced = append(sliced, seq.Elements[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				sliced = append(sliced, seq.Elements[i])
+			}
+		}
+		return &Tuple{Elements: sliced}
 
 	// string
 	case string:
@@ -1567,18 +1591,30 @@ func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 		}
 
 		runes := []rune(cleanedStr)
-		start, end := calculateSliceBounds(startOpt, endOpt, len(runes))
-		slicedStr := string(runes[start:end])
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(runes))
 
-		if hasQuotes {
-			return "\"" + slicedStr + "\""
+		slicedRunes := []rune{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				slicedRunes = append(slicedRunes, runes[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				slicedRunes = append(slicedRunes, runes[i])
+			}
 		}
-		return slicedStr
+
+		resStr := string(slicedRunes)
+		if hasQuotes {
+			return "\"" + resStr + "\""
+		}
+		return resStr
 
 	default:
 		panic(fmt.Sprintf("TypeError: Type %T does not support slicing", collection))
 	}
 }
+
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 	arrayName := ctx.IDENTIFIER().GetText()
 
@@ -2072,39 +2108,74 @@ func calculateIndex(index, length int) (int, bool) {
 	return index, true
 }
 
-func calculateSliceBounds(startOpt, endOpt any, length int) (int, int) {
-	start := 0
-	if startOpt != nil {
-		s := startOpt.(int)
-		if s < 0 {
-			s = length + s
+func calculateSliceBoundsWithStep(startOpt, endOpt, stepOpt any, length int) (int, int, int) {
+	// step value (defaults is 1)
+	step := 1
+	if stepOpt != nil {
+		var ok bool
+		step, ok = stepOpt.(int)
+		if !ok {
+			if f, ok := stepOpt.(float64); ok {
+				step = int(f)
+			} else {
+				panic("TypeError: Slice step must be an integer")
+			}
 		}
-		if s < 0 {
-			s = 0
-		}
-		if s > length {
-			s = length
-		}
-		start = s
+	}
+	if step == 0 {
+		panic("ValueError: slice step cannot be zero")
 	}
 
-	end := length
-	if endOpt != nil {
-		e := endOpt.(int)
-		if e < 0 {
-			e = length + e
+	var start, end int
+	if step > 0 {
+		// Forward step defaults
+		start = 0
+		if startOpt != nil {
+			start = normalizeIndex(startOpt, length)
 		}
-		if e < 0 {
-			e = 0
+		end = length
+		if endOpt != nil {
+			end = normalizeIndex(endOpt, length)
 		}
-		if e > length {
-			e = length
+		// Clamp boundaries
+		if start < 0 {
+			start = 0
 		}
-		end = e
+		if end > length {
+			end = length
+		}
+	} else {
+		// Backward step defaults
+		start = length - 1
+		if startOpt != nil {
+			start = normalizeIndex(startOpt, length)
+		}
+		end = -1 // going backward
+		if endOpt != nil {
+			end = normalizeIndex(endOpt, length)
+		}
+		if start >= length {
+			start = length - 1
+		}
+		if end < -1 {
+			end = -1
+		}
 	}
 
-	if start > end {
-		start = end
+	return start, end, step
+}
+
+func normalizeIndex(opt any, length int) int {
+	val := 0
+	if i, ok := opt.(int); ok {
+		val = i
 	}
-	return start, end
+	if f, ok := opt.(float64); ok {
+		val = int(f)
+	}
+
+	if val < 0 {
+		return length + val
+	}
+	return val
 }
