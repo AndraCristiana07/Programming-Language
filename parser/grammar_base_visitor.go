@@ -220,6 +220,10 @@ func (v *BaseGrammarVisitor) VisitBitOr(ctx *BitOrContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitSliceIndex(ctx *SliceIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
 	return v.VisitChildren(ctx)
 }

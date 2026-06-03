@@ -1423,61 +1423,89 @@ func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) a
 }
 
 func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
-	// TODO: make -1 indexing possible to give last elem
 	collection := ctx.Expr(0).Accept(v)
 	indexKey := ctx.Expr(1).Accept(v)
 
-	// expect pointer to the slice (*[]any)
+	getValidIntIndex := func(raw any) (int, bool) {
+		if idx, ok := raw.(int); ok {
+			return idx, true
+		}
+		if f, ok := raw.(float64); ok {
+			return int(f), true
+		}
+		return 0, false
+	}
+
+	// array
 	if arrPtr, ok := collection.(*[]any); ok && arrPtr != nil {
 		// dereference it locally to perform size checks and lookups safely
 		arr := *arrPtr
 
-		idx, ok := indexKey.(int)
+		idx, ok := getValidIntIndex(indexKey)
 		if !ok {
-			// try converting to int
-			if f, ok := indexKey.(float64); ok {
-				idx = int(f)
-			} else {
-				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
-			}
+			panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 		}
 
-		if idx < 0 || idx >= len(arr) {
+		// for negative indexing
+		actualIdx, valid := calculateIndex(idx, len(arr))
+		if !valid {
 			panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
 		}
 
-		return arr[idx]
+		return arr[actualIdx]
 	}
 
 	// tuple
 	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
-		idx, ok := indexKey.(int)
+		idx, ok := getValidIntIndex(indexKey)
 		if !ok {
-			if f, ok := indexKey.(float64); ok {
-				idx = int(f)
-			} else {
-				panic(RuntimeError("TypeError", "Tuple index must be an integer", ctx))
-			}
+			panic(RuntimeError("TypeError", "Tuple index must be an integer", ctx))
 		}
 
-		if idx < 0 || idx >= len(tuplePtr.Elements) {
+		// for negative indexing
+		actualIdx, valid := calculateIndex(idx, len(tuplePtr.Elements))
+		if !valid {
 			panic(RuntimeError("IndexError", fmt.Sprintf("Tuple index %d is out of bounds (length %d)", idx, len(tuplePtr.Elements)), ctx))
 		}
 
-		return tuplePtr.Elements[idx]
+		return tuplePtr.Elements[actualIdx]
+	}
+
+	// string
+	if str, ok := collection.(string); ok {
+		cleanedStr := str
+		// clean quotes
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+
+		idx, ok := getValidIntIndex(indexKey)
+		if !ok {
+			panic(RuntimeError("TypeError", "String index must be an integer", ctx))
+		}
+
+		runes := []rune(cleanedStr)
+		actualIdx, valid := calculateIndex(idx, len(runes))
+		if !valid {
+			panic(RuntimeError("IndexError", fmt.Sprintf("String index %d is out of bounds (length %d)", idx, len(runes)), ctx))
+		}
+
+		resChar := string(runes[actualIdx])
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			return "\"" + resChar + "\""
+		}
+		return resChar
 	}
 
 	// dict/map
 	if mapPtr, ok := collection.(*map[string]any); ok && mapPtr != nil {
 		targetMap := *mapPtr
 
-		// indexKey into string for map lookup
 		var lookupKey string
 		switch k := indexKey.(type) {
 		case string:
 			lookupKey = k
 		case bool:
-			// true -> "true", false -> "false"
 			if k {
 				lookupKey = "true"
 			} else {
@@ -1491,17 +1519,66 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 			lookupKey = fmt.Sprintf("%v", indexKey)
 		}
 
-		// lookup inside map
 		if val, exists := targetMap[lookupKey]; exists {
 			return val
 		}
-
 		return nil
 	}
 
 	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read properties of type %T using brackets [...]", collection), ctx))
 }
 
+func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
+	collection := ctx.Expr(0).Accept(v)
+
+	var startOpt, endOpt any
+	if ctx.GetStartOpt() != nil {
+		startOpt = ctx.GetStartOpt().Accept(v)
+	}
+	if ctx.GetEndOpt() != nil {
+		endOpt = ctx.GetEndOpt().Accept(v)
+	}
+
+	switch seq := collection.(type) {
+	// array
+	case *[]any:
+		if seq == nil {
+			panic("NullPointerError")
+		}
+		start, end := calculateSliceBounds(startOpt, endOpt, len(*seq))
+		slicedSlice := append([]any{}, (*seq)[start:end]...)
+		return &slicedSlice
+
+	// tuple
+	case *Tuple:
+		if seq == nil {
+			panic("NullPointerError")
+		}
+		start, end := calculateSliceBounds(startOpt, endOpt, len(seq.Elements))
+		slicedElements := append([]any{}, seq.Elements[start:end]...)
+		return &Tuple{Elements: slicedElements}
+
+	// string
+	case string:
+		cleanedStr := seq
+		hasQuotes := len(seq) >= 2 && seq[0] == '"' && seq[len(seq)-1] == '"'
+		if hasQuotes {
+			cleanedStr = seq[1 : len(seq)-1]
+		}
+
+		runes := []rune(cleanedStr)
+		start, end := calculateSliceBounds(startOpt, endOpt, len(runes))
+		slicedStr := string(runes[start:end])
+
+		if hasQuotes {
+			return "\"" + slicedStr + "\""
+		}
+		return slicedStr
+
+	default:
+		panic(fmt.Sprintf("TypeError: Type %T does not support slicing", collection))
+	}
+}
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
 	arrayName := ctx.IDENTIFIER().GetText()
 
@@ -1983,4 +2060,51 @@ func (v *Visitor) unwrapContainer(parentContainer any, parentIndex any) any {
 	default:
 		panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer), nil))
 	}
+}
+
+func calculateIndex(index, length int) (int, bool) {
+	if index < 0 {
+		index = length + index
+	}
+	if index < 0 || index >= length {
+		return 0, false
+	}
+	return index, true
+}
+
+func calculateSliceBounds(startOpt, endOpt any, length int) (int, int) {
+	start := 0
+	if startOpt != nil {
+		s := startOpt.(int)
+		if s < 0 {
+			s = length + s
+		}
+		if s < 0 {
+			s = 0
+		}
+		if s > length {
+			s = length
+		}
+		start = s
+	}
+
+	end := length
+	if endOpt != nil {
+		e := endOpt.(int)
+		if e < 0 {
+			e = length + e
+		}
+		if e < 0 {
+			e = 0
+		}
+		if e > length {
+			e = length
+		}
+		end = e
+	}
+
+	if start > end {
+		start = end
+	}
+	return start, end
 }

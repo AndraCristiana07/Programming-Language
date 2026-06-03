@@ -339,6 +339,12 @@ func (s *BaseGrammarListener) EnterBitOr(ctx *BitOrContext) {}
 // ExitBitOr is called when production BitOr is exited.
 func (s *BaseGrammarListener) ExitBitOr(ctx *BitOrContext) {}
 
+// EnterSliceIndex is called when production SliceIndex is entered.
+func (s *BaseGrammarListener) EnterSliceIndex(ctx *SliceIndexContext) {}
+
+// ExitSliceIndex is called when production SliceIndex is exited.
+func (s *BaseGrammarListener) ExitSliceIndex(ctx *SliceIndexContext) {}
+
 // EnterAddSub is called when production AddSub is entered.
 func (s *BaseGrammarListener) EnterAddSub(ctx *AddSubContext) {}
 

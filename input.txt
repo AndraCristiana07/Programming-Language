@@ -383,3 +383,7 @@ var newlist1 = [x for x in fruits if "a" not in x]
 print newlist1
 
 
+print "number last elem: " + nums[-1]
+print "number slicing: " + nums[1:]
+print "number slicing: " + nums[1:-1]
+

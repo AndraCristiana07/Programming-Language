@@ -157,6 +157,54 @@ func TestTuple(t *testing.T) {
 			`,
 			expected: 60,
 		},
+		{
+			name: "Tuple with slicing",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[1:3]
+			`,
+			expected: &ast.Tuple{Elements: []any{4, 7}},
+		},
+		{
+			name: "Tuple with slicing from beginning",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[:3]
+			`,
+			expected: &ast.Tuple{Elements: []any{1, 4, 7}},
+		},
+		{
+			name: "Tuple with negative index for last",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[-1]
+			`,
+			expected: 3,
+		},
+		{
+			name: "Tuple with negative index for -2",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[-2]
+			`,
+			expected: 7,
+		},
+		{
+			name: "Tuple with slicing with negative with range ",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[-3:-1]
+			`,
+			expected: &ast.Tuple{Elements: []any{1, 7}},
+		},
+		{
+			name: "Tuple with slicing with negative ",
+			input: `
+				var dataMatrix = (1,4,7,4,1,7,3)
+				var testResult = dataMatrix[:-3]
+			`,
+			expected: &ast.Tuple{Elements: []any{1, 4, 7, 4}},
+		},
 	}
 
 	for _, tc := range tests {

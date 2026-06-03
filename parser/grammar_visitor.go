@@ -167,6 +167,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#BitOr.
 	VisitBitOr(ctx *BitOrContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#SliceIndex.
+	VisitSliceIndex(ctx *SliceIndexContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#AddSub.
 	VisitAddSub(ctx *AddSubContext) interface{}
 

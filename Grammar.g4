@@ -79,6 +79,7 @@ forPost         : assignStmt
 postfixStmt     : expr op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                               # ArrayIndex
+            | expr LBRACKET startOpt=expr? COLON endOpt=expr? RBRACKET  # SliceIndex
             | expr DOT IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN   # MethodCall
             | expr DOT IDENTIFIER                                       # FieldAccess
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN            # FunctionCall

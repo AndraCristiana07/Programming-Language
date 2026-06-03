@@ -167,6 +167,9 @@ type GrammarListener interface {
 	// EnterBitOr is called when entering the BitOr production.
 	EnterBitOr(c *BitOrContext)
 
+	// EnterSliceIndex is called when entering the SliceIndex production.
+	EnterSliceIndex(c *SliceIndexContext)
+
 	// EnterAddSub is called when entering the AddSub production.
 	EnterAddSub(c *AddSubContext)
 
@@ -373,6 +376,9 @@ type GrammarListener interface {
 
 	// ExitBitOr is called when exiting the BitOr production.
 	ExitBitOr(c *BitOrContext)
+
+	// ExitSliceIndex is called when exiting the SliceIndex production.
+	ExitSliceIndex(c *SliceIndexContext)
 
 	// ExitAddSub is called when exiting the AddSub production.
 	ExitAddSub(c *AddSubContext)

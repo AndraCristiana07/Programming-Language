@@ -133,3 +133,10 @@ var tupleB = (1, [2, 3])
 if (tupleA == tupleB) {
     print "Same tuple"
 }
+
+
+print dataMatrix[:2]
+
+print dataMatrix[0:3]
+
+print dataMatrix[-1]
