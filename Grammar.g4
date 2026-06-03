@@ -42,8 +42,14 @@ switchStmt          : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* de
 caseBlock           : CASE expr COLON (statement | terminator)* ;
 defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 
-forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
+forInStmt : FOR LPAREN loopTarget IN expr RPAREN body=blockStmt ;
 
+loopTarget
+    : VAR? id=IDENTIFIER           # SingleLoopVar        
+    | LPAREN identifierList RPAREN # TupleUnpackLoopVar   
+    ;
+
+identifierList : id=IDENTIFIER (COMMA IDENTIFIER)+ ;
 varDecl             : VAR (IDENTIFIER | LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN) EQUALS expr ;
 
 assignStmt          : expr EQUALS expr ;

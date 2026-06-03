@@ -76,6 +76,18 @@ func (v *BaseGrammarVisitor) VisitForInStmt(ctx *ForInStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitSingleLoopVar(ctx *SingleLoopVarContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitTupleUnpackLoopVar(ctx *TupleUnpackLoopVarContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseGrammarVisitor) VisitIdentifierList(ctx *IdentifierListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitVarDecl(ctx *VarDeclContext) interface{} {
 	return v.VisitChildren(ctx)
 }

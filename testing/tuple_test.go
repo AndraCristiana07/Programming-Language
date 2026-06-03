@@ -146,6 +146,17 @@ func TestTuple(t *testing.T) {
 			`,
 			expected: 21,
 		},
+		{
+			name: "Tuple unpacking in for...in",
+			input: `
+				var dataMatrix = ((10, "A"), (20, "B"), (30, "C"))
+				var testResult = 0
+				for ((value, label) in dataMatrix) {
+					testResult += value
+				}
+			`,
+			expected: 60,
+		},
 	}
 
 	for _, tc := range tests {

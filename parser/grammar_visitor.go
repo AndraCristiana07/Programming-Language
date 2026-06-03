@@ -59,6 +59,15 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#forInStmt.
 	VisitForInStmt(ctx *ForInStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#SingleLoopVar.
+	VisitSingleLoopVar(ctx *SingleLoopVarContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#TupleUnpackLoopVar.
+	VisitTupleUnpackLoopVar(ctx *TupleUnpackLoopVarContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#identifierList.
+	VisitIdentifierList(ctx *IdentifierListContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 

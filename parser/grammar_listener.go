@@ -59,6 +59,15 @@ type GrammarListener interface {
 	// EnterForInStmt is called when entering the forInStmt production.
 	EnterForInStmt(c *ForInStmtContext)
 
+	// EnterSingleLoopVar is called when entering the SingleLoopVar production.
+	EnterSingleLoopVar(c *SingleLoopVarContext)
+
+	// EnterTupleUnpackLoopVar is called when entering the TupleUnpackLoopVar production.
+	EnterTupleUnpackLoopVar(c *TupleUnpackLoopVarContext)
+
+	// EnterIdentifierList is called when entering the identifierList production.
+	EnterIdentifierList(c *IdentifierListContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -256,6 +265,15 @@ type GrammarListener interface {
 
 	// ExitForInStmt is called when exiting the forInStmt production.
 	ExitForInStmt(c *ForInStmtContext)
+
+	// ExitSingleLoopVar is called when exiting the SingleLoopVar production.
+	ExitSingleLoopVar(c *SingleLoopVarContext)
+
+	// ExitTupleUnpackLoopVar is called when exiting the TupleUnpackLoopVar production.
+	ExitTupleUnpackLoopVar(c *TupleUnpackLoopVarContext)
+
+	// ExitIdentifierList is called when exiting the identifierList production.
+	ExitIdentifierList(c *IdentifierListContext)
 
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)

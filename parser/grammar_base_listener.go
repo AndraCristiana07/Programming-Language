@@ -123,6 +123,24 @@ func (s *BaseGrammarListener) EnterForInStmt(ctx *ForInStmtContext) {}
 // ExitForInStmt is called when production forInStmt is exited.
 func (s *BaseGrammarListener) ExitForInStmt(ctx *ForInStmtContext) {}
 
+// EnterSingleLoopVar is called when production SingleLoopVar is entered.
+func (s *BaseGrammarListener) EnterSingleLoopVar(ctx *SingleLoopVarContext) {}
+
+// ExitSingleLoopVar is called when production SingleLoopVar is exited.
+func (s *BaseGrammarListener) ExitSingleLoopVar(ctx *SingleLoopVarContext) {}
+
+// EnterTupleUnpackLoopVar is called when production TupleUnpackLoopVar is entered.
+func (s *BaseGrammarListener) EnterTupleUnpackLoopVar(ctx *TupleUnpackLoopVarContext) {}
+
+// ExitTupleUnpackLoopVar is called when production TupleUnpackLoopVar is exited.
+func (s *BaseGrammarListener) ExitTupleUnpackLoopVar(ctx *TupleUnpackLoopVarContext) {}
+
+// EnterIdentifierList is called when production identifierList is entered.
+func (s *BaseGrammarListener) EnterIdentifierList(ctx *IdentifierListContext) {}
+
+// ExitIdentifierList is called when production identifierList is exited.
+func (s *BaseGrammarListener) ExitIdentifierList(ctx *IdentifierListContext) {}
+
 // EnterVarDecl is called when production varDecl is entered.
 func (s *BaseGrammarListener) EnterVarDecl(ctx *VarDeclContext) {}
 

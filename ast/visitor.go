@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"my_language/parser"
+	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -719,9 +720,21 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 
 	switch op {
 	case "==":
-		return left == right
+		switch left.(type) {
+		case *[]any, *Tuple:
+			return reflect.DeepEqual(left, right)
+		default:
+			return left == right
+		}
+
 	case "!=":
-		return left != right
+		switch left.(type) {
+		case *[]any, *Tuple:
+			return !reflect.DeepEqual(left, right)
+		default:
+			return left != right
+		}
+
 	case "<":
 		lVal, lOk := left.(int)
 		rVal, rOk := right.(int)
@@ -758,7 +771,6 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
-
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	val := ctx.Expr().Accept(v)
 
@@ -861,17 +873,25 @@ func condCheck(val any) bool {
 	if val == nil {
 		return false
 	}
-	if b, ok := val.(bool); ok {
-		return b
+
+	switch v := val.(type) {
+	case bool:
+		return v
+	case int:
+		return v != 0
+	case float64:
+		return v != 0.0
+	case string:
+		return v != ""
+
+	case *[]any:
+		return v != nil && len(*v) > 0
+	case *Tuple:
+		return v != nil && len(v.Elements) > 0
+
+	default:
+		return true
 	}
-	if f, ok := val.(float64); ok {
-		return f != 0
-	}
-	// check if empty string
-	if s, ok := val.(string); ok {
-		return s != "" && s != "\"\""
-	}
-	return true
 }
 
 func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
@@ -941,11 +961,6 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	collection := ctx.Expr().Accept(v)
 
-	varName := ctx.IDENTIFIER().GetText()
-
-	// check if 'var' exixsts in assign
-	hasVarKeyword := ctx.VAR() != nil
-
 	previousEnv := v.currEnv
 	v.currEnv = NewScope(previousEnv)
 	defer func() {
@@ -953,14 +968,53 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	}()
 
 	assignLoopVar := func(val any) {
-		if hasVarKeyword {
-			// for (var x in arr)
-			v.currEnv.Define(varName, val)
-		} else {
-			// for (x in arr)
-			if success := v.currEnv.Assign(varName, val); !success {
+		targetCtx := ctx.LoopTarget()
+
+		// single variable
+		if singleCtx, ok := targetCtx.(*parser.SingleLoopVarContext); ok {
+			varName := singleCtx.GetId().GetText()
+			hasVarKeyword := singleCtx.VAR() != nil
+			// check if 'var' exixsts in assign
+			if hasVarKeyword {
 				v.currEnv.Define(varName, val)
+			} else {
+				if success := v.currEnv.Assign(varName, val); !success {
+					v.currEnv.Define(varName, val)
+				}
 			}
+			return
+		}
+
+		// tuple unpacking
+		if unpackCtx, ok := targetCtx.(*parser.TupleUnpackLoopVarContext); ok {
+			runtimeTuple, ok := val.(*Tuple)
+			if !ok {
+				panic(RuntimeError("TypeError", fmt.Sprintf("Loop iteration item of type %T cannot be unpacked into multiple variables", val), ctx))
+			}
+
+			// variable names from identifierList
+			idListCtx := unpackCtx.IdentifierList()
+
+			var idTokens []antlr.Token
+			for _, node := range idListCtx.AllIDENTIFIER() {
+				if node != nil {
+					idTokens = append(idTokens, node.GetSymbol())
+				}
+			}
+
+			// size checking
+			if len(idTokens) != len(runtimeTuple.Elements) {
+				panic(RuntimeError("ValueError", fmt.Sprintf("Too many or too few values to unpack (expected %d, got %d)", len(idTokens), len(runtimeTuple.Elements)), ctx))
+			}
+
+			// assign each variable
+			for i, idToken := range idTokens {
+				varName := idToken.GetText()
+				if success := v.currEnv.Assign(varName, runtimeTuple.Elements[i]); !success {
+					v.currEnv.Define(varName, runtimeTuple.Elements[i])
+				}
+			}
+			return
 		}
 	}
 
@@ -977,10 +1031,8 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	}
 
 	if targetPtr, ok := collection.(*[]any); ok && targetPtr != nil {
-		// dereference the pointer
 		for _, value := range *targetPtr {
 			assignLoopVar(value)
-
 			if !executeBody() {
 				return nil
 			}
@@ -992,7 +1044,6 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
 		for _, value := range tuplePtr.Elements {
 			assignLoopVar(value)
-
 			if !executeBody() {
 				return nil
 			}
@@ -1002,19 +1053,12 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 
 	//string iteration
 	if str, ok := collection.(string); ok {
-		// clean up quotes
 		cleanedStr := str
 		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
 			cleanedStr = str[1 : len(str)-1]
 		}
-
-		// loop through the string by rune
 		for _, runeVal := range cleanedStr {
-			// convert rune back into single-character string
-			charStr := string(runeVal)
-
-			assignLoopVar(charStr)
-
+			assignLoopVar(string(runeVal))
 			if !executeBody() {
 				return nil
 			}
@@ -1043,8 +1087,15 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 		}
 		return nil
 	}
+	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot iterate over type %T using for...in", collection), ctx))
+}
 
-	panic(fmt.Sprintf("TypeError: Cannot iterate over type %T using for...in", collection))
+func (v *Visitor) VisitSingleLoopVar(ctx *parser.SingleLoopVarContext) any {
+	return ctx
+}
+
+func (v *Visitor) VisitTupleUnpackLoopVar(ctx *parser.TupleUnpackLoopVarContext) any {
+	return ctx
 }
 
 func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {

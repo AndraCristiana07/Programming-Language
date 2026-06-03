@@ -96,3 +96,40 @@ print "map squares: " + map(square, numbers)
 
 print "min nrs: " + min(numbers)
 print "max nrs: " + max(numbers)
+
+func getCoordinates() {
+    return (45, 90)
+}
+
+var (lat, lng) = getCoordinates()
+print lat
+print lng
+
+var matrix = {}
+matrix[(0, 1)] = "Visited"
+matrix[(0, 1)] = "Overwritten"
+print matrix
+
+
+
+var base = (1, 2)
+var tripled = base * 3
+var combined = tripled + (100, 200)
+print combined
+
+var processed = [x * 10 for x in base if x < 50]
+print processed  
+
+print count(combined, 1) 
+print index(combined, 100) 
+
+var dataMatrix = ((10, "A"), (20, "B"), (30, "C"))
+for ((value, label) in dataMatrix) {
+    print label
+}
+
+var tupleA = (1, [2, 3])
+var tupleB = (1, [2, 3])
+if (tupleA == tupleB) {
+    print "Same tuple"
+}
