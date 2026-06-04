@@ -614,6 +614,7 @@ func NewGlobalEnvironment() *Environment {
 			return true
 		},
 	})
+
 	globals.Define("any", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
@@ -1226,14 +1227,31 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("enumerate", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: enumerate() expects an array")
+			var elements []any
+
+			switch val := args[0].(type) {
+			case *[]any:
+				elements = *val
+			case *Tuple:
+				elements = val.Elements
+			case *map[string]any:
+				m := *val
+				sortedKeys := make([]string, 0, len(m))
+				for k := range m {
+					sortedKeys = append(sortedKeys, k)
+				}
+				sort.Strings(sortedKeys)
+
+				elements = make([]any, len(sortedKeys))
+				for i, k := range sortedKeys {
+					elements[i] = k
+				}
+			default:
+				panic(fmt.Sprintf("TypeError: enumerate() expects an array, tuple, or map, got %T", args[0]))
 			}
 
-			arr := *arrPtr
-			result := make([]any, len(arr))
-			for i, val := range arr {
+			result := make([]any, len(elements))
+			for i, val := range elements {
 				pair := []any{i, val}
 				result[i] = &pair
 			}
@@ -1285,10 +1303,18 @@ func NewGlobalEnvironment() *Environment {
 				actualType = "bool"
 			case *[]any:
 				actualType = "array"
-			case Callable:
-				actualType = "function"
+			case *Tuple:
+				actualType = "tuple"
+			case *map[string]any:
+				actualType = "map"
 			default:
-				actualType = "nil"
+				if _, ok := args[0].(Callable); ok {
+					actualType = "function"
+				} else if args[0] == nil {
+					actualType = "nil"
+				} else {
+					actualType = "unknown"
+				}
 			}
 
 			return actualType == targetType
@@ -1374,14 +1400,31 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("zip", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr1, ok1 := args[0].(*[]any)
-			arrPtr2, ok2 := args[1].(*[]any)
-			if !ok1 || !ok2 {
-				panic("TypeError: zip() expects two array")
+			extractElements := func(arg any) []any {
+				switch val := arg.(type) {
+				case *[]any:
+					return *val
+				case *Tuple:
+					return val.Elements
+				case *map[string]any:
+					m := *val
+					keys := make([]string, 0, len(m))
+					for k := range m {
+						keys = append(keys, k)
+					}
+					sort.Strings(keys)
+					res := make([]any, len(keys))
+					for i, k := range keys {
+						res[i] = k
+					}
+					return res
+				default:
+					panic(fmt.Sprintf("TypeError: zip() arguments must be an array, tuple, or map, got %T", arg))
+				}
 			}
 
-			arr1 := *arrPtr1
-			arr2 := *arrPtr2
+			arr1 := extractElements(args[0])
+			arr2 := extractElements(args[1])
 
 			minLen := len(arr1)
 			if len(arr2) < minLen {
@@ -1400,16 +1443,23 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("join", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok1 := args[0].(*[]any)
-			delim, ok2 := args[1].(string)
-			if !ok1 || !ok2 {
-				panic("TypeError: join() expects an array pointer and a delimiter string")
+			var elements []any
+			switch val := args[0].(type) {
+			case *[]any:
+				elements = *val
+			case *Tuple:
+				elements = val.Elements
+			default:
+				panic(fmt.Sprintf("TypeError: join() expects an array or tuple as the first argument, got %T", args[0]))
 			}
 
-			arr := *arrPtr
-			strParts := make([]string, len(arr))
+			delim, ok2 := args[1].(string)
+			if !ok2 {
+				panic("TypeError: join() second argument must be a delimiter string")
+			}
 
-			for i, val := range arr {
+			strParts := make([]string, len(elements))
+			for i, val := range elements {
 				switch v := val.(type) {
 				case string:
 					strParts[i] = v
@@ -1674,13 +1724,15 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("clear", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			mPtr, ok := args[0].(*map[string]any)
-			if !ok {
-				panic("TypeError: clear() expects a map pointer")
+			if mapPtr, ok := args[0].(*map[string]any); ok && mapPtr != nil {
+				*mapPtr = make(map[string]any)
+				return nil
 			}
-
-			*mPtr = make(map[string]any)
-			return nil
+			if arrPtr, ok := args[0].(*[]any); ok && arrPtr != nil {
+				*arrPtr = []any{}
+				return nil
+			}
+			panic("TypeError: clear() expects an array or map pointer")
 		},
 	})
 
@@ -1723,6 +1775,20 @@ func NewGlobalEnvironment() *Environment {
 			case *Tuple:
 				elements := make([]any, len(obj.Elements))
 				copy(elements, obj.Elements)
+				return &Tuple{Elements: elements}
+
+			case *map[string]any:
+				m := *obj
+				sortedKeys := make([]string, 0, len(m))
+				for k := range m {
+					sortedKeys = append(sortedKeys, k)
+				}
+				sort.Strings(sortedKeys)
+
+				elements := make([]any, len(sortedKeys))
+				for i, k := range sortedKeys {
+					elements[i] = k
+				}
 				return &Tuple{Elements: elements}
 
 			default:
