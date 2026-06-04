@@ -1278,34 +1278,34 @@ func TestStartsEndswtih(t *testing.T) {
 		expected any
 	}{
 		{
-			name: "Startswtih string",
+			name: "Startswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = startswtih(filename, "script")  
+				var testResult = startswith(filename, "script")  
 			`,
 			expected: true,
 		},
 		{
-			name: "Startswtih string false",
+			name: "Startswith string false",
 			input: `
 				var filename = "script.exe"
-				var testResult = startswtih(filename, "file")  
+				var testResult = startswith(filename, "file")  
 			`,
 			expected: false,
 		},
 		{
-			name: "Endswtih string",
+			name: "Endswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = endswitsh(filename, "exe")  
+				var testResult = endswith(filename, "exe")  
 			`,
 			expected: true,
 		},
 		{
-			name: "Endswtih string",
+			name: "Endswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = endswitsh(filename, "txt")  
+				var testResult = endswith(filename, "txt")  
 			`,
 			expected: false,
 		},

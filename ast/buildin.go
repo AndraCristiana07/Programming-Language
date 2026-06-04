@@ -199,23 +199,23 @@ func NewGlobalEnvironment() *Environment {
 				return false
 			}
 
-			switch v := val.(type) {
+			switch vl := val.(type) {
 			case bool:
-				return v
+				return vl
 			case int:
 				// 0  false
-				return v != 0
+				return vl != 0
 			case string:
 				// empty string "" is false
-				return v != ""
+				return vl != ""
 			case *[]any:
 				// empty array is false
-				return len(*v) > 0
+				return len(*vl) > 0
 			case *Tuple:
-				return len(v.Elements) > 0
+				return len(vl.Elements) > 0
 			case *map[string]any:
 				// empty map is false
-				return len(*v) > 0
+				return len(*vl) > 0
 			default:
 				// objects are true
 				return true
@@ -240,6 +240,8 @@ func NewGlobalEnvironment() *Environment {
 				return "array"
 			case *Tuple:
 				return "tuple"
+			case *map[string]any:
+				return "map"
 			default:
 				if _, ok := args[0].(Callable); ok {
 					return "function"
@@ -584,16 +586,27 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("all", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: all() expects an array as an argument")
+			var elements []any
+
+			switch val := args[0].(type) {
+			case *[]any:
+				elements = *val
+			case *Tuple:
+				elements = val.Elements
+			case *map[string]any:
+				m := *val
+				for k := range m {
+					elements = append(elements, k)
+				}
+			default:
+				panic(fmt.Sprintf("TypeError: all() expects an array, tuple, or map, got %T", args[0]))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
 			boolCallable := boolFunc.(Callable)
 
-			for _, item := range *arrPtr {
-				truth := boolCallable.Call(nil, []any{item}).(bool)
+			for _, item := range elements {
+				truth := boolCallable.Call(v, []any{item}).(bool)
 				if !truth {
 					return false
 				}
@@ -601,20 +614,30 @@ func NewGlobalEnvironment() *Environment {
 			return true
 		},
 	})
-
 	globals.Define("any", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: any() expects an array as an argument")
+			var elements []any
+
+			switch val := args[0].(type) {
+			case *[]any:
+				elements = *val
+			case *Tuple:
+				elements = val.Elements
+			case *map[string]any:
+				m := *val
+				for k := range m {
+					elements = append(elements, k)
+				}
+			default:
+				panic(fmt.Sprintf("TypeError: any() expects an array, tuple, or map, got %T", args[0]))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
 			boolCallable := boolFunc.(Callable)
 
-			for _, item := range *arrPtr {
-				truth := boolCallable.Call(nil, []any{item}).(bool)
+			for _, item := range elements {
+				truth := boolCallable.Call(v, []any{item}).(bool)
 				if truth {
 					return true
 				}
@@ -657,9 +680,9 @@ func NewGlobalEnvironment() *Environment {
 			filteredElements := make([]any, 0)
 
 			for _, item := range elements {
-				res := predicate.Call(nil, []any{item})
+				res := predicate.Call(v, []any{item})
 
-				if boolCallable.Call(nil, []any{res}).(bool) {
+				if boolCallable.Call(v, []any{res}).(bool) {
 					filteredElements = append(filteredElements, item)
 				}
 			}
@@ -675,18 +698,18 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("float", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			switch v := args[0].(type) {
+			switch val := args[0].(type) {
 			case float64:
-				return v
+				return val
 			case int:
-				return float64(v)
+				return float64(val)
 			case string:
-				if f, err := strconv.ParseFloat(v, 64); err == nil {
+				if f, err := strconv.ParseFloat(val, 64); err == nil {
 					return f
 				}
-				panic("ValueError: Cannot convert string '" + v + "' to float")
+				panic("ValueError: Cannot convert string '" + val + "' to float")
 			case bool:
-				if v {
+				if val {
 					return 1.0
 				}
 				return 0.0
@@ -699,22 +722,35 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("list", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			switch v := args[0].(type) {
+			switch val := args[0].(type) {
 			case string:
 				// convert string to an array of individual characters
 				result := []any{}
-				for _, r := range v {
+				for _, r := range val {
 					result = append(result, string(r))
 				}
 				return &result
 			case *Tuple:
-				newSlice := make([]any, len(v.Elements))
-				copy(newSlice, v.Elements)
+				newSlice := make([]any, len(val.Elements))
+				copy(newSlice, val.Elements)
 				return &newSlice
 			case *[]any:
 				// create copy of an existing array pointer
-				result := make([]any, len(*v))
-				copy(result, *v)
+				result := make([]any, len(*val))
+				copy(result, *val)
+				return &result
+			case *map[string]any:
+				m := *val
+				sortedKeys := make([]string, 0, len(m))
+				for k := range m {
+					sortedKeys = append(sortedKeys, k)
+				}
+				sort.Strings(sortedKeys)
+
+				result := make([]any, len(sortedKeys))
+				for i, k := range sortedKeys {
+					result[i] = k
+				}
 				return &result
 			default:
 				panic("TypeError: list() expects a string or an array")
@@ -750,7 +786,7 @@ func NewGlobalEnvironment() *Environment {
 
 			mappedElements := make([]any, 0, len(elements))
 			for _, item := range elements {
-				res := predicate.Call(nil, []any{item})
+				res := predicate.Call(v, []any{item})
 				mappedElements = append(mappedElements, res)
 			}
 
@@ -782,20 +818,37 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("sorted", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: sorted() expects an array")
+			var elements []any
+
+			switch val := args[0].(type) {
+			case *[]any:
+				elements = *val
+			case *Tuple:
+				elements = val.Elements
+			case *map[string]any:
+				m := *val
+				sortedKeys := make([]string, 0, len(m))
+				for k := range m {
+					sortedKeys = append(sortedKeys, k)
+				}
+				sort.Strings(sortedKeys)
+
+				result := make([]any, len(sortedKeys))
+				for i, k := range sortedKeys {
+					result[i] = k
+				}
+				return &result
+			default:
+				panic(fmt.Sprintf("TypeError: sorted() expects an array, tuple, or map, got %T", args[0]))
 			}
 
-			arr := *arrPtr
-			if len(arr) == 0 {
+			if len(elements) == 0 {
 				return &[]any{}
 			}
 
-			sortedElements := make([]any, len(arr))
-			copy(sortedElements, arr)
+			sortedElements := make([]any, len(elements))
+			copy(sortedElements, elements)
 
-			// type check
 			switch sortedElements[0].(type) {
 			case int:
 				sort.Slice(sortedElements, func(i, j int) bool {
@@ -806,7 +859,7 @@ func NewGlobalEnvironment() *Environment {
 					return sortedElements[i].(string) < sortedElements[j].(string)
 				})
 			default:
-				panic("TypeError: sorted() only supports arrays of integers or strings")
+				panic("TypeError: sorted() only supports sequences of integers or strings")
 			}
 
 			return &sortedElements
@@ -915,24 +968,24 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
-	globals.Define("startswtih", &NativeFunction{
+	globals.Define("startswith", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			prefix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: startswtih() expects two string arguments")
+				panic("TypeError: startswith() expects two string arguments")
 			}
 			return strings.HasPrefix(str, prefix)
 		},
 	})
-	globals.Define("endswitsh", &NativeFunction{
+	globals.Define("endswith", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			suffix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: endswitsh() expects two string arguments")
+				panic("TypeError: endswith() expects two string arguments")
 			}
 			return strings.HasSuffix(str, suffix)
 		},
@@ -1128,7 +1181,7 @@ func NewGlobalEnvironment() *Environment {
 			base, ok1 := args[0].(int)
 			exp, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
-				panic("TypeError: pow() expects two string arguments")
+				panic("TypeError: pow() expects two integer arguments")
 			}
 
 			return power(base, exp)

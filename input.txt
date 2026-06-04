@@ -194,8 +194,8 @@ var phrase = "  hello-there  "
 print "stripped: " + strip(phrase)
 print "split: " + split(phrase, "-")
 var filename = "script.exe"
-print startswtih(filename, "script")          
-print endswitsh(filename, ".txt")
+print startswith(filename, "script")          
+print endswith(filename, ".txt")
 
 print replace("banana", "a", "o")
 print rfind("in here", "here")
