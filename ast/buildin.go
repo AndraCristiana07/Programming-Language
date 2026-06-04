@@ -36,10 +36,13 @@ type FileHandle struct {
 func NewGlobalEnvironment() *Environment {
 	globals := NewEnvironment()
 
-	//  len(arr)
+	//  len(container)
 	globals.Define("len", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
+			if args[0] == nil {
+				return 0
+			}
 			// check for array slice
 			if arrPtr, ok := args[0].(*[]any); ok {
 				return len(*arrPtr) // dereference pointer
@@ -51,6 +54,10 @@ func NewGlobalEnvironment() *Environment {
 			// check for tuple
 			if tpl, ok := args[0].(*Tuple); ok {
 				return len(tpl.Elements)
+			}
+			// check map
+			if mapPtr, ok := args[0].(*map[string]any); ok {
+				return len(*mapPtr)
 			}
 			panic("InvalidArgument: len() expects an array or string type")
 		},
@@ -148,6 +155,36 @@ func NewGlobalEnvironment() *Environment {
 				}
 				sb.WriteString("]")
 				return sb.String()
+			case *Tuple:
+				var sb strings.Builder
+				sb.WriteString("(")
+				for i, element := range v.Elements {
+					fmt.Fprintf(&sb, "%v", element)
+					if i < len(v.Elements)-1 {
+						sb.WriteString(", ")
+					}
+				}
+				sb.WriteString(")")
+				return sb.String()
+			case *map[string]any:
+				targetMap := *v
+				keys := make([]string, 0, len(targetMap))
+				for k := range targetMap {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+
+				var sb strings.Builder
+				sb.WriteString("{")
+				for i, k := range keys {
+					fmt.Fprintf(&sb, `"%s" : %v`, k, targetMap[k])
+					if i < len(keys)-1 {
+						sb.WriteString(", ")
+					}
+				}
+				sb.WriteString("}")
+				return sb.String()
+
 			default:
 				return fmt.Sprintf("%v", v)
 			}
@@ -173,6 +210,11 @@ func NewGlobalEnvironment() *Environment {
 				return v != ""
 			case *[]any:
 				// empty array is false
+				return len(*v) > 0
+			case *Tuple:
+				return len(v.Elements) > 0
+			case *map[string]any:
+				// empty map is false
 				return len(*v) > 0
 			default:
 				// objects are true
