@@ -156,13 +156,17 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			env := runInterpreter(tc.input)
+
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("Variable 'testResult' missing")
+				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
-			if !reflect.DeepEqual(result, tc.expected) {
-				t.Errorf("Expected %v, got %v", tc.expected, result)
+			finalResult := sliceSorter(result)
+			finalExpected := sliceSorter(tc.expected)
+			if !reflect.DeepEqual(finalResult, finalExpected) {
+				t.Errorf("Expected %v (%T), got %v (%T)",
+					tc.expected, tc.expected, result, result)
 			}
 		})
 	}

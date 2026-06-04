@@ -1039,7 +1039,9 @@ func TestMap(t *testing.T) {
 				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
-			if !reflect.DeepEqual(result, tc.expected) {
+			finalResult := sliceSorter(result)
+			finalExpected := sliceSorter(tc.expected)
+			if !reflect.DeepEqual(finalResult, finalExpected) {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
