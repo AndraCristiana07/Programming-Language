@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"my_language/ast"
 	"reflect"
 	"testing"
 )
@@ -17,7 +18,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
                 var user = {"name": "Alice", "age": 30}
                 var testResult = keys(user)
             `,
-			expected: &[]any{"name", "age"},
+			expected: &[]any{"age", "name"},
 		},
 		{
 			name: "Construct and fetch values from map",
@@ -25,7 +26,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
                 var user = {"name": "Alice", "age": 30}
                 var testResult = values(user)
             `,
-			expected: &[]any{"Alice", 30},
+			expected: &[]any{30, "Alice"},
 		},
 		{
 			name: "Clear drops all elements inside map",
@@ -151,6 +152,101 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 				"sch2": &map[string]any{"Anna": "class4", "Fred": "class2"},
 			},
 		},
+		{
+			name: "Len on a map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = len(users)
+			`,
+			expected: 2,
+		},
+		{
+			name: "Str on a map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = str(users)
+			`,
+			expected: `{"age" : 20, "name" : Anna}`,
+		},
+		{
+			name: "Bool on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = bool(users)
+			`,
+			expected: true,
+		},
+		{
+			name: "Type on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = type(users)
+			`,
+			expected: "map",
+		},
+		{
+			name: "Any on map",
+			input: `
+				var bMap = {"was":true, "is":false}
+				var testResult = any(bMap)
+			`,
+			expected: true,
+		},
+		{
+			name: "All on map",
+			input: `
+				var bMap = {true : "apple", true : "orange"}
+				var testResult = all(bMap)
+			`,
+			expected: true,
+		},
+		{
+			name: "List on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = list(users)
+			`,
+			expected: &[]any{"age", "name"},
+		},
+		{
+			name: "Enumerate on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = enumerate(users)
+			`,
+			expected: &[]any{
+				&[]any{0, "age"},
+				&[]any{1, "name"},
+			},
+		},
+		{
+			name: "Is instsnce on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = isinstance(users, "map")
+			`,
+			expected: true,
+		},
+		{
+			name: "Zip on maps",
+			input: `
+                var users = {"name":"Anna", "age":20}
+                var school = {"year":2001, "principle":"Bob"}
+                var testResult = tuple(zip(users, school))
+            `,
+			expected: &ast.Tuple{Elements: []any{
+				&ast.Tuple{Elements: []any{"age", "principle"}},
+				&ast.Tuple{Elements: []any{"name", "year"}},
+			}},
+		},
+		{
+			name: "Tuple on map",
+			input: `
+				var users = {"name":"Anna", "age":20}
+				var testResult = tuple(users)
+			`,
+			expected: &ast.Tuple{Elements: []any{"age", "name"}},
+		},
 	}
 
 	for _, tc := range tests {
@@ -162,9 +258,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
-			finalResult := sliceSorter(result)
-			finalExpected := sliceSorter(tc.expected)
-			if !reflect.DeepEqual(finalResult, finalExpected) {
+			if !reflect.DeepEqual(result, tc.expected) {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}

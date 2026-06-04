@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"my_language/ast"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -1039,9 +1040,7 @@ func TestMap(t *testing.T) {
 				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
-			finalResult := sliceSorter(result)
-			finalExpected := sliceSorter(tc.expected)
-			if !reflect.DeepEqual(finalResult, finalExpected) {
+			if !reflect.DeepEqual(result, tc.expected) {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}
@@ -1280,34 +1279,34 @@ func TestStartsEndswtih(t *testing.T) {
 		expected any
 	}{
 		{
-			name: "Startswtih string",
+			name: "Startswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = startswtih(filename, "script")  
+				var testResult = startswith(filename, "script")  
 			`,
 			expected: true,
 		},
 		{
-			name: "Startswtih string false",
+			name: "Startswith string false",
 			input: `
 				var filename = "script.exe"
-				var testResult = startswtih(filename, "file")  
+				var testResult = startswith(filename, "file")  
 			`,
 			expected: false,
 		},
 		{
-			name: "Endswtih string",
+			name: "Endswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = endswitsh(filename, "exe")  
+				var testResult = endswith(filename, "exe")  
 			`,
 			expected: true,
 		},
 		{
-			name: "Endswtih string",
+			name: "Endswith string",
 			input: `
 				var filename = "script.exe"
-				var testResult = endswitsh(filename, "txt")  
+				var testResult = endswith(filename, "txt")  
 			`,
 			expected: false,
 		},
@@ -1742,12 +1741,13 @@ func TestZip(t *testing.T) {
 
 				var testResult = zip(arr1, arr2)
 			`,
-			expected: &[]any{
-				&[]any{1, 5},
-				&[]any{4, 9},
-				&[]any{7, 17},
-				&[]any{3, 13},
-			},
+
+			expected: &ast.Tuple{Elements: []any{
+				&ast.Tuple{Elements: []any{1, 5}},
+				&ast.Tuple{Elements: []any{4, 9}},
+				&ast.Tuple{Elements: []any{7, 17}},
+				&ast.Tuple{Elements: []any{3, 13}},
+			}},
 		},
 	}
 
