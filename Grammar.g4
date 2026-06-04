@@ -50,9 +50,10 @@ loopTarget
     ;
 
 identifierList : id=IDENTIFIER (COMMA IDENTIFIER)+ ;
-varDecl             : VAR (IDENTIFIER | LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN) EQUALS expr ;
 
+varDecl             : VAR (IDENTIFIER | LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN) EQUALS expr ;
 assignStmt          : expr EQUALS expr ;
+
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
 printStmt           : PRINT expr ;
