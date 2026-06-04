@@ -17,7 +17,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
                 var user = {"name": "Alice", "age": 30}
                 var testResult = keys(user)
             `,
-			expected: &[]any{"name", "age"},
+			expected: &[]any{"age", "name"},
 		},
 		{
 			name: "Construct and fetch values from map",
@@ -25,7 +25,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
                 var user = {"name": "Alice", "age": 30}
                 var testResult = values(user)
             `,
-			expected: &[]any{"Alice", 30},
+			expected: &[]any{30, "Alice"},
 		},
 		{
 			name: "Clear drops all elements inside map",
@@ -162,9 +162,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
 			}
 
-			finalResult := sliceSorter(result)
-			finalExpected := sliceSorter(tc.expected)
-			if !reflect.DeepEqual(finalResult, finalExpected) {
+			if !reflect.DeepEqual(result, tc.expected) {
 				t.Errorf("Expected %v (%T), got %v (%T)",
 					tc.expected, tc.expected, result, result)
 			}

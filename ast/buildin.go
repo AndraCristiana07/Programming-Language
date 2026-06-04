@@ -1533,9 +1533,18 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			m := *mPtr
-			res := make([]any, 0, len(m))
+
+			//gather keys as plain strings
+			sortedKeys := make([]string, 0, len(m))
 			for k := range m {
-				res = append(res, k)
+				sortedKeys = append(sortedKeys, k)
+			}
+
+			sort.Strings(sortedKeys)
+
+			res := make([]any, len(sortedKeys))
+			for i, k := range sortedKeys {
+				res[i] = k
 			}
 			return &res
 		},
@@ -1550,9 +1559,18 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			m := *mPtr
-			res := make([]any, 0, len(m))
-			for _, val := range m {
-				res = append(res, val)
+
+			//gather keys as plain strings
+			sortedKeys := make([]string, 0, len(m))
+			for k := range m {
+				sortedKeys = append(sortedKeys, k)
+			}
+
+			sort.Strings(sortedKeys)
+
+			res := make([]any, len(sortedKeys))
+			for i, k := range sortedKeys {
+				res[i] = m[k]
 			}
 			return &res
 		},
