@@ -71,4 +71,17 @@ func main() {
 	eval := ast.NewVisitor()
 	tree.Accept(eval)
 
+	env := eval.GetEnvironment()
+
+	mainFunc, found := env.Lookup("main")
+	if found {
+		callable, ok := mainFunc.(ast.Callable)
+		if !ok {
+			panic("TypeError: 'main' is defined but it is not a callable function")
+		}
+
+		callable.Call(eval, []any{})
+	} else {
+		fmt.Println("Warning: No main() function discovered. Executing script top-to-bottom.")
+	}
 }
