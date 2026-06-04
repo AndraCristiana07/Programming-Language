@@ -1,0 +1,70 @@
+struct User { 
+    name;
+    age;
+}
+
+struct TaxCalculator {
+    rate;
+}
+
+func (u User) greet() {
+    return "Hello, my name is " + u.name;
+}
+
+func calcSum(arr) {
+    return sum(arr)
+}
+
+
+func reverseArr(arr){
+    return reverse(arr)
+}
+
+func (t TaxCalculator) GetTaxLambda() {
+    return lambda amount : amount * t.rate
+}
+
+func withALot(arr) {
+    var rev = reverseArr(arr)
+    print "The reverse for your array is: " + rev
+    var arrSum = calcSum(arr)
+    var revSum = calcSum(rev)
+    print "Sum: " + arrSum
+
+    if (arrSum == revSum) {
+        print "Correct"
+    } else {
+        print "Incorrect"
+    }
+
+    if (arrSum < 15) {
+        print "Sum is smaller than 15"
+    } elif (arrSum > 15) {
+        print "Sum is bigger than 15"
+    } else {
+        print "Sum is equal to 15"
+    }
+    
+    return str(arrSum)
+}
+
+func (u User) agePlayer() {
+    if (u.age >= 21) {
+        return "adult"
+    } else {
+        return "under age"
+    }
+}
+
+var player = User { name: "Anna", age: 21 }
+
+print player.greet()
+print player.agePlayer()
+var arr1 = [2, 5, 7]
+
+var al = withALot(arr1)
+print al
+
+
+
+

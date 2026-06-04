@@ -221,6 +221,90 @@ func TestTuple(t *testing.T) {
 			`,
 			expected: &ast.Tuple{Elements: []any{3, 7, 1, 4, 7, 4, 1}},
 		},
+		{
+			name: "Str on tuple ",
+			input: `
+				var data = (1,4,7)
+				var testResult = str(data)
+			`,
+			expected: "(1, 4, 7)",
+		},
+		{
+			name: "Bool on tuple ",
+			input: `
+				var data = (1,4,7)
+				var testResult = bool(data)
+			`,
+			expected: true,
+		},
+		{
+			name: "All on tuple ",
+			input: `
+				var data = (true, false)
+				var testResult = all(data)
+			`,
+			expected: false,
+		},
+		{
+			name: "Any on tuple ",
+			input: `
+				var data = (true, false)
+				var testResult = any(data)
+			`,
+			expected: true,
+		},
+		{
+			name: "Filter on tuple for even ",
+			input: `
+			 	func isEven(x) {
+                    return x % 2 == 0
+                }
+				var data = (1,4,7,8)
+				var testResult = filter(isEven, data)
+			`,
+			expected: &ast.Tuple{Elements: []any{4, 8}},
+		},
+		{
+			name: "Enumerate on tuple",
+			input: `
+				var data = (1,4,7)
+				var testResult = enumerate(data)
+			`,
+			expected: &[]any{
+				&[]any{0, 1},
+				&[]any{1, 4},
+				&[]any{2, 7},
+			},
+		},
+		{
+			name: "Is instance on tuple ",
+			input: `
+				var data = (true, false)
+				var testResult = isinstance(data,"tuple")
+			`,
+			expected: true,
+		},
+		{
+			name: "Zip on tuple",
+			input: `
+				var data = (1,4)
+				var data2 = (9,10)
+
+				var testResult = zip(data, data2)
+			`,
+			expected: &ast.Tuple{Elements: []any{
+				&ast.Tuple{Elements: []any{1, 9}},
+				&ast.Tuple{Elements: []any{4, 10}},
+			}},
+		},
+		{
+			name: "Join on tuple",
+			input: `
+				var data = (1,4,5)
+				var testResult = join(data, "-")
+			`,
+			expected: "1-4-5",
+		},
 	}
 
 	for _, tc := range tests {
