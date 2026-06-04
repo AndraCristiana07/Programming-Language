@@ -1413,6 +1413,7 @@ func NewGlobalEnvironment() *Environment {
 						keys = append(keys, k)
 					}
 					sort.Strings(keys)
+
 					res := make([]any, len(keys))
 					for i, k := range keys {
 						res[i] = k
@@ -1433,10 +1434,9 @@ func NewGlobalEnvironment() *Environment {
 
 			result := make([]any, minLen)
 			for i := 0; i < minLen; i++ {
-				pair := []any{arr1[i], arr2[i]}
-				result[i] = &pair
+				result[i] = &Tuple{Elements: []any{arr1[i], arr2[i]}}
 			}
-			return &result
+			return &Tuple{Elements: result}
 		},
 	})
 

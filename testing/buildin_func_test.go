@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"my_language/ast"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -1740,12 +1741,13 @@ func TestZip(t *testing.T) {
 
 				var testResult = zip(arr1, arr2)
 			`,
-			expected: &[]any{
-				&[]any{1, 5},
-				&[]any{4, 9},
-				&[]any{7, 17},
-				&[]any{3, 13},
-			},
+
+			expected: &ast.Tuple{Elements: []any{
+				&ast.Tuple{Elements: []any{1, 5}},
+				&ast.Tuple{Elements: []any{4, 9}},
+				&ast.Tuple{Elements: []any{7, 17}},
+				&ast.Tuple{Elements: []any{3, 13}},
+			}},
 		},
 	}
 
