@@ -12,8 +12,6 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-// TODO: make range indexing possible (thistuple[2:])
-
 type Callable interface {
 	NrArgs() int
 	Call(v *Visitor, args []any) any
@@ -329,6 +327,7 @@ func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 	v.currEnv.Define(varName, value)
 	return nil
 }
+
 func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 	leftSide := ctx.Expr(0)
 	assignedValue := ctx.Expr(1).Accept(v)
@@ -398,71 +397,6 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 
 	return nil
 }
-
-// func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
-// 	leftSide := ctx.Expr(0)
-// 	assignedValue := ctx.Expr(1).Accept(v)
-
-// 	// tuple
-// 	if tupleLitCtx, isTupleLit := leftSide.(*parser.TupleLiteralContext); isTupleLit {
-// 		runtimeTuple, ok := assignedValue.(*Tuple)
-// 		if !ok {
-// 			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T", assignedValue), ctx))
-// 		}
-
-// 		// pull all child variable expressions
-// 		childrenExprs := tupleLitCtx.AllExpr()
-
-// 		if len(childrenExprs) != len(runtimeTuple.Elements) {
-// 			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: too many or too few values to unpack (expected %d, got %d)", len(childrenExprs), len(runtimeTuple.Elements)), ctx))
-// 		}
-
-// 		// assign each element to its corresponding variable
-// 		for i, exprCtx := range childrenExprs {
-// 			identCtx, isId := exprCtx.(*parser.IdentifierContext)
-// 			if !isId {
-// 				panic(RuntimeError("SyntaxError", "SyntaxError: Left-hand side of tuple unpacking must contain valid variable names", ctx))
-// 			}
-
-// 			name := identCtx.IDENTIFIER().GetText()
-// 			if !v.currEnv.Assign(name, runtimeTuple.Elements[i]) {
-// 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
-// 			}
-// 		}
-// 		return nil
-// 	}
-
-// 	// normal assign
-// 	container, indexVal := v.resolveAssignTarget(leftSide)
-// 	// nested
-// 	if container != nil {
-// 		switch obj := container.(type) {
-// 		case *[]any:
-// 			idx, ok := indexVal.(int)
-// 			if !ok {
-// 				panic(RuntimeError("TypeError", "Array lookup index position must resolve to an integer", ctx))
-// 			}
-// 			(*obj)[idx] = assignedValue
-// 		case *map[string]any:
-// 			keyStr := fmt.Sprintf("%v", indexVal)
-// 			(*obj)[keyStr] = assignedValue
-// 		default:
-// 			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot assign index to type %T", container), ctx))
-// 		}
-// 	} else {
-// 		// plain assign
-// 		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
-// 			name := identCtx.IDENTIFIER().GetText()
-// 			if !v.currEnv.Assign(name, assignedValue) {
-// 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
-// 			}
-// 		} else {
-// 			panic(RuntimeError("SyntaxError", "Invalid assignment target", ctx))
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 	leftSide := ctx.Expr()
