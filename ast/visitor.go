@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"my_language/parser"
+	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -10,6 +11,8 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 )
+
+// TODO: make range indexing possible (thistuple[2:])
 
 type Callable interface {
 	NrArgs() int
@@ -43,6 +46,10 @@ type Lambda struct {
 	Parameters []string
 	BodyExpr   parser.IExprContext
 	ClosureEnv *Environment
+}
+
+type Tuple struct {
+	Elements []any
 }
 
 type BreakSignal struct{}
@@ -163,6 +170,34 @@ func (v *Visitor) VisitLambdaExpr(ctx *parser.LambdaExprContext) any {
 	}
 }
 
+func (t *Tuple) String() string {
+	var sb strings.Builder
+	sb.WriteString("(")
+	strs := make([]string, len(t.Elements))
+	for i, el := range t.Elements {
+		strs[i] = fmt.Sprintf("%v", el)
+	}
+	sb.WriteString(strings.Join(strs, ", "))
+	// single element tuple -> trailing comma
+	if len(t.Elements) == 1 {
+		sb.WriteString(",")
+	}
+	sb.WriteString(")")
+	return sb.String()
+}
+
+func (v *Visitor) VisitTupleLiteral(ctx *parser.TupleLiteralContext) any {
+	elements := make([]any, 0)
+	for _, exprCtx := range ctx.AllExpr() {
+		elements = append(elements, exprCtx.Accept(v))
+	}
+	return &Tuple{Elements: elements}
+}
+
+func (v *Visitor) VisitEmptyTupleLiteral(ctx *parser.EmptyTupleLiteralContext) any {
+	return &Tuple{Elements: []any{}}
+}
+
 func (v *Visitor) VisitStructStmt(ctx *parser.StructStmtContext) any {
 	structName := ctx.GetId().GetText()
 	fields := make([]string, 0)
@@ -267,19 +302,74 @@ func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
 }
 
 func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
-	varName := ctx.IDENTIFIER().GetText()
 	value := ctx.Expr().Accept(v)
+
+	// var (a, b) =
+	if ctx.LPAREN() != nil {
+		runtimeTuple, ok := value.(*Tuple)
+		if !ok {
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T during initialization", value), ctx))
+		}
+
+		identifiers := ctx.AllIDENTIFIER()
+		if len(identifiers) != len(runtimeTuple.Elements) {
+			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: Value mismatch during unpacking: variables (%d) vs tuple elements (%d)", len(identifiers), len(runtimeTuple.Elements)), ctx))
+		}
+
+		// define each variable in the current scope
+		for i, idToken := range identifiers {
+			varName := idToken.GetText()
+			v.currEnv.Define(varName, runtimeTuple.Elements[i])
+		}
+		return nil
+	}
+
+	// simple var declaration
+	varName := ctx.IDENTIFIER(0).GetText()
 	v.currEnv.Define(varName, value)
 	return nil
 }
-
 func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
-	leftHandSide := ctx.Expr(0)
+	leftSide := ctx.Expr(0)
 	assignedValue := ctx.Expr(1).Accept(v)
 
-	// nested
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	// left side  wrapped in parentheses -> unwrap its inner expression
+	if parenCtx, isParen := leftSide.(*parser.ParenthesesContext); isParen {
+		leftSide = parenCtx.Expr()
+	}
 
+	// tuple
+	if tupleLitCtx, isTupleLit := leftSide.(*parser.TupleLiteralContext); isTupleLit {
+		runtimeTuple, ok := assignedValue.(*Tuple)
+		if !ok {
+			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T", assignedValue), ctx))
+		}
+
+		// pull all child variable expressions
+		childrenExprs := tupleLitCtx.AllExpr()
+
+		if len(childrenExprs) != len(runtimeTuple.Elements) {
+			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: too many or too few values to unpack (expected %d, got %d)", len(childrenExprs), len(runtimeTuple.Elements)), ctx))
+		}
+
+		// assign each element to its corresponding variable
+		for i, exprCtx := range childrenExprs {
+			identCtx, isId := exprCtx.(*parser.IdentifierContext)
+			if !isId {
+				panic(RuntimeError("SyntaxError", "SyntaxError: Left-hand side of tuple unpacking must contain valid variable names", ctx))
+			}
+
+			name := identCtx.IDENTIFIER().GetText()
+			if !v.currEnv.Assign(name, runtimeTuple.Elements[i]) {
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
+			}
+		}
+		return nil
+	}
+
+	// normal assign
+	container, indexVal := v.resolveAssignTarget(leftSide)
+	// nested
 	if container != nil {
 		switch obj := container.(type) {
 		case *[]any:
@@ -296,26 +386,89 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			name := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(name, assignedValue) {
 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
-
 			}
 		} else {
 			panic(RuntimeError("SyntaxError", "Invalid assignment target", ctx))
-
 		}
 	}
 
 	return nil
 }
 
+// func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
+// 	leftSide := ctx.Expr(0)
+// 	assignedValue := ctx.Expr(1).Accept(v)
+
+// 	// tuple
+// 	if tupleLitCtx, isTupleLit := leftSide.(*parser.TupleLiteralContext); isTupleLit {
+// 		runtimeTuple, ok := assignedValue.(*Tuple)
+// 		if !ok {
+// 			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot unpack non-tuple type %T", assignedValue), ctx))
+// 		}
+
+// 		// pull all child variable expressions
+// 		childrenExprs := tupleLitCtx.AllExpr()
+
+// 		if len(childrenExprs) != len(runtimeTuple.Elements) {
+// 			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: too many or too few values to unpack (expected %d, got %d)", len(childrenExprs), len(runtimeTuple.Elements)), ctx))
+// 		}
+
+// 		// assign each element to its corresponding variable
+// 		for i, exprCtx := range childrenExprs {
+// 			identCtx, isId := exprCtx.(*parser.IdentifierContext)
+// 			if !isId {
+// 				panic(RuntimeError("SyntaxError", "SyntaxError: Left-hand side of tuple unpacking must contain valid variable names", ctx))
+// 			}
+
+// 			name := identCtx.IDENTIFIER().GetText()
+// 			if !v.currEnv.Assign(name, runtimeTuple.Elements[i]) {
+// 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
+// 			}
+// 		}
+// 		return nil
+// 	}
+
+// 	// normal assign
+// 	container, indexVal := v.resolveAssignTarget(leftSide)
+// 	// nested
+// 	if container != nil {
+// 		switch obj := container.(type) {
+// 		case *[]any:
+// 			idx, ok := indexVal.(int)
+// 			if !ok {
+// 				panic(RuntimeError("TypeError", "Array lookup index position must resolve to an integer", ctx))
+// 			}
+// 			(*obj)[idx] = assignedValue
+// 		case *map[string]any:
+// 			keyStr := fmt.Sprintf("%v", indexVal)
+// 			(*obj)[keyStr] = assignedValue
+// 		default:
+// 			panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot assign index to type %T", container), ctx))
+// 		}
+// 	} else {
+// 		// plain assign
+// 		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
+// 			name := identCtx.IDENTIFIER().GetText()
+// 			if !v.currEnv.Assign(name, assignedValue) {
+// 				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' is not defined", name), ctx))
+// 			}
+// 		} else {
+// 			panic(RuntimeError("SyntaxError", "Invalid assignment target", ctx))
+// 		}
+// 	}
+
+// 	return nil
+// }
+
 func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
-	leftHandSide := ctx.Expr()
+	leftSide := ctx.Expr()
 	op := ctx.GetOp().GetText()
 
-	currentValue := leftHandSide.Accept(v)
+	currentValue := leftSide.Accept(v)
 
 	intValue, ok := currentValue.(int)
 	if !ok {
@@ -332,7 +485,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 	}
 
 	// write result to destination
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	container, indexVal := v.resolveAssignTarget(leftSide)
 
 	if container != nil {
 		// nested
@@ -352,7 +505,7 @@ func (v *Visitor) VisitPostfixStmt(ctx *parser.PostfixStmtContext) any {
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, intValue) {
 				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))
@@ -416,9 +569,9 @@ func (v *Visitor) VisitString(ctx *parser.StringContext) any {
 	}
 
 	// remove the surrounding quotes
-
 	return rawStr[1 : len(rawStr)-1]
 }
+
 func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 	left := ctx.Expr(0).Accept(v)
 	right := ctx.Expr(1).Accept(v)
@@ -433,6 +586,24 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 		} else {
 			panic(RuntimeError("SyntaxError", fmt.Sprintf("Unsupported operator for strings: %s", op), ctx))
 		}
+	}
+
+	leftTuple, leftIsTuple := left.(*Tuple)
+	rightTuple, rightIsTuple := right.(*Tuple)
+
+	if leftIsTuple && rightIsTuple {
+		if op == "+" {
+			// new slice with size of both combined
+			combinedElements := make([]any, 0, len(leftTuple.Elements)+len(rightTuple.Elements))
+			combinedElements = append(combinedElements, leftTuple.Elements...)
+			combinedElements = append(combinedElements, rightTuple.Elements...)
+
+			return &Tuple{Elements: combinedElements}
+		} else {
+			panic(RuntimeError("TypeError", fmt.Sprintf("Unsupported operator for tuples: %s", op), ctx))
+		}
+	} else if leftIsTuple || rightIsTuple {
+		panic(RuntimeError("TypeError", "Can only concatenate tuple (not to other types) to tuple", ctx))
 	}
 
 	lVal, lOk := left.(int)
@@ -472,6 +643,39 @@ func (v *Visitor) VisitMulDivMod(ctx *parser.MulDivModContext) any {
 		default:
 			return 0, false
 		}
+	}
+
+	leftTuple, leftIsTuple := left.(*Tuple)
+	rightTuple, rightIsTuple := right.(*Tuple)
+
+	if (leftIsTuple || rightIsTuple) && op == "*" {
+		var targetTuple *Tuple
+		var repeatCount int
+		var ok bool
+
+		// take which side is tuple and which is mul
+		if leftIsTuple {
+			targetTuple = leftTuple
+			repeatCount, ok = right.(int)
+		} else {
+			targetTuple = rightTuple
+			repeatCount, ok = left.(int)
+		}
+
+		if !ok {
+			panic(RuntimeError("TypeError", "Tuple can only be multiplied by an integer", ctx))
+		}
+
+		if repeatCount <= 0 {
+			return &Tuple{Elements: make([]any, 0)}
+		}
+
+		repeatedElements := make([]any, 0, len(targetTuple.Elements)*repeatCount)
+		for i := 0; i < repeatCount; i++ {
+			repeatedElements = append(repeatedElements, targetTuple.Elements...)
+		}
+
+		return &Tuple{Elements: repeatedElements}
 	}
 
 	leftNum, okL := toFloat(left)
@@ -585,9 +789,21 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 
 	switch op {
 	case "==":
-		return left == right
+		switch left.(type) {
+		case *[]any, *Tuple:
+			return reflect.DeepEqual(left, right)
+		default:
+			return left == right
+		}
+
 	case "!=":
-		return left != right
+		switch left.(type) {
+		case *[]any, *Tuple:
+			return !reflect.DeepEqual(left, right)
+		default:
+			return left != right
+		}
+
 	case "<":
 		lVal, lOk := left.(int)
 		rVal, rOk := right.(int)
@@ -624,7 +840,6 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
-
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	val := ctx.Expr().Accept(v)
 
@@ -727,17 +942,25 @@ func condCheck(val any) bool {
 	if val == nil {
 		return false
 	}
-	if b, ok := val.(bool); ok {
-		return b
+
+	switch v := val.(type) {
+	case bool:
+		return v
+	case int:
+		return v != 0
+	case float64:
+		return v != 0.0
+	case string:
+		return v != ""
+
+	case *[]any:
+		return v != nil && len(*v) > 0
+	case *Tuple:
+		return v != nil && len(v.Elements) > 0
+
+	default:
+		return true
 	}
-	if f, ok := val.(float64); ok {
-		return f != 0
-	}
-	// check if empty string
-	if s, ok := val.(string); ok {
-		return s != "" && s != "\"\""
-	}
-	return true
 }
 
 func (v *Visitor) VisitWhileStmt(ctx *parser.WhileStmtContext) any {
@@ -807,11 +1030,6 @@ func (v *Visitor) VisitForStmt(ctx *parser.ForStmtContext) any {
 func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	collection := ctx.Expr().Accept(v)
 
-	varName := ctx.IDENTIFIER().GetText()
-
-	// check if 'var' exixsts in assign
-	hasVarKeyword := ctx.VAR() != nil
-
 	previousEnv := v.currEnv
 	v.currEnv = NewScope(previousEnv)
 	defer func() {
@@ -819,14 +1037,53 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	}()
 
 	assignLoopVar := func(val any) {
-		if hasVarKeyword {
-			// for (var x in arr)
-			v.currEnv.Define(varName, val)
-		} else {
-			// for (x in arr)
-			if success := v.currEnv.Assign(varName, val); !success {
+		targetCtx := ctx.LoopTarget()
+
+		// single variable
+		if singleCtx, ok := targetCtx.(*parser.SingleLoopVarContext); ok {
+			varName := singleCtx.GetId().GetText()
+			hasVarKeyword := singleCtx.VAR() != nil
+			// check if 'var' exixsts in assign
+			if hasVarKeyword {
 				v.currEnv.Define(varName, val)
+			} else {
+				if success := v.currEnv.Assign(varName, val); !success {
+					v.currEnv.Define(varName, val)
+				}
 			}
+			return
+		}
+
+		// tuple unpacking
+		if unpackCtx, ok := targetCtx.(*parser.TupleUnpackLoopVarContext); ok {
+			runtimeTuple, ok := val.(*Tuple)
+			if !ok {
+				panic(RuntimeError("TypeError", fmt.Sprintf("Loop iteration item of type %T cannot be unpacked into multiple variables", val), ctx))
+			}
+
+			// variable names from identifierList
+			idListCtx := unpackCtx.IdentifierList()
+
+			var idTokens []antlr.Token
+			for _, node := range idListCtx.AllIDENTIFIER() {
+				if node != nil {
+					idTokens = append(idTokens, node.GetSymbol())
+				}
+			}
+
+			// size checking
+			if len(idTokens) != len(runtimeTuple.Elements) {
+				panic(RuntimeError("ValueError", fmt.Sprintf("Too many or too few values to unpack (expected %d, got %d)", len(idTokens), len(runtimeTuple.Elements)), ctx))
+			}
+
+			// assign each variable
+			for i, idToken := range idTokens {
+				varName := idToken.GetText()
+				if success := v.currEnv.Assign(varName, runtimeTuple.Elements[i]); !success {
+					v.currEnv.Define(varName, runtimeTuple.Elements[i])
+				}
+			}
+			return
 		}
 	}
 
@@ -843,10 +1100,19 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 	}
 
 	if targetPtr, ok := collection.(*[]any); ok && targetPtr != nil {
-		// dereference the pointer
 		for _, value := range *targetPtr {
 			assignLoopVar(value)
+			if !executeBody() {
+				return nil
+			}
+		}
+		return nil
+	}
 
+	// tuple
+	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
+		for _, value := range tuplePtr.Elements {
+			assignLoopVar(value)
 			if !executeBody() {
 				return nil
 			}
@@ -856,19 +1122,12 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 
 	//string iteration
 	if str, ok := collection.(string); ok {
-		// clean up quotes
 		cleanedStr := str
 		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
 			cleanedStr = str[1 : len(str)-1]
 		}
-
-		// loop through the string by rune
 		for _, runeVal := range cleanedStr {
-			// convert rune back into single-character string
-			charStr := string(runeVal)
-
-			assignLoopVar(charStr)
-
+			assignLoopVar(string(runeVal))
 			if !executeBody() {
 				return nil
 			}
@@ -897,8 +1156,15 @@ func (v *Visitor) VisitForInStmt(ctx *parser.ForInStmtContext) any {
 		}
 		return nil
 	}
+	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot iterate over type %T using for...in", collection), ctx))
+}
 
-	panic(fmt.Sprintf("TypeError: Cannot iterate over type %T using for...in", collection))
+func (v *Visitor) VisitSingleLoopVar(ctx *parser.SingleLoopVarContext) any {
+	return ctx
+}
+
+func (v *Visitor) VisitTupleUnpackLoopVar(ctx *parser.TupleUnpackLoopVarContext) any {
+	return ctx
 }
 
 func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {
@@ -942,8 +1208,8 @@ func (v *Visitor) VisitSwitchStmt(ctx *parser.SwitchStmtContext) any {
 }
 
 func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext) any {
-	leftHandSide := ctx.Expr(0)
-	currentValue := leftHandSide.Accept(v)
+	leftSide := ctx.Expr(0)
+	currentValue := leftSide.Accept(v)
 	value := ctx.Expr(1).Accept(v)
 	op := ctx.GetOp().GetText()
 
@@ -1003,7 +1269,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	}
 
 	// write result to destination
-	container, indexVal := v.resolveAssignTarget(leftHandSide)
+	container, indexVal := v.resolveAssignTarget(leftSide)
 
 	if container != nil {
 		// nested
@@ -1023,7 +1289,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 		}
 	} else {
 		// plain assign
-		if identCtx, ok := leftHandSide.(*parser.IdentifierContext); ok {
+		if identCtx, ok := leftSide.(*parser.IdentifierContext); ok {
 			varName := identCtx.IDENTIFIER().GetText()
 			if !v.currEnv.Assign(varName, result) {
 				panic(RuntimeError("TypeError", fmt.Sprintf("Failed to assign value to variable '%s'", varName), ctx))
@@ -1204,6 +1470,11 @@ func (v *Visitor) VisitListComprehension(ctx *parser.ListComprehensionContext) a
 		for _, value := range *arrPtr {
 			processElement(value)
 		}
+	} else if tuplePtr, ok := sourceCollection.(*Tuple); ok && tuplePtr != nil {
+		// if tuple
+		for _, value := range tuplePtr.Elements {
+			processElement(value)
+		}
 	} else if str, ok := sourceCollection.(string); ok {
 		// if string -> clean and process
 		cleanedStr := str
@@ -1224,39 +1495,86 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 	collection := ctx.Expr(0).Accept(v)
 	indexKey := ctx.Expr(1).Accept(v)
 
-	// expect pointer to the slice (*[]any)
+	getValidIntIndex := func(raw any) (int, bool) {
+		if idx, ok := raw.(int); ok {
+			return idx, true
+		}
+		if f, ok := raw.(float64); ok {
+			return int(f), true
+		}
+		return 0, false
+	}
+
+	// array
 	if arrPtr, ok := collection.(*[]any); ok && arrPtr != nil {
 		// dereference it locally to perform size checks and lookups safely
 		arr := *arrPtr
 
-		idx, ok := indexKey.(int)
+		idx, ok := getValidIntIndex(indexKey)
 		if !ok {
-			// try converting to int
-			if f, ok := indexKey.(float64); ok {
-				idx = int(f)
-			} else {
-				panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
-			}
+			panic(RuntimeError("TypeError", "Array index must be an integer", ctx))
 		}
 
-		if idx < 0 || idx >= len(arr) {
+		// for negative indexing
+		actualIdx, valid := calculateIndex(idx, len(arr))
+		if !valid {
 			panic(RuntimeError("IndexError", fmt.Sprintf("Array index %d is out of bounds (length %d)", idx, len(arr)), ctx))
 		}
 
-		return arr[idx]
+		return arr[actualIdx]
+	}
+
+	// tuple
+	if tuplePtr, ok := collection.(*Tuple); ok && tuplePtr != nil {
+		idx, ok := getValidIntIndex(indexKey)
+		if !ok {
+			panic(RuntimeError("TypeError", "Tuple index must be an integer", ctx))
+		}
+
+		// for negative indexing
+		actualIdx, valid := calculateIndex(idx, len(tuplePtr.Elements))
+		if !valid {
+			panic(RuntimeError("IndexError", fmt.Sprintf("Tuple index %d is out of bounds (length %d)", idx, len(tuplePtr.Elements)), ctx))
+		}
+
+		return tuplePtr.Elements[actualIdx]
+	}
+
+	// string
+	if str, ok := collection.(string); ok {
+		cleanedStr := str
+		// clean quotes
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			cleanedStr = str[1 : len(str)-1]
+		}
+
+		idx, ok := getValidIntIndex(indexKey)
+		if !ok {
+			panic(RuntimeError("TypeError", "String index must be an integer", ctx))
+		}
+
+		runes := []rune(cleanedStr)
+		actualIdx, valid := calculateIndex(idx, len(runes))
+		if !valid {
+			panic(RuntimeError("IndexError", fmt.Sprintf("String index %d is out of bounds (length %d)", idx, len(runes)), ctx))
+		}
+
+		resChar := string(runes[actualIdx])
+		if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
+			return "\"" + resChar + "\""
+		}
+		return resChar
 	}
 
 	// dict/map
 	if mapPtr, ok := collection.(*map[string]any); ok && mapPtr != nil {
 		targetMap := *mapPtr
 
-		// indexKey into string for map lookup
 		var lookupKey string
 		switch k := indexKey.(type) {
 		case string:
 			lookupKey = k
 		case bool:
-			// true -> "true", false -> "false"
 			if k {
 				lookupKey = "true"
 			} else {
@@ -1270,15 +1588,100 @@ func (v *Visitor) VisitArrayIndex(ctx *parser.ArrayIndexContext) any {
 			lookupKey = fmt.Sprintf("%v", indexKey)
 		}
 
-		// lookup inside map
 		if val, exists := targetMap[lookupKey]; exists {
 			return val
 		}
-
 		return nil
 	}
 
 	panic(RuntimeError("TypeError", fmt.Sprintf("Cannot read properties of type %T using brackets [...]", collection), ctx))
+}
+
+func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
+	collection := ctx.Expr(0).Accept(v)
+
+	var startVal, endVal, stepVal any
+	if ctx.GetStartOpt() != nil {
+		startVal = ctx.GetStartOpt().Accept(v)
+	}
+	if ctx.GetEndOpt() != nil {
+		endVal = ctx.GetEndOpt().Accept(v)
+	}
+	if ctx.GetStepOpt() != nil {
+		stepVal = ctx.GetStepOpt().Accept(v)
+	}
+
+	switch seq := collection.(type) {
+	// array
+	case *[]any:
+		if seq == nil {
+			panic("NullPointerError")
+		}
+		arr := *seq
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(arr))
+
+		sliced := []any{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				sliced = append(sliced, arr[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				sliced = append(sliced, arr[i])
+			}
+		}
+		return &sliced
+
+	// tuple
+	case *Tuple:
+		if seq == nil {
+			panic("NullPointerError")
+		}
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(seq.Elements))
+
+		sliced := []any{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				sliced = append(sliced, seq.Elements[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				sliced = append(sliced, seq.Elements[i])
+			}
+		}
+		return &Tuple{Elements: sliced}
+
+	// string
+	case string:
+		cleanedStr := seq
+		hasQuotes := len(seq) >= 2 && seq[0] == '"' && seq[len(seq)-1] == '"'
+		if hasQuotes {
+			cleanedStr = seq[1 : len(seq)-1]
+		}
+
+		runes := []rune(cleanedStr)
+		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(runes))
+
+		slicedRunes := []rune{}
+		if step > 0 {
+			for i := start; i < end; i += step {
+				slicedRunes = append(slicedRunes, runes[i])
+			}
+		} else {
+			for i := start; i > end; i += step {
+				slicedRunes = append(slicedRunes, runes[i])
+			}
+		}
+
+		resStr := string(slicedRunes)
+		if hasQuotes {
+			return "\"" + resStr + "\""
+		}
+		return resStr
+
+	default:
+		panic(fmt.Sprintf("TypeError: Type %T does not support slicing", collection))
+	}
 }
 
 func (v *Visitor) VisitArrayAssignStmt(ctx *parser.ArrayAssignStmtContext) any {
@@ -1627,9 +2030,23 @@ func cleanStringRepr(val any) string {
 		}
 		sb.WriteString("]")
 		return sb.String()
+	case *Tuple:
+		var sb strings.Builder
+		sb.WriteString("(")
+		for i, element := range v.Elements {
+			sb.WriteString(cleanStringRepr(element))
+			if i < len(v.Elements)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		// (10,)
+		if len(v.Elements) == 1 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(")")
+		return sb.String()
 	case *map[string]any:
 		m := *v
-
 		// struct
 		if typeName, isStruct := m["__type__"].(string); isStruct {
 			var sb strings.Builder
@@ -1748,4 +2165,86 @@ func (v *Visitor) unwrapContainer(parentContainer any, parentIndex any) any {
 	default:
 		panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: %T is not an indexable container", parentContainer), nil))
 	}
+}
+
+func calculateIndex(index, length int) (int, bool) {
+	if index < 0 {
+		index = length + index
+	}
+	if index < 0 || index >= length {
+		return 0, false
+	}
+	return index, true
+}
+
+func calculateSliceBoundsWithStep(startOpt, endOpt, stepOpt any, length int) (int, int, int) {
+	// step value (defaults is 1)
+	step := 1
+	if stepOpt != nil {
+		var ok bool
+		step, ok = stepOpt.(int)
+		if !ok {
+			if f, ok := stepOpt.(float64); ok {
+				step = int(f)
+			} else {
+				panic("TypeError: Slice step must be an integer")
+			}
+		}
+	}
+	if step == 0 {
+		panic("ValueError: slice step cannot be zero")
+	}
+
+	var start, end int
+	if step > 0 {
+		// Forward step defaults
+		start = 0
+		if startOpt != nil {
+			start = normalizeIndex(startOpt, length)
+		}
+		end = length
+		if endOpt != nil {
+			end = normalizeIndex(endOpt, length)
+		}
+		// Clamp boundaries
+		if start < 0 {
+			start = 0
+		}
+		if end > length {
+			end = length
+		}
+	} else {
+		// Backward step defaults
+		start = length - 1
+		if startOpt != nil {
+			start = normalizeIndex(startOpt, length)
+		}
+		end = -1 // going backward
+		if endOpt != nil {
+			end = normalizeIndex(endOpt, length)
+		}
+		if start >= length {
+			start = length - 1
+		}
+		if end < -1 {
+			end = -1
+		}
+	}
+
+	return start, end, step
+}
+
+func normalizeIndex(opt any, length int) int {
+	val := 0
+	if i, ok := opt.(int); ok {
+		val = i
+	}
+	if f, ok := opt.(float64); ok {
+		val = int(f)
+	}
+
+	if val < 0 {
+		return length + val
+	}
+	return val
 }

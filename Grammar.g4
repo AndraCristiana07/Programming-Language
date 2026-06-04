@@ -42,11 +42,18 @@ switchStmt          : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* de
 caseBlock           : CASE expr COLON (statement | terminator)* ;
 defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 
-forInStmt           : FOR LPAREN VAR? id=IDENTIFIER IN expr RPAREN body=blockStmt ;
+forInStmt : FOR LPAREN loopTarget IN expr RPAREN body=blockStmt ;
 
-varDecl             : VAR IDENTIFIER EQUALS expr ;
+loopTarget
+    : VAR? id=IDENTIFIER           # SingleLoopVar        
+    | LPAREN identifierList RPAREN # TupleUnpackLoopVar   
+    ;
 
+identifierList : id=IDENTIFIER (COMMA IDENTIFIER)+ ;
+
+varDecl             : VAR (IDENTIFIER | LPAREN IDENTIFIER (COMMA IDENTIFIER)* RPAREN) EQUALS expr ;
 assignStmt          : expr EQUALS expr ;
+
 arrayAssignStmt     : IDENTIFIER LBRACKET expr RBRACKET EQUALS expr ;
 compoundAssignStmt  : expr op=(PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL | MODEQUAL | EXPONENTIALEQUAL | BITANDEQUAL | BITOREQUAL | BITXOREQAUL | BITLSHIFTEQUAL | BITRSHIFTEQUAL) expr ;
 printStmt           : PRINT expr ;
@@ -73,6 +80,7 @@ forPost         : assignStmt
 postfixStmt     : expr op=(INC | DEC) ;
 
 expr        : expr LBRACKET expr RBRACKET                               # ArrayIndex
+            | expr LBRACKET startOpt=expr? COLON endOpt=expr? (COLON stepOpt=expr?)? RBRACKET # SliceIndex
             | expr DOT IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN   # MethodCall
             | expr DOT IDENTIFIER                                       # FieldAccess
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN            # FunctionCall
@@ -93,6 +101,8 @@ expr        : expr LBRACKET expr RBRACKET                               # ArrayI
             | structLiteral                                             # Struct
             | LBRACE (mapEntry (COMMA mapEntry)*)? RBRACE               # MapLiteral                              
             | LAMBDA (IDENTIFIER (COMMA IDENTIFIER)*)? COLON expr       # LambdaExpr
+            | LPAREN expr COMMA expr (COMMA expr)* COMMA? RPAREN        # TupleLiteral
+            | LPAREN RPAREN                                             # EmptyTupleLiteral
             | IDENTIFIER                                                # Identifier          
             | NUMBER                                                    # Number     
             | val=(TRUE | FALSE)                                        # Boolean

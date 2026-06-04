@@ -59,6 +59,15 @@ type GrammarListener interface {
 	// EnterForInStmt is called when entering the forInStmt production.
 	EnterForInStmt(c *ForInStmtContext)
 
+	// EnterSingleLoopVar is called when entering the SingleLoopVar production.
+	EnterSingleLoopVar(c *SingleLoopVarContext)
+
+	// EnterTupleUnpackLoopVar is called when entering the TupleUnpackLoopVar production.
+	EnterTupleUnpackLoopVar(c *TupleUnpackLoopVarContext)
+
+	// EnterIdentifierList is called when entering the identifierList production.
+	EnterIdentifierList(c *IdentifierListContext)
+
 	// EnterVarDecl is called when entering the varDecl production.
 	EnterVarDecl(c *VarDeclContext)
 
@@ -137,11 +146,17 @@ type GrammarListener interface {
 	// EnterComparison is called when entering the Comparison production.
 	EnterComparison(c *ComparisonContext)
 
+	// EnterTupleLiteral is called when entering the TupleLiteral production.
+	EnterTupleLiteral(c *TupleLiteralContext)
+
 	// EnterMembership is called when entering the Membership production.
 	EnterMembership(c *MembershipContext)
 
 	// EnterFunctionCall is called when entering the FunctionCall production.
 	EnterFunctionCall(c *FunctionCallContext)
+
+	// EnterEmptyTupleLiteral is called when entering the EmptyTupleLiteral production.
+	EnterEmptyTupleLiteral(c *EmptyTupleLiteralContext)
 
 	// EnterBoolean is called when entering the Boolean production.
 	EnterBoolean(c *BooleanContext)
@@ -151,6 +166,9 @@ type GrammarListener interface {
 
 	// EnterBitOr is called when entering the BitOr production.
 	EnterBitOr(c *BitOrContext)
+
+	// EnterSliceIndex is called when entering the SliceIndex production.
+	EnterSliceIndex(c *SliceIndexContext)
 
 	// EnterAddSub is called when entering the AddSub production.
 	EnterAddSub(c *AddSubContext)
@@ -251,6 +269,15 @@ type GrammarListener interface {
 	// ExitForInStmt is called when exiting the forInStmt production.
 	ExitForInStmt(c *ForInStmtContext)
 
+	// ExitSingleLoopVar is called when exiting the SingleLoopVar production.
+	ExitSingleLoopVar(c *SingleLoopVarContext)
+
+	// ExitTupleUnpackLoopVar is called when exiting the TupleUnpackLoopVar production.
+	ExitTupleUnpackLoopVar(c *TupleUnpackLoopVarContext)
+
+	// ExitIdentifierList is called when exiting the identifierList production.
+	ExitIdentifierList(c *IdentifierListContext)
+
 	// ExitVarDecl is called when exiting the varDecl production.
 	ExitVarDecl(c *VarDeclContext)
 
@@ -329,11 +356,17 @@ type GrammarListener interface {
 	// ExitComparison is called when exiting the Comparison production.
 	ExitComparison(c *ComparisonContext)
 
+	// ExitTupleLiteral is called when exiting the TupleLiteral production.
+	ExitTupleLiteral(c *TupleLiteralContext)
+
 	// ExitMembership is called when exiting the Membership production.
 	ExitMembership(c *MembershipContext)
 
 	// ExitFunctionCall is called when exiting the FunctionCall production.
 	ExitFunctionCall(c *FunctionCallContext)
+
+	// ExitEmptyTupleLiteral is called when exiting the EmptyTupleLiteral production.
+	ExitEmptyTupleLiteral(c *EmptyTupleLiteralContext)
 
 	// ExitBoolean is called when exiting the Boolean production.
 	ExitBoolean(c *BooleanContext)
@@ -343,6 +376,9 @@ type GrammarListener interface {
 
 	// ExitBitOr is called when exiting the BitOr production.
 	ExitBitOr(c *BitOrContext)
+
+	// ExitSliceIndex is called when exiting the SliceIndex production.
+	ExitSliceIndex(c *SliceIndexContext)
 
 	// ExitAddSub is called when exiting the AddSub production.
 	ExitAddSub(c *AddSubContext)

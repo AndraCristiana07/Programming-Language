@@ -48,6 +48,10 @@ func NewGlobalEnvironment() *Environment {
 			if str, ok := args[0].(string); ok {
 				return len(str)
 			}
+			// check for tuple
+			if tpl, ok := args[0].(*Tuple); ok {
+				return len(tpl.Elements)
+			}
 			panic("InvalidArgument: len() expects an array or string type")
 		},
 	})
@@ -192,6 +196,8 @@ func NewGlobalEnvironment() *Environment {
 				return "bool"
 			case *[]any:
 				return "array"
+			case *Tuple:
+				return "tuple"
 			default:
 				if _, ok := args[0].(Callable); ok {
 					return "function"
@@ -252,33 +258,97 @@ func NewGlobalEnvironment() *Environment {
 
 	// min(item1, item2)
 	globals.Define("min", &NativeFunction{
-		ArgsCount: 2,
+		ArgsCount: -1,
 		Body: func(v *Visitor, args []any) any {
-			a, ok1 := args[0].(int)
-			b, ok2 := args[1].(int)
-			if !ok1 || !ok2 {
-				panic("min() expects two integers")
+			if len(args) == 0 {
+				panic("ValueError: min() expects at least 1 argument")
 			}
-			if a < b {
-				return a
+
+			var elements []any
+
+			// array or tuple
+			if len(args) == 1 {
+				switch collection := args[0].(type) {
+				case *[]any:
+					if collection != nil {
+						elements = *collection
+					}
+				case *Tuple:
+					if collection != nil {
+						elements = collection.Elements
+					}
+				default:
+					return args[0]
+				}
+			} else {
+				// simple min(10, 20)
+				elements = args
 			}
-			return b
+
+			if len(elements) == 0 {
+				panic("ValueError: min() arg is an empty sequence")
+			}
+
+			smallest := elements[0]
+			for _, item := range elements {
+				curr, ok1 := item.(int)
+				minSoFar, ok2 := smallest.(int)
+				if !ok1 || !ok2 {
+					panic("TypeError: min() comparisons require numeric values")
+				}
+				if curr < minSoFar {
+					smallest = item
+				}
+			}
+			return smallest
 		},
 	})
 
 	// max(item1, item2)
 	globals.Define("max", &NativeFunction{
-		ArgsCount: 2,
+		ArgsCount: -1,
 		Body: func(v *Visitor, args []any) any {
-			a, ok1 := args[0].(int)
-			b, ok2 := args[1].(int)
-			if !ok1 || !ok2 {
-				panic("max() expects two integers")
+			if len(args) == 0 {
+				panic("ValueError: max() expects at least 1 argument")
 			}
-			if a > b {
-				return a
+
+			var elements []any
+
+			// array or tuple
+			if len(args) == 1 {
+				switch collection := args[0].(type) {
+				case *[]any:
+					if collection != nil {
+						elements = *collection
+					}
+				case *Tuple:
+					if collection != nil {
+						elements = collection.Elements
+					}
+				default:
+					return args[0]
+				}
+			} else {
+				// simple max(10, 20)
+				elements = args
 			}
-			return b
+
+			if len(elements) == 0 {
+				panic("ValueError: max() arg is an empty sequence")
+			}
+
+			biggest := elements[0]
+			for _, item := range elements {
+				curr, ok1 := item.(int)
+				maxSoFar, ok2 := biggest.(int)
+				if !ok1 || !ok2 {
+					panic("TypeError: max() comparisons require numeric values")
+				}
+				if curr > maxSoFar {
+					biggest = item
+				}
+			}
+			return biggest
 		},
 	})
 
@@ -520,18 +590,31 @@ func NewGlobalEnvironment() *Environment {
 				panic("TypeError: first argument to filter() must be a callable function")
 			}
 
-			// validate the target array pointer
-			arrPtr, ok := args[1].(*[]any)
-			if !ok {
-				panic("TypeError: second argument to filter() must be an array")
+			// track item type
+			var elements []any
+			var isTuple bool
+
+			switch collection := args[1].(type) {
+			case *[]any:
+				if collection != nil {
+					elements = *collection
+				}
+				isTuple = false
+			case *Tuple:
+				if collection != nil {
+					elements = collection.Elements
+				}
+				isTuple = true
+			default:
+				panic(fmt.Sprintf("TypeError: second argument to filter() must be an array or tuple, got %T", args[1]))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
 			boolCallable := boolFunc.(Callable)
 
-			filteredElements := []any{}
+			filteredElements := make([]any, 0)
 
-			for _, item := range *arrPtr {
+			for _, item := range elements {
 				res := predicate.Call(nil, []any{item})
 
 				if boolCallable.Call(nil, []any{res}).(bool) {
@@ -539,6 +622,10 @@ func NewGlobalEnvironment() *Environment {
 				}
 			}
 
+			// return correct matching
+			if isTuple {
+				return &Tuple{Elements: filteredElements}
+			}
 			return &filteredElements
 		},
 	})
@@ -578,6 +665,10 @@ func NewGlobalEnvironment() *Environment {
 					result = append(result, string(r))
 				}
 				return &result
+			case *Tuple:
+				newSlice := make([]any, len(v.Elements))
+				copy(newSlice, v.Elements)
+				return &newSlice
 			case *[]any:
 				// create copy of an existing array pointer
 				result := make([]any, len(*v))
@@ -592,21 +683,38 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("map", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
-			transform, ok := args[0].(Callable)
+			predicate, ok := args[0].(Callable)
 			if !ok {
-				panic("TypeError: first argument to map() must be a callable function")
+				panic("TypeError: first argument to map() must be a callable")
 			}
 
-			arrPtr, ok := args[1].(*[]any)
-			if !ok {
-				panic("TypeError: second argument to map() must be an array")
+			var elements []any
+			var isTuple bool
+
+			switch collection := args[1].(type) {
+			case *[]any:
+				if collection != nil {
+					elements = *collection
+				}
+				isTuple = false
+			case *Tuple:
+				if collection != nil {
+					elements = collection.Elements
+				}
+				isTuple = true
+			default:
+				panic(fmt.Sprintf("TypeError: second argument to map() must be an array or tuple, got %T", args[1]))
 			}
 
-			mappedElements := make([]any, len(*arrPtr))
-			for i, item := range *arrPtr {
-				mappedElements[i] = transform.Call(v, []any{item})
+			mappedElements := make([]any, 0, len(elements))
+			for _, item := range elements {
+				res := predicate.Call(nil, []any{item})
+				mappedElements = append(mappedElements, res)
 			}
 
+			if isTuple {
+				return &Tuple{Elements: mappedElements}
+			}
 			return &mappedElements
 		},
 	})
@@ -666,31 +774,41 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("sum", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: sum() expects an array")
+
+			var elements []any
+			switch collection := args[0].(type) {
+			case *[]any:
+				if collection != nil {
+					elements = *collection
+				}
+			case *Tuple:
+				if collection != nil {
+					elements = collection.Elements
+				}
+			default:
+				panic(fmt.Sprintf("TypeError: sum() expects an array or a tuple, got %T", args[0]))
 			}
 
 			var totalInt int = 0
 			var totalFloat float64 = 0.0
 			hasFloat := false
 
-			for _, item := range *arrPtr {
-				switch v := item.(type) {
+			for _, item := range elements {
+				switch num := item.(type) {
 				case int:
 					if hasFloat {
-						totalFloat += float64(v)
+						totalFloat += float64(num)
 					} else {
-						totalInt += v
+						totalInt += num
 					}
 				case float64:
 					if !hasFloat {
 						hasFloat = true
 						totalFloat = float64(totalInt)
 					}
-					totalFloat += v
+					totalFloat += num
 				default:
-					panic("TypeError: sum() array elements must be numbers")
+					panic("TypeError: sum() collection elements must be numbers")
 				}
 			}
 
@@ -978,12 +1096,35 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("count", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
-			str, ok1 := args[0].(string)
-			sub, ok2 := args[1].(string)
-			if !ok1 || !ok2 {
-				panic("TypeError: count() expects two strings")
+			switch collection := args[0].(type) {
+			case string:
+				sub, ok := args[1].(string)
+				if !ok {
+					panic("TypeError: count() expects two strings")
+				}
+				return strings.Count(collection, sub)
+
+			case *Tuple:
+				occurrences := 0
+				for _, val := range collection.Elements {
+					if reflect.DeepEqual(val, args[1]) {
+						occurrences++
+					}
+				}
+				return occurrences
+			case *[]any:
+				occurrences := 0
+				for _, val := range *collection {
+					if reflect.DeepEqual(val, args[1]) {
+						occurrences++
+					}
+				}
+				return occurrences
+
+			default:
+				panic(fmt.Sprintf("TypeError: count() expects a string, array, or tuple as the first argument, got %T", args[0]))
 			}
-			return strings.Count(str, sub)
+
 		},
 	})
 
@@ -1008,17 +1149,24 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("index", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
-			arrPtr, ok := args[0].(*[]any)
-			if !ok {
-				panic("TypeError: index() expects an array as the first argument")
+			switch collection := args[0].(type) {
+			case *[]any:
+				for i, val := range *collection {
+					if reflect.DeepEqual(val, args[1]) {
+						return i
+					}
+				}
+			case *Tuple:
+				for i, val := range collection.Elements {
+					if reflect.DeepEqual(val, args[1]) {
+						return i
+					}
+				}
+			default:
+				panic(fmt.Sprintf("TypeError: index() expects an array or tuple as the first argument, got %T", args[0]))
 			}
 
-			for i, val := range *arrPtr {
-				if reflect.DeepEqual(val, args[1]) {
-					return i
-				}
-			}
-			panic(fmt.Sprintf("ValueError: element '%v' is not in array", args[1]))
+			panic(fmt.Sprintf("ValueError: element '%v' is not in collection", args[1]))
 		},
 	})
 
@@ -1447,6 +1595,26 @@ func NewGlobalEnvironment() *Environment {
 
 			// return the object if it matches
 			return mapPtr
+		},
+	})
+
+	globals.Define("tuple", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			switch obj := args[0].(type) {
+			case *[]any:
+				elements := make([]any, len(*obj))
+				copy(elements, *obj)
+				return &Tuple{Elements: elements}
+
+			case *Tuple:
+				elements := make([]any, len(obj.Elements))
+				copy(elements, obj.Elements)
+				return &Tuple{Elements: elements}
+
+			default:
+				panic(fmt.Sprintf("TypeError: object of type %T cannot be converted to a tuple", args[0]))
+			}
 		},
 	})
 

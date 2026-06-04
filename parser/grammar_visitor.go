@@ -59,6 +59,15 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#forInStmt.
 	VisitForInStmt(ctx *ForInStmtContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#SingleLoopVar.
+	VisitSingleLoopVar(ctx *SingleLoopVarContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#TupleUnpackLoopVar.
+	VisitTupleUnpackLoopVar(ctx *TupleUnpackLoopVarContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#identifierList.
+	VisitIdentifierList(ctx *IdentifierListContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#varDecl.
 	VisitVarDecl(ctx *VarDeclContext) interface{}
 
@@ -137,11 +146,17 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Comparison.
 	VisitComparison(ctx *ComparisonContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#TupleLiteral.
+	VisitTupleLiteral(ctx *TupleLiteralContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Membership.
 	VisitMembership(ctx *MembershipContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#FunctionCall.
 	VisitFunctionCall(ctx *FunctionCallContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#EmptyTupleLiteral.
+	VisitEmptyTupleLiteral(ctx *EmptyTupleLiteralContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#Boolean.
 	VisitBoolean(ctx *BooleanContext) interface{}
@@ -151,6 +166,9 @@ type GrammarVisitor interface {
 
 	// Visit a parse tree produced by GrammarParser#BitOr.
 	VisitBitOr(ctx *BitOrContext) interface{}
+
+	// Visit a parse tree produced by GrammarParser#SliceIndex.
+	VisitSliceIndex(ctx *SliceIndexContext) interface{}
 
 	// Visit a parse tree produced by GrammarParser#AddSub.
 	VisitAddSub(ctx *AddSubContext) interface{}

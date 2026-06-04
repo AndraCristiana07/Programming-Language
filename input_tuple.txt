@@ -1,0 +1,162 @@
+var myTuple = (10, "apple")
+var val1 = myTuple[0]
+var val2 = myTuple[1]
+print val1
+print myTuple
+
+
+var thistuple = ("apple", "banana", "cherry", "apple", "cherry")
+print thistuple
+
+
+var tuple2 = (1, 5, 7, 9, 3)
+var tuple3 = (true, false, false)
+print tuple2
+print tuple3
+
+var tuple1 = ("abc", 34, true, 40, "male")
+print tuple1
+
+print type(tuple1)
+print len(myTuple)
+
+var x = ("apple", "banana", "cherry")
+var y = list(x)
+y[1] = "kiwi"
+x = tuple(y)
+
+print(x)
+
+var fruits = ("apple", "banana", "cherry")
+var green = ""
+var yellow = ""
+var red = ""
+(green, yellow, red) = fruits
+
+print(green)
+print(yellow)
+print(red)
+
+var tuple4 = ("a", "b", "c")
+for (tl in tuple4) {
+    print tl
+}
+
+var tuple5 = (1, 2, 3, 4, 5)
+
+var evensSquared = [x * x for x in tuple5 if x % 2 == 0]
+
+print evensSquared
+
+
+var tuple6 = ("apple", "banana", "cherry")
+for (i in range(len(tuple6))){
+    print thistuple[i]
+}
+
+var i = 0
+while (i < len(tuple6)){
+  print(thistuple[i])
+  i = i + 1
+}
+
+var tuple7 = ("a", "b" , "c")
+var tuple8 = (1, 2, 3)
+
+var mixed = tuple7 + tuple8
+print mixed 
+
+var tuple9 = ("apple", "banana")
+var mulTpl = tuple9 * 3
+print mulTpl
+
+var newtuple = ("apple", "banana", "cherry", "apple", "cherry")
+
+print "cherry idx: " + index(newtuple, "cherry") 
+print count(newtuple, "apple")  
+print count(newtuple, "kiwi")   
+
+print "apple appearence count: " + count(mulTpl, "apple")
+
+func isEven(n) {
+    return n % 2 == 0
+}
+
+var numbers = (1, 2, 3, 4, 5, 6)
+var evens = filter(isEven, numbers)
+
+print "filtered evens: " + evens
+print "summed: " + sum(numbers)
+
+func square(x) {
+    return x * x
+}
+print "map squares: " + map(square, numbers)
+
+
+print "min nrs: " + min(numbers)
+print "max nrs: " + max(numbers)
+
+func getCoordinates() {
+    return (45, 90)
+}
+
+var (lat, lng) = getCoordinates()
+print lat
+print lng
+
+var matrix = {}
+matrix[(0, 1)] = "Visited"
+matrix[(0, 1)] = "Overwritten"
+print matrix
+
+
+
+var base = (1, 2)
+var tripled = base * 3
+var combined = tripled + (100, 200)
+print combined
+
+var processed = [x * 10 for x in base if x < 50]
+print processed  
+
+print count(combined, 1) 
+print index(combined, 100) 
+
+var dataMatrix = ((10, "A"), (20, "B"), (30, "C"))
+for ((value, label) in dataMatrix) {
+    print label
+}
+
+var tupleA = (1, [2, 3])
+var tupleB = (1, [2, 3])
+if (tupleA == tupleB) {
+    print "Same tuple"
+}
+
+
+print dataMatrix[:2]
+print dataMatrix[0:3]
+print dataMatrix[-1]
+
+print "tuple slice with step " + numbers[0:6:2]  
+print "tuple reversed: " + numbers[::-1]   
+
+var (a, b, c) = (100, "Hello", true)
+print a  
+print b 
+print c 
+
+var x = 5
+var y = 99
+
+(x, y) = (y, x)
+
+print x  
+print y  
+
+var complexTuple = ((10, 20), (30, 40))
+var (leftSide, rightSide) = complexTuple
+
+print leftSide 
+ 

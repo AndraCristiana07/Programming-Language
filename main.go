@@ -9,6 +9,14 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+type PanicErrorListener struct {
+	*antlr.DefaultErrorListener
+}
+
+func (p *PanicErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol any, line, column int, msg string, e antlr.RecognitionException) {
+	panic(fmt.Sprintf("SyntaxError: Line %d:%d - %s", line, column, msg))
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: go run main.go <filename>")
@@ -22,19 +30,6 @@ func main() {
 		fmt.Printf("Error reading file '%s': %v\n", filename, err)
 		os.Exit(1)
 	}
-
-	inputCode := string(fileBytes)
-	input := antlr.NewInputStream(inputCode)
-
-	lexer := parser.NewGrammarLexer(input)
-	tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-
-	p := parser.NewGrammarParser(tokens)
-
-	tree := p.Program()
-
-	fmt.Println("--- Parse Tree ---")
-	fmt.Println(tree.ToStringTree(nil, p))
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -55,6 +50,23 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	inputCode := string(fileBytes)
+	input := antlr.NewInputStream(inputCode)
+
+	lexer := parser.NewGrammarLexer(input)
+	tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+
+	p := parser.NewGrammarParser(tokens)
+
+	panicListener := &PanicErrorListener{}
+	lexer.AddErrorListener(panicListener)
+	p.AddErrorListener(panicListener)
+
+	tree := p.Program()
+
+	fmt.Println("--- Parse Tree ---")
+	fmt.Println(tree.ToStringTree(nil, p))
 
 	eval := ast.NewVisitor()
 	tree.Accept(eval)
