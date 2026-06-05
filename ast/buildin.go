@@ -459,7 +459,7 @@ func NewGlobalEnvironment() *Environment {
 				start = sVal
 				end = eVal
 			} else {
-				panic(RuntimeError("ValueError", " range() expects 1 or 2 arguments", v.currCtx))
+				panic(RuntimeError("ValueError", "range() expects 1 or 2 arguments", v.currCtx))
 			}
 
 			if start > end {
@@ -515,7 +515,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("upper() expects a string")
+				panic(RuntimeError("TypeError", "upper() expects a string", v.currCtx))
 			}
 			return strings.ToUpper(str)
 		},
@@ -767,7 +767,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			predicate, ok := args[0].(Callable)
 			if !ok {
-				panic(RuntimeError("TypeError", "first argument to map() must be a callable", v.currCtx))
+				panic(RuntimeError("TypeError", "First argument to map() must be a callable function", v.currCtx))
 			}
 
 			var elements []any
