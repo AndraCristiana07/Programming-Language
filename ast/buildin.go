@@ -59,7 +59,7 @@ func NewGlobalEnvironment() *Environment {
 			if mapPtr, ok := args[0].(*map[string]any); ok {
 				return len(*mapPtr)
 			}
-			panic("InvalidArgument: len() expects an array or string type")
+			panic(RuntimeError("TypeError", "len() expects a string, array, tuple, or map type", v.currCtx))
 		},
 	})
 
@@ -69,7 +69,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
-				panic("InvalidArgument: append() expects an array as the first argument")
+				panic(RuntimeError("TypeError", "append() expects an array as the first argument", v.currCtx))
 			}
 
 			// grab the actual slice value
@@ -100,7 +100,7 @@ func NewGlobalEnvironment() *Environment {
 						gotName = "array"
 					}
 
-					panic(fmt.Sprintf("TypeError: Cannot append %s to an array of %s", gotName, expectedName))
+					panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot append %s to an array of %s", gotName, expectedName), v.currCtx))
 				}
 			}
 
@@ -113,21 +113,22 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("int", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			switch v := args[0].(type) {
+			switch val := args[0].(type) {
 			case string:
-				if i, err := strconv.Atoi(v); err == nil {
+				if i, err := strconv.Atoi(val); err == nil {
 					return i
 				}
-				panic("Cannot convert string '" + v + "' to int")
+				panic(RuntimeError("TypeError", fmt.Sprintf("Cannot convert string '%v' to int", val), v.currCtx))
+
 			case bool:
-				if v {
+				if val {
 					return 1
 				}
 				return 0
 			case int:
-				return v
+				return val
 			default:
-				panic("Unsupported type for int() conversion")
+				panic(RuntimeError("TypeError", "Unsupported type for conversion", v.currCtx))
 			}
 		},
 	})
@@ -140,11 +141,11 @@ func NewGlobalEnvironment() *Environment {
 				return "nil"
 			}
 
-			switch v := args[0].(type) {
+			switch val := args[0].(type) {
 			case string:
-				return v
+				return val
 			case *[]any:
-				elements := *v
+				elements := *val
 				var sb strings.Builder
 				sb.WriteString("[")
 				for i, element := range elements {
@@ -158,16 +159,17 @@ func NewGlobalEnvironment() *Environment {
 			case *Tuple:
 				var sb strings.Builder
 				sb.WriteString("(")
-				for i, element := range v.Elements {
+				for i, element := range val.Elements {
 					fmt.Fprintf(&sb, "%v", element)
-					if i < len(v.Elements)-1 {
+					if i < len(val.Elements)-1 {
 						sb.WriteString(", ")
 					}
 				}
 				sb.WriteString(")")
 				return sb.String()
+
 			case *map[string]any:
-				targetMap := *v
+				targetMap := *val
 				keys := make([]string, 0, len(targetMap))
 				for k := range targetMap {
 					keys = append(keys, k)
@@ -186,7 +188,7 @@ func NewGlobalEnvironment() *Environment {
 				return sb.String()
 
 			default:
-				return fmt.Sprintf("%v", v)
+				return fmt.Sprintf("%v", val)
 			}
 		},
 	})
@@ -256,7 +258,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
-				panic("InvalidArgument: bin() expects an integer")
+				panic(RuntimeError("TypeError", "bin() expects an integer", v.currCtx))
 			}
 
 			return "0b" + strconv.FormatInt(int64(val), 2)
@@ -268,7 +270,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
-				panic("InvalidArgument: hex() expects an integer")
+				panic(RuntimeError("TypeError", "hex() expects an integer", v.currCtx))
 			}
 
 			return "0x" + strconv.FormatInt(int64(val), 16)
@@ -280,7 +282,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
-				panic("InvalidArgument: oct() expects an integer")
+				panic(RuntimeError("TypeError", "oct() expects an integer", v.currCtx))
 			}
 			return "0o" + strconv.FormatInt(int64(val), 8)
 		},
@@ -291,7 +293,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok {
-				panic("abs() expects an integer")
+				panic(RuntimeError("TypeError", "abs() expects an integer", v.currCtx))
 			}
 			if val < 0 {
 				return -val
@@ -305,7 +307,7 @@ func NewGlobalEnvironment() *Environment {
 		ArgsCount: -1,
 		Body: func(v *Visitor, args []any) any {
 			if len(args) == 0 {
-				panic("ValueError: min() expects at least 1 argument")
+				panic(RuntimeError("ValueError", "min() expects at least 1 argument", v.currCtx))
 			}
 
 			var elements []any
@@ -330,7 +332,7 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			if len(elements) == 0 {
-				panic("ValueError: min() arg is an empty sequence")
+				panic(RuntimeError("ValueError", "min() arg is an empty sequence", v.currCtx))
 			}
 
 			smallest := elements[0]
@@ -338,7 +340,7 @@ func NewGlobalEnvironment() *Environment {
 				curr, ok1 := item.(int)
 				minSoFar, ok2 := smallest.(int)
 				if !ok1 || !ok2 {
-					panic("TypeError: min() comparisons require numeric values")
+					panic(RuntimeError("TypeError", "min() comparisons require numeric values", v.currCtx))
 				}
 				if curr < minSoFar {
 					smallest = item
@@ -353,7 +355,7 @@ func NewGlobalEnvironment() *Environment {
 		ArgsCount: -1,
 		Body: func(v *Visitor, args []any) any {
 			if len(args) == 0 {
-				panic("ValueError: max() expects at least 1 argument")
+				panic(RuntimeError("ValueError", "max() expects at least 1 argument", v.currCtx))
 			}
 
 			var elements []any
@@ -378,7 +380,7 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			if len(elements) == 0 {
-				panic("ValueError: max() arg is an empty sequence")
+				panic(RuntimeError("ValueError", "max() arg is an empty sequence", v.currCtx))
 			}
 
 			biggest := elements[0]
@@ -386,7 +388,7 @@ func NewGlobalEnvironment() *Environment {
 				curr, ok1 := item.(int)
 				maxSoFar, ok2 := biggest.(int)
 				if !ok1 || !ok2 {
-					panic("TypeError: max() comparisons require numeric values")
+					panic(RuntimeError("TypeError", "max() comparisons require numeric values", v.currCtx))
 				}
 				if curr > maxSoFar {
 					biggest = item
@@ -401,7 +403,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			prompt, ok := args[0].(string)
 			if !ok {
-				panic("input() expects a string prompt")
+				panic(RuntimeError("TypeError", "input() expects a string prompt", v.currCtx))
 			}
 
 			fmt.Print(prompt)
@@ -419,7 +421,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok || len(str) != 1 {
-				panic("ord() expects a single-character string")
+				panic(RuntimeError("TypeError", "ord() expects a single-character string", v.currCtx))
 			}
 			return int(str[0])
 		},
@@ -430,7 +432,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			val, ok := args[0].(int)
 			if !ok || val < 0 || val > 255 {
-				panic("chr() expects an integer ASCII code (0-255)")
+				panic(RuntimeError("TypeError", "chr() expects an integer ASCII code (0-255)", v.currCtx))
 			}
 			return string(rune(val))
 		},
@@ -445,19 +447,19 @@ func NewGlobalEnvironment() *Environment {
 			if len(args) == 1 {
 				val, ok := args[0].(int)
 				if !ok {
-					panic("TypeError: range() arguments must be integers")
+					panic(RuntimeError("TypeError", "range() arguments must be integers", v.currCtx))
 				}
 				end = val
 			} else if len(args) == 2 {
 				sVal, ok1 := args[0].(int)
 				eVal, ok2 := args[1].(int)
 				if !ok1 || !ok2 {
-					panic("TypeError: range() arguments must be integers")
+					panic(RuntimeError("TypeError", "range() arguments must be integers", v.currCtx))
 				}
 				start = sVal
 				end = eVal
 			} else {
-				panic("ArgumentError: range() expects 1 or 2 arguments")
+				panic(RuntimeError("ValueError", " range() expects 1 or 2 arguments", v.currCtx))
 			}
 
 			if start > end {
@@ -481,7 +483,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			arr, ok := args[0].(*[]any)
 			if !ok {
-				panic("TypeError: set() expects an array as an argument")
+				panic(RuntimeError("TypeError", "set() expects an array as an argument", v.currCtx))
 			}
 
 			seen := make(map[any]bool)
@@ -502,7 +504,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("lower() expects a string")
+				panic(RuntimeError("TypeError", "lower() expects a string", v.currCtx))
 			}
 			return strings.ToLower(str)
 		},
@@ -525,12 +527,12 @@ func NewGlobalEnvironment() *Environment {
 			// grab shared pointer address
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
-				panic("TypeError: pop() expects an array reference")
+				panic(RuntimeError("TypeError", "pop() expects an array reference", v.currCtx))
 			}
 
 			arr := *arrPtr
 			if len(arr) == 0 {
-				panic("IndexError: pop from empty array")
+				panic(RuntimeError("IndexError", "pop from empty array", v.currCtx))
 			}
 
 			lastIdx := len(arr) - 1
@@ -551,7 +553,7 @@ func NewGlobalEnvironment() *Environment {
 			case string:
 				target, ok := args[1].(string)
 				if !ok {
-					panic("find() on a string expects a string target")
+					panic(RuntimeError("TypeError", "find() on a string expects a string target", v.currCtx))
 				}
 				return strings.Index(container, target)
 			case *[]any:
@@ -562,7 +564,7 @@ func NewGlobalEnvironment() *Environment {
 				}
 				return -1
 			default:
-				panic("TypeError: find() expects a string or array")
+				panic(RuntimeError("TypeError", "find() expects a string or array", v.currCtx))
 			}
 		},
 	})
@@ -572,7 +574,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
-				panic("reverse() expects an array")
+				panic(RuntimeError("TypeError", "reverse() expects an array", v.currCtx))
 			}
 			arr := *arrPtr
 			reversed := make([]any, len(arr))
@@ -599,7 +601,7 @@ func NewGlobalEnvironment() *Environment {
 					elements = append(elements, k)
 				}
 			default:
-				panic(fmt.Sprintf("TypeError: all() expects an array, tuple, or map, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("all() expects an array, tuple, or map, got %T", args[0]), v.currCtx))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
@@ -631,7 +633,7 @@ func NewGlobalEnvironment() *Environment {
 					elements = append(elements, k)
 				}
 			default:
-				panic(fmt.Sprintf("TypeError: any() expects an array, tuple, or map, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("any() expects an array, tuple, or map, got %T", args[0]), v.currCtx))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
@@ -653,7 +655,7 @@ func NewGlobalEnvironment() *Environment {
 			// validate the predicate function
 			predicate, ok := args[0].(Callable)
 			if !ok {
-				panic("TypeError: first argument to filter() must be a callable function")
+				panic(RuntimeError("TypeError", "First argument to filter() must be a callable function", v.currCtx))
 			}
 
 			// track item type
@@ -672,7 +674,7 @@ func NewGlobalEnvironment() *Environment {
 				}
 				isTuple = true
 			default:
-				panic(fmt.Sprintf("TypeError: second argument to filter() must be an array or tuple, got %T", args[1]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Second argument to filter() must be an array or tuple, got %T", args[1]), v.currCtx))
 			}
 
 			boolFunc, _ := globals.Lookup("bool")
@@ -708,14 +710,15 @@ func NewGlobalEnvironment() *Environment {
 				if f, err := strconv.ParseFloat(val, 64); err == nil {
 					return f
 				}
-				panic("ValueError: Cannot convert string '" + val + "' to float")
+				panic(RuntimeError("ValueError", fmt.Sprintf("Cannot convert string %s to float", val), v.currCtx))
+
 			case bool:
 				if val {
 					return 1.0
 				}
 				return 0.0
 			default:
-				panic("TypeError: Unsupported type for float() conversion")
+				panic(RuntimeError("ValueError", "Unsupported type for float() conversion", v.currCtx))
 			}
 		},
 	})
@@ -754,7 +757,7 @@ func NewGlobalEnvironment() *Environment {
 				}
 				return &result
 			default:
-				panic("TypeError: list() expects a string or an array")
+				panic(RuntimeError("TypeError", "list() expects a string or an array", v.currCtx))
 			}
 		},
 	})
@@ -764,7 +767,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			predicate, ok := args[0].(Callable)
 			if !ok {
-				panic("TypeError: first argument to map() must be a callable")
+				panic(RuntimeError("TypeError", "first argument to map() must be a callable", v.currCtx))
 			}
 
 			var elements []any
@@ -782,7 +785,7 @@ func NewGlobalEnvironment() *Environment {
 				}
 				isTuple = true
 			default:
-				panic(fmt.Sprintf("TypeError: second argument to map() must be an array or tuple, got %T", args[1]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Second argument to map() must be an array or tuple, got %T", args[1]), v.currCtx))
 			}
 
 			mappedElements := make([]any, 0, len(elements))
@@ -801,17 +804,17 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("round", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			switch v := args[0].(type) {
+			switch val := args[0].(type) {
 			case int:
-				return v
+				return val
 			case float64:
 				// basic round logic for floats to integers
-				if v < 0 {
-					return int(v - 0.5)
+				if val < 0 {
+					return int(val - 0.5)
 				}
-				return int(v + 0.5)
+				return int(val + 0.5)
 			default:
-				panic("TypeError: round() expects a number")
+				panic(RuntimeError("TypeError", "round() expects a number", v.currCtx))
 			}
 		},
 	})
@@ -840,7 +843,7 @@ func NewGlobalEnvironment() *Environment {
 				}
 				return &result
 			default:
-				panic(fmt.Sprintf("TypeError: sorted() expects an array, tuple, or map, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("sorted() expects an array, tuple, or map, got %T", args[0]), v.currCtx))
 			}
 
 			if len(elements) == 0 {
@@ -860,7 +863,7 @@ func NewGlobalEnvironment() *Environment {
 					return sortedElements[i].(string) < sortedElements[j].(string)
 				})
 			default:
-				panic("TypeError: sorted() only supports sequences of integers or strings")
+				panic(RuntimeError("TypeError", "sorted() only supports sequences of integers or strings", v.currCtx))
 			}
 
 			return &sortedElements
@@ -882,7 +885,7 @@ func NewGlobalEnvironment() *Environment {
 					elements = collection.Elements
 				}
 			default:
-				panic(fmt.Sprintf("TypeError: sum() expects an array or a tuple, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("sum() expects an array or a tuple, got %T", args[0]), v.currCtx))
 			}
 
 			var totalInt int = 0
@@ -904,7 +907,7 @@ func NewGlobalEnvironment() *Environment {
 					}
 					totalFloat += num
 				default:
-					panic("TypeError: sum() collection elements must be numbers")
+					panic(RuntimeError("TypeError", "sum() collection elements must be numbers", v.currCtx))
 				}
 			}
 
@@ -921,7 +924,7 @@ func NewGlobalEnvironment() *Environment {
 			str, ok1 := args[0].(string)
 			sep, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: split() expects two string arguments")
+				panic(RuntimeError("TypeError", "split() expects two string arguments", v.currCtx))
 			}
 
 			parts := strings.Split(str, sep)
@@ -939,12 +942,12 @@ func NewGlobalEnvironment() *Environment {
 			arrPtr, ok1 := args[0].(*[]any)
 			idx, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
-				panic("TypeError: insert() expects an array and an integer index")
+				panic(RuntimeError("TypeError", "insert() expects an array and an integer index", v.currCtx))
 			}
 
 			arr := *arrPtr
 			if idx < 0 || idx > len(arr) {
-				panic(fmt.Sprintf("IndexError: insert index %d out of bounds for length %d", idx, len(arr)))
+				panic(RuntimeError("IndexError", fmt.Sprintf("insert index %d out of bounds for length %d", idx, len(arr)), v.currCtx))
 			}
 
 			// grow slice by appending a dummy element
@@ -963,7 +966,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: strip() expects a string argument")
+				panic(RuntimeError("TypeError", "strip() expects a string argument", v.currCtx))
 			}
 			return strings.TrimSpace(str)
 		},
@@ -975,18 +978,19 @@ func NewGlobalEnvironment() *Environment {
 			str, ok1 := args[0].(string)
 			prefix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: startswith() expects two string arguments")
+				panic(RuntimeError("TypeError", "startswith() expects two string arguments", v.currCtx))
 			}
 			return strings.HasPrefix(str, prefix)
 		},
 	})
+
 	globals.Define("endswith", &NativeFunction{
 		ArgsCount: 2,
 		Body: func(v *Visitor, args []any) any {
 			str, ok1 := args[0].(string)
 			suffix, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: endswith() expects two string arguments")
+				panic(RuntimeError("TypeError", "endswith() expects two string arguments", v.currCtx))
 			}
 			return strings.HasSuffix(str, suffix)
 		},
@@ -997,7 +1001,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: isalnum() expects a string")
+				panic(RuntimeError("TypeError", "isalnum() expects a string", v.currCtx))
 			}
 			if len(str) == 0 {
 				return false
@@ -1017,7 +1021,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: isalpha() expects a string")
+				panic(RuntimeError("TypeError", "isalpha() expects a string", v.currCtx))
 			}
 			if len(str) == 0 {
 				return false
@@ -1037,7 +1041,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: isdigit() expects a string")
+				panic(RuntimeError("TypeError", "isdigit() expects a string", v.currCtx))
 			}
 			if len(str) == 0 {
 				return false
@@ -1057,7 +1061,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: islower() expects a string")
+				panic(RuntimeError("TypeError", "islower() expects a string", v.currCtx))
 			}
 
 			hasCased := false
@@ -1078,7 +1082,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: isupper() expects a string")
+				panic(RuntimeError("TypeError", "isupper() expects a string", v.currCtx))
 			}
 
 			hasCased := false
@@ -1099,7 +1103,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: isspace() expects a string")
+				panic(RuntimeError("TypeError", "isspace() expects a string", v.currCtx))
 			}
 			if len(str) == 0 {
 				return false
@@ -1121,7 +1125,7 @@ func NewGlobalEnvironment() *Environment {
 			old, ok2 := args[1].(string)
 			newStr, ok3 := args[2].(string)
 			if !ok1 || !ok2 || !ok3 {
-				panic("TypeError: replace() expects three string arguments")
+				panic(RuntimeError("TypeError", "replace() expects three string arguments", v.currCtx))
 			}
 
 			return strings.ReplaceAll(str, old, newStr)
@@ -1134,7 +1138,7 @@ func NewGlobalEnvironment() *Environment {
 			str, ok1 := args[0].(string)
 			substr, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: rfind() expects two string arguments")
+				panic(RuntimeError("TypeError", "rfind() expects two string arguments", v.currCtx))
 			}
 
 			return strings.LastIndex(str, substr)
@@ -1147,12 +1151,12 @@ func NewGlobalEnvironment() *Environment {
 			str, ok1 := args[0].(string)
 			substr, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: rindex() expects two string arguments")
+				panic(RuntimeError("TypeError", "rindex() expects two string arguments", v.currCtx))
 			}
 
 			idx := strings.LastIndex(str, substr)
 			if idx == -1 {
-				panic(fmt.Sprintf("ValueError: substring '%s' not found in rindex()", substr))
+				panic(RuntimeError("ValueError", fmt.Sprintf("Substring '%s' not found in rindex()", substr), v.currCtx))
 			}
 
 			return idx
@@ -1165,10 +1169,10 @@ func NewGlobalEnvironment() *Environment {
 			a, ok1 := args[0].(int)
 			b, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
-				panic("TypeError: divmod() expects two integers")
+				panic(RuntimeError("TypeError", "divmod() expects two integers", v.currCtx))
 			}
 			if b == 0 {
-				panic("ZeroDivisionError: integer division or modulo by zero")
+				panic(RuntimeError("ZeroDivisionError", "integer division or modulo by zero", v.currCtx))
 			}
 
 			result := []any{a / b, a % b}
@@ -1182,10 +1186,10 @@ func NewGlobalEnvironment() *Environment {
 			base, ok1 := args[0].(int)
 			exp, ok2 := args[1].(int)
 			if !ok1 || !ok2 {
-				panic("TypeError: pow() expects two integer arguments")
+				panic(RuntimeError("TypeError", "pow() expects two integer arguments", v.currCtx))
 			}
 
-			return power(base, exp)
+			return v.power(base, exp)
 		},
 	})
 
@@ -1196,7 +1200,7 @@ func NewGlobalEnvironment() *Environment {
 			case string:
 				sub, ok := args[1].(string)
 				if !ok {
-					panic("TypeError: count() expects two strings")
+					panic(RuntimeError("TypeError", "count() expects two strings", v.currCtx))
 				}
 				return strings.Count(collection, sub)
 
@@ -1218,7 +1222,7 @@ func NewGlobalEnvironment() *Environment {
 				return occurrences
 
 			default:
-				panic(fmt.Sprintf("TypeError: count() expects a string, array, or tuple as the first argument, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("count() expects a string, array, or tuple as the first argument, got %T", args[0]), v.currCtx))
 			}
 
 		},
@@ -1247,7 +1251,7 @@ func NewGlobalEnvironment() *Environment {
 					elements[i] = k
 				}
 			default:
-				panic(fmt.Sprintf("TypeError: enumerate() expects an array, tuple, or map, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("enumerate() expects an array, tuple, or map, got %T", args[0]), v.currCtx))
 			}
 
 			result := make([]any, len(elements))
@@ -1276,10 +1280,10 @@ func NewGlobalEnvironment() *Environment {
 					}
 				}
 			default:
-				panic(fmt.Sprintf("TypeError: index() expects an array or tuple as the first argument, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("index() expects an array or tuple as the first argument, got %T", args[0]), v.currCtx))
 			}
 
-			panic(fmt.Sprintf("ValueError: element '%v' is not in collection", args[1]))
+			panic(RuntimeError("ValueError", fmt.Sprintf("element '%v' is not in collection", args[1]), v.currCtx))
 		},
 	})
 
@@ -1288,7 +1292,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			targetType, ok := args[1].(string)
 			if !ok {
-				panic("TypeError: isinstance() second argument must be a type string")
+				panic(RuntimeError("TypeError", "isinstance() second argument must be a type string", v.currCtx))
 			}
 
 			var actualType string
@@ -1326,7 +1330,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			code, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: eval() expects a string argument")
+				panic(RuntimeError("TypeError", "eval() expects a string argument", v.currCtx))
 			}
 
 			// givw dynamic string into ANTLR pipeline
@@ -1346,7 +1350,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			code, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: exec() expects a string argument")
+				panic(RuntimeError("TypeError", "exec() expects a string argument", v.currCtx))
 			}
 
 			inputStream := antlr.NewInputStream(code)
@@ -1366,7 +1370,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			spec, ok := args[1].(string)
 			if !ok {
-				panic("TypeError: format() specifier must be a string")
+				panic(RuntimeError("TypeError", "format() specifier must be a string", v.currCtx))
 			}
 
 			switch spec {
@@ -1420,7 +1424,7 @@ func NewGlobalEnvironment() *Environment {
 					}
 					return res
 				default:
-					panic(fmt.Sprintf("TypeError: zip() arguments must be an array, tuple, or map, got %T", arg))
+					panic(RuntimeError("TypeError", fmt.Sprintf("zip() arguments must be an array, tuple, or map, got %T", arg), v.currCtx))
 				}
 			}
 
@@ -1450,12 +1454,12 @@ func NewGlobalEnvironment() *Environment {
 			case *Tuple:
 				elements = val.Elements
 			default:
-				panic(fmt.Sprintf("TypeError: join() expects an array or tuple as the first argument, got %T", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("join() expects an array or tuple as the first argument, got %T", args[0]), v.currCtx))
 			}
 
 			delim, ok2 := args[1].(string)
 			if !ok2 {
-				panic("TypeError: join() second argument must be a delimiter string")
+				panic(RuntimeError("TypeError", "join() second argument must be a delimiter string", v.currCtx))
 			}
 
 			strParts := make([]string, len(elements))
@@ -1485,7 +1489,7 @@ func NewGlobalEnvironment() *Environment {
 			sep, ok2 := args[1].(string)
 			maxsplit, ok3 := args[2].(int)
 			if !ok1 || !ok2 || !ok3 {
-				panic("TypeError: rsplit() expects two strings and an integer maxsplit count")
+				panic(RuntimeError("TypeError", "rsplit() expects two strings and an integer maxsplit count", v.currCtx))
 			}
 
 			var parts []string
@@ -1515,7 +1519,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: lstrip() expects a string argument")
+				panic(RuntimeError("TypeError", "lstrip() expects a string argument", v.currCtx))
 			}
 
 			return strings.TrimLeftFunc(str, unicode.IsSpace)
@@ -1527,7 +1531,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: rstrip() expects a string argument")
+				panic(RuntimeError("TypeError", "rstrip() expects a string argument", v.currCtx))
 			}
 
 			return strings.TrimRightFunc(str, unicode.IsSpace)
@@ -1539,7 +1543,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			str, ok := args[0].(string)
 			if !ok {
-				panic("TypeError: swapcase() expects a string argument")
+				panic(RuntimeError("TypeError", "swapcase() expects a string argument", v.currCtx))
 			}
 
 			runes := []rune(str)
@@ -1559,7 +1563,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			arrPtr, ok := args[0].(*[]any)
 			if !ok {
-				panic("TypeError: remove() expects an array pointer as the first argument")
+				panic(RuntimeError("TypeError", "remove() expects an array pointer as the first argument", v.currCtx))
 			}
 
 			arr := *arrPtr
@@ -1575,7 +1579,7 @@ func NewGlobalEnvironment() *Environment {
 			}
 
 			if foundIdx == -1 {
-				panic("ValueError: remove(x): x not in array")
+				panic(RuntimeError("ValueError", "remove(x): x not in array", v.currCtx))
 			}
 
 			// re-assign the slice back to the pointer
@@ -1590,7 +1594,7 @@ func NewGlobalEnvironment() *Environment {
 			filename, ok1 := args[0].(string)
 			mode, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: open() expects a filename string and a mode string")
+				panic(RuntimeError("TypeError", "open() expects a filename string and a mode string", v.currCtx))
 			}
 
 			var flags int
@@ -1602,12 +1606,12 @@ func NewGlobalEnvironment() *Environment {
 			case "a":
 				flags = os.O_WRONLY | os.O_CREATE | os.O_APPEND
 			default:
-				panic("ValueError: mode must be 'r', 'w', or 'a'")
+				panic(RuntimeError("ValueError", "mode for open must be 'r', 'w', or 'a'", v.currCtx))
 			}
 
 			file, err := os.OpenFile(filename, flags, 0666)
 			if err != nil {
-				panic(fmt.Sprintf("IOError: could not open file '%s': %v", filename, err))
+				panic(RuntimeError("IOError", fmt.Sprintf("Could not open file '%s': %v", filename, err), v.currCtx))
 			}
 
 			return &FileHandle{File: file, Mode: mode}
@@ -1619,15 +1623,15 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			handle, ok := args[0].(*FileHandle)
 			if !ok {
-				panic("TypeError: read() expects a valid FileHandle object")
+				panic(RuntimeError("TypeError", "read() expects a valid FileHandle object", v.currCtx))
 			}
 			if handle.Mode != "r" {
-				panic("IOError: file not opened for reading")
+				panic(RuntimeError("IOError", "file not opened for reading", v.currCtx))
 			}
 
 			content, err := io.ReadAll(handle.File)
 			if err != nil {
-				panic(fmt.Sprintf("IOError: failed reading file: %v", err))
+				panic(RuntimeError("IOError", fmt.Sprintf("Failed reading file: %v", err), v.currCtx))
 			}
 			return string(content)
 		},
@@ -1639,15 +1643,15 @@ func NewGlobalEnvironment() *Environment {
 			handle, ok1 := args[0].(*FileHandle)
 			content, ok2 := args[1].(string)
 			if !ok1 || !ok2 {
-				panic("TypeError: write() expects a FileHandle object and a content string")
+				panic(RuntimeError("TypeError", "write() expects a FileHandle object and a content string", v.currCtx))
 			}
 			if handle.Mode == "r" {
-				panic("IOError: file opened as read-only")
+				panic(RuntimeError("TypeError", "file opened as read-only", v.currCtx))
 			}
 
 			_, err := handle.File.WriteString(content)
 			if err != nil {
-				panic(fmt.Sprintf("IOError: failed writing to file: %v", err))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Failed writing to file: %v", err), v.currCtx))
 			}
 			return nil
 		},
@@ -1658,12 +1662,12 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			handle, ok := args[0].(*FileHandle)
 			if !ok {
-				panic("TypeError: close() expects a valid FileHandle object")
+				panic(RuntimeError("TypeError", "close() expects a valid FileHandle object", v.currCtx))
 			}
 
 			err := handle.File.Close()
 			if err != nil {
-				panic(fmt.Sprintf("IOError: failed closing file cleanly: %v", err))
+				panic(RuntimeError("IOError", fmt.Sprintf("Failed closing file cleanly: %v", err), v.currCtx))
 			}
 			return nil
 		},
@@ -1674,7 +1678,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			mPtr, ok := args[0].(*map[string]any)
 			if !ok {
-				panic("TypeError: keys() expects a map pointer")
+				panic(RuntimeError("TypeError", "keys() expects a map pointer", v.currCtx))
 			}
 
 			m := *mPtr
@@ -1700,7 +1704,7 @@ func NewGlobalEnvironment() *Environment {
 		Body: func(v *Visitor, args []any) any {
 			mPtr, ok := args[0].(*map[string]any)
 			if !ok {
-				panic("TypeError: values() expects a map pointer")
+				panic(RuntimeError("TypeError", "values() expects a map pointer", v.currCtx))
 			}
 
 			m := *mPtr
@@ -1732,7 +1736,7 @@ func NewGlobalEnvironment() *Environment {
 				*arrPtr = []any{}
 				return nil
 			}
-			panic("TypeError: clear() expects an array or map pointer")
+			panic(RuntimeError("TypeError", "clear() expects an array or map pointer", v.currCtx))
 		},
 	})
 
@@ -1745,17 +1749,17 @@ func NewGlobalEnvironment() *Environment {
 			interfaceName, isString := args[1].(string)
 
 			if !isString {
-				panic("TypeError: assert() second argument must be an interface name string")
+				panic(RuntimeError("TypeError", "assert() second argument must be an interface name string", v.currCtx))
 			}
 
 			if !isStruct || mapPtr == nil {
-				panic(fmt.Sprintf("TypeError: Value does not satisfy interface '%s' (not a struct object)", interfaceName))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Value does not satisfy interface '%s' (not a struct object)", interfaceName), v.currCtx))
 			}
 
 			// execute the implicit structural match contract scan
 			passed, reason := v.satisfiesInterface(mapPtr, interfaceName)
 			if !passed {
-				panic(fmt.Sprintf("TypeError: Interface contract violation! %s", reason))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Interface contract violation! %s", reason), v.currCtx))
 			}
 
 			// return the object if it matches
@@ -1792,7 +1796,7 @@ func NewGlobalEnvironment() *Environment {
 				return &Tuple{Elements: elements}
 
 			default:
-				panic(fmt.Sprintf("TypeError: object of type %T cannot be converted to a tuple", args[0]))
+				panic(RuntimeError("TypeError", fmt.Sprintf("Object of type %T cannot be converted to a tuple", args[0]), v.currCtx))
 			}
 		},
 	})

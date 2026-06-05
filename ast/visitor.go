@@ -23,6 +23,7 @@ type Visitor struct {
 	StructRegistry    map[string][]string
 	MethodRegistry    map[string]map[string]*parser.FuncStmtContext // for member methods
 	InterfaceRegistry map[string]Interface
+	currCtx           antlr.ParserRuleContext
 }
 
 type Interface struct {
@@ -56,6 +57,10 @@ type ContinueSignal struct{}
 type NullValue struct{}
 
 var LanguageNull = &NullValue{}
+
+// TODO: print formatitng (printf, sprintf)
+// TODO: warning for unused vars
+// maybe specific file extension for the lang
 
 func NewVisitor() *Visitor {
 	return &Visitor{
@@ -663,7 +668,7 @@ func (v *Visitor) VisitExponential(ctx *parser.ExponentialContext) any {
 		panic(RuntimeError("TypeError", "Both operands must be integers for operator: **", ctx))
 	}
 
-	return power(lVal, rVal)
+	return v.power(lVal, rVal)
 }
 
 func (v *Visitor) VisitBoolean(ctx *parser.BooleanContext) any {
@@ -1186,7 +1191,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 			}
 			result = intCurrentValue % intValue
 		case "**=":
-			result = power(intCurrentValue, intValue)
+			result = v.power(intCurrentValue, intValue)
 		case "&=":
 			result = intCurrentValue & intValue
 		case "|=":
@@ -1549,7 +1554,7 @@ func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 	// array
 	case *[]any:
 		if seq == nil {
-			panic("NullPointerError")
+			panic(RuntimeError("NullPointerError", "Array pointer is null", nil))
 		}
 		arr := *seq
 		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(arr))
@@ -1569,7 +1574,7 @@ func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 	// tuple
 	case *Tuple:
 		if seq == nil {
-			panic("NullPointerError")
+			panic(RuntimeError("NullPointerError", "Array pointer is null", nil))
 		}
 		start, end, step := calculateSliceBoundsWithStep(startVal, endVal, stepVal, len(seq.Elements))
 
@@ -1614,7 +1619,7 @@ func (v *Visitor) VisitSliceIndex(ctx *parser.SliceIndexContext) any {
 		return resStr
 
 	default:
-		panic(fmt.Sprintf("TypeError: Type %T does not support slicing", collection))
+		panic(RuntimeError("TypeError", fmt.Sprintf("Type %T does not support slicing", collection), nil))
 	}
 }
 
@@ -1739,7 +1744,17 @@ func (v *Visitor) VisitMethodCall(ctx *parser.MethodCallContext) any {
 	}
 
 	// execute the body block scope statement loops safely
+	prevCtx := v.currCtx
+	v.currCtx = ctx
+
 	v.currEnv = methodEnv
+
+	//go back to previous env
+	defer func() {
+		v.currEnv = previousEnv
+		v.currCtx = prevCtx
+	}()
+
 	var methodResult any = LanguageNull
 
 	func() {
@@ -1755,8 +1770,6 @@ func (v *Visitor) VisitMethodCall(ctx *parser.MethodCallContext) any {
 		methodCtx.BlockStmt().Accept(v)
 	}()
 
-	//go back to previous env
-	v.currEnv = previousEnv
 	return methodResult
 }
 
@@ -1824,6 +1837,11 @@ func (v *Visitor) VisitFunctionCall(ctx *parser.FunctionCallContext) any {
 	if callable.NrArgs() != -1 && len(argValues) != callable.NrArgs() {
 		panic(RuntimeError("TypeError", fmt.Sprintf("Function %s expects %d arguments, got %d", funcName, callable.NrArgs(), len(argValues)), ctx))
 	}
+
+	prevCtx := v.currCtx
+	v.currCtx = ctx
+
+	defer func() { v.currCtx = prevCtx }()
 
 	return callable.Call(v, argValues)
 }
@@ -1927,9 +1945,9 @@ func RuntimeError(errorType string, message string, ctx antlr.ParserRuleContext)
 	return &errObj
 }
 
-func power(base, exp int) int {
+func (v *Visitor) power(base, exp int) int {
 	if exp < 0 {
-		panic("Negative exponent not supported")
+		panic(RuntimeError("TypeError", "Negative exponent not supported", v.currCtx))
 	}
 	result := 1
 	for i := 0; i < exp; i++ {
@@ -2121,12 +2139,12 @@ func calculateSliceBoundsWithStep(startOpt, endOpt, stepOpt any, length int) (in
 			if f, ok := stepOpt.(float64); ok {
 				step = int(f)
 			} else {
-				panic("TypeError: Slice step must be an integer")
+				panic(RuntimeError("TypeError", "Slice step must be an integer", nil))
 			}
 		}
 	}
 	if step == 0 {
-		panic("ValueError: slice step cannot be zero")
+		panic(RuntimeError("ValueError", "Slice step cannot be zero", nil))
 	}
 
 	var start, end int
