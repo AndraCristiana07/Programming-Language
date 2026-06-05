@@ -166,7 +166,7 @@ func TestMapLiteralsAndBuiltins(t *testing.T) {
 				var users = {"name":"Anna", "age":20}
 				var testResult = str(users)
 			`,
-			expected: `{"age" : 20, "name" : Anna}`,
+			expected: `{"age" : 20, "name" : "Anna"}`,
 		},
 		{
 			name: "Bool on map",

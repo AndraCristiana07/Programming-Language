@@ -160,3 +160,16 @@ var (leftSide, rightSide) = complexTuple
 
 print leftSide 
  
+func main() {
+    var user = {"name": "Alice", "role": "Admin"}
+    var scores = [94, 88, 100]
+
+    printf("User info: %s holds permissions.\n", user)
+    printf("Grades accumulated: %s\n", scores)
+
+    var systemLog = sprintf("ALERT [%s]: Operations failed tracking grades.", user.role)
+    
+    var logFile = open("system.log", "a")
+    write(logFile, systemLog + "\n")
+    close(logFile)
+}

@@ -137,59 +137,7 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("str", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			if args[0] == nil {
-				return "nil"
-			}
-
-			switch val := args[0].(type) {
-			case string:
-				return val
-			case *[]any:
-				elements := *val
-				var sb strings.Builder
-				sb.WriteString("[")
-				for i, element := range elements {
-					fmt.Fprintf(&sb, "%v", element)
-					if i < len(elements)-1 {
-						sb.WriteString(", ")
-					}
-				}
-				sb.WriteString("]")
-				return sb.String()
-			case *Tuple:
-				var sb strings.Builder
-				sb.WriteString("(")
-				for i, element := range val.Elements {
-					fmt.Fprintf(&sb, "%v", element)
-					if i < len(val.Elements)-1 {
-						sb.WriteString(", ")
-					}
-				}
-				sb.WriteString(")")
-				return sb.String()
-
-			case *map[string]any:
-				targetMap := *val
-				keys := make([]string, 0, len(targetMap))
-				for k := range targetMap {
-					keys = append(keys, k)
-				}
-				sort.Strings(keys)
-
-				var sb strings.Builder
-				sb.WriteString("{")
-				for i, k := range keys {
-					fmt.Fprintf(&sb, `"%s" : %v`, k, targetMap[k])
-					if i < len(keys)-1 {
-						sb.WriteString(", ")
-					}
-				}
-				sb.WriteString("}")
-				return sb.String()
-
-			default:
-				return fmt.Sprintf("%v", val)
-			}
+			return stringify(args[0])
 		},
 	})
 
@@ -1801,7 +1749,128 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	globals.Define("printf", &NativeFunction{
+		ArgsCount: -1,
+		Body: func(v *Visitor, args []any) any {
+			if len(args) < 1 {
+				panic(RuntimeError("TypeError", "printf() expects at least 1 argument", v.currCtx))
+			}
+			formatStr, ok := args[0].(string)
+			if !ok {
+				panic(RuntimeError("TypeError", "printf() first argument must be a string", v.currCtx))
+			}
+
+			// clean strings
+			processedArgs := make([]any, len(args[1:]))
+			for i, arg := range args[1:] {
+				processedArgs[i] = stringify(arg)
+			}
+
+			finalOutput := fmt.Sprintf(formatStr, processedArgs...)
+
+			// print cleanly message
+			fmt.Print(finalOutput)
+			return nil
+		},
+	})
+
+	globals.Define("sprintf", &NativeFunction{
+		ArgsCount: -1,
+		Body: func(v *Visitor, args []any) any {
+			if len(args) < 1 {
+				panic(RuntimeError("TypeError", "sprintf() expects at least 1 argument", v.currCtx))
+			}
+			formatStr, ok := args[0].(string)
+			if !ok {
+				panic(RuntimeError("TypeError", "sprintf() first argument must be a string", v.currCtx))
+			}
+
+			processedArgs := make([]any, len(args[1:]))
+			for i, arg := range args[1:] {
+				processedArgs[i] = stringify(arg)
+			}
+
+			return fmt.Sprintf(formatStr, processedArgs...)
+		},
+	})
+
 	return globals
+}
+
+func stringify(val any) string {
+	if val == nil {
+		return "nil"
+	}
+
+	switch actual := val.(type) {
+	case string:
+		return actual
+	case *[]any:
+		elements := *actual
+		var sb strings.Builder
+		sb.WriteString("[")
+		for i, element := range elements {
+			sb.WriteString(stringify(element))
+			if i < len(elements)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString("]")
+		return sb.String()
+
+	case *Tuple:
+		var sb strings.Builder
+		sb.WriteString("(")
+		for i, element := range actual.Elements {
+			sb.WriteString(stringify(element))
+			if i < len(actual.Elements)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString(")")
+		return sb.String()
+
+	case *map[string]any:
+		targetMap := *actual
+
+		// check if struct instance with a type tag metadata
+		if t, exists := targetMap["__type__"].(string); exists {
+			return fmt.Sprintf("<object Instance of %s>", t)
+		}
+
+		keys := make([]string, 0, len(targetMap))
+		for k := range targetMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		var sb strings.Builder
+		sb.WriteString("{")
+		for i, k := range keys {
+			if strVal, isStr := targetMap[k].(string); isStr {
+				fmt.Fprintf(&sb, `"%s" : "%s"`, k, strVal)
+			} else {
+				fmt.Fprintf(&sb, `"%s" : %s`, k, stringify(targetMap[k]))
+			}
+			if i < len(keys)-1 {
+				sb.WriteString(", ")
+			}
+		}
+		sb.WriteString("}")
+		return sb.String()
+
+	default:
+		return fmt.Sprintf("%v", val)
+	}
+}
+
+// converts complex language objects to strings
+func preprocessArgs(args []any) []any {
+	processed := make([]any, len(args))
+	for i, arg := range args {
+		processed[i] = stringify(arg)
+	}
+	return processed
 }
 
 func (v *Visitor) satisfiesInterface(structInstanceMap *map[string]any, interfaceName string) (bool, string) {
