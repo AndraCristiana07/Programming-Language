@@ -55,15 +55,17 @@ func (u User) agePlayer() {
         return "under age"
     }
 }
+
+
 func main() {
     var player = User { name: "Anna", age: 21 }
-
     print player.greet()
     print player.agePlayer()
     var arr1 = [2, 5, 7]
 
     var al = withALot(arr1)
     print al
+    
 
 }
 
