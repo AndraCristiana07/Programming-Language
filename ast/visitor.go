@@ -58,7 +58,6 @@ type NullValue struct{}
 
 var LanguageNull = &NullValue{}
 
-// TODO: print formatitng (printf, sprintf)
 // TODO: warning for unused vars
 // maybe specific file extension for the lang
 
