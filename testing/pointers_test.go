@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"my_language/ast"
 	"reflect"
 	"testing"
 )
@@ -71,6 +72,77 @@ func TestPointers(t *testing.T) {
             `,
 			expected: true,
 		},
+		{
+			name: "Pointers to form linked list",
+			input: `
+
+				struct Node {
+					val;
+					next;
+				}
+
+                var node1 = Node { val: 7, next: null }
+				var node2 = Node { val: 11, next: null }
+				var node3 = Node { val: 10, next: null }
+				var node4 = Node { val: 2, next: null }
+				var node5 = Node { val: 9, next: null }
+
+				node1.next = node2
+				node2.next = node3
+				node3.next = node4
+				node4.next = node5
+
+				var testResult = node1
+            `,
+			expected: "Node(7) -> Node(11) -> Node(10) -> Node(2) -> Node(9) -> null",
+		},
+		{
+			name: "Deleting node form linked list",
+			input: `
+
+				struct Node {
+					val;
+					next;
+				}
+
+
+				func deleteSpecificNode(head, nodeToDelete) {
+					if (head == nodeToDelete){
+						return head.next
+					}
+
+					var currentNode = head
+					while (currentNode.next != null and currentNode.next != nodeToDelete) {
+						currentNode = currentNode.next
+					}
+
+					if (currentNode.next == null) {
+						return head
+					}
+
+					currentNode.next = currentNode.next.next
+
+					return head
+
+				}
+
+                var node1 = Node { val: 7, next: null }
+				var node2 = Node { val: 11, next: null }
+				var node3 = Node { val: 10, next: null }
+				var node4 = Node { val: 2, next: null }
+				var node5 = Node { val: 9, next: null }
+
+				node1.next = node2
+				node2.next = node3
+				node3.next = node4
+				node4.next = node5
+
+
+    			deleteSpecificNode(node1, node2)
+				var testResult = node1
+            `,
+			expected: "Node(7) -> Node(10) -> Node(2) -> Node(9) -> null",
+		},
 	}
 
 	for _, tc := range tests {
@@ -81,8 +153,13 @@ func TestPointers(t *testing.T) {
 				t.Fatalf("Variable 'testResult' missing")
 			}
 
-			if !reflect.DeepEqual(result, tc.expected) {
-				t.Errorf("Expected %v, got %v", tc.expected, result)
+			var actual any = result
+			if _, isExpectedString := tc.expected.(string); isExpectedString {
+				actual = ast.Stringify(result)
+			}
+
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, got %v", tc.expected, actual)
 			}
 		})
 	}
