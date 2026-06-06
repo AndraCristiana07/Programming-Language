@@ -15,6 +15,8 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TODO: stack-queues fct, ll
+
 type NativeFunction struct {
 	ArgsCount int
 	Body      func(v *Visitor, args []any) any
