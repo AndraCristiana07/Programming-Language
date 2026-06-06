@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -29,20 +30,37 @@ func TestPointers(t *testing.T) {
             `,
 			expected: 7,
 		},
+		{
+			name: "Pointer on array item",
+			input: `
+                var numbers = [1, 2, 3]
+    			var ptr = &numbers[1]
+				var testResult = *ptr
+            `,
+			expected: 2,
+		},
+		{
+			name: "Pointer on array",
+			input: `
+                var numbers = [1, 2, 3]
+    			var ptr = &numbers[1]
+				*ptr = 4
+				var testResult = numbers
+            `,
+			expected: &[]any{1, 4, 3},
+		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			env := runInterpreter(tc.input)
-
 			result, ok := env.Lookup("testResult")
 			if !ok {
-				t.Fatalf("Variable 'testResult' was missing from environment state entirely")
+				t.Fatalf("Variable 'testResult' missing")
 			}
 
-			if result != tc.expected {
-				t.Errorf("Expected %v (%T), got %v (%T)",
-					tc.expected, tc.expected, result, result)
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("Expected %v, got %v", tc.expected, result)
 			}
 		})
 	}

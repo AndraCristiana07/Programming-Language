@@ -29,6 +29,8 @@ type Visitor struct {
 type Pointer struct {
 	VarName string       // name of the targeted variable
 	Env     *Environment // the scope where target is
+	Get     func() any
+	Set     func(newValue any) bool
 }
 
 type Interface struct {
@@ -356,8 +358,14 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer dereference", ctx))
 		}
 
-		ptr.Env.Assign(ptr.VarName, assignedValue)
+		if ptr.Set != nil {
+			if !ptr.Set(assignedValue) {
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable assignment target '%s' missing", ptr.VarName), ctx))
+			}
+			return nil
+		}
 
+		ptr.Env.Assign(ptr.VarName, assignedValue)
 		return nil
 	}
 
@@ -1265,37 +1273,80 @@ func (v *Visitor) VisitParentheses(ctx *parser.ParenthesesContext) any {
 
 func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 	op := ctx.GetOp().GetText()
-	value := ctx.Expr().Accept(v)
 
 	switch op {
 	case "not":
+		value := ctx.Expr().Accept(v)
 		boolVal, ok := value.(bool)
 		if !ok {
 			panic(RuntimeError("TypeError", "Operand of 'not' must be boolean", ctx))
 		}
 		return !boolVal
 	case "~":
+		value := ctx.Expr().Accept(v)
 		intVal, ok := value.(int)
 		if !ok {
-			panic(RuntimeError("TypeError", "Operand of '~' must be boolean", ctx))
+			panic(RuntimeError("TypeError", "Operand of '~' must be an integer", ctx))
 		}
 		return ^intVal
 	case "-":
+		value := ctx.Expr().Accept(v)
 		intVal, ok := value.(int)
 		if !ok {
 			panic(RuntimeError("TypeError", "Unary minus operator can only be applied to an integer", ctx))
-
 		}
 		return -intVal
+
 	case "&":
-		idCtx, ok := ctx.Expr().(*parser.IdentifierContext)
-		if !ok {
-			panic(RuntimeError("ReferenceError", "Cannot take the address of a non-variable", ctx))
+		innerExpr := ctx.Expr()
+
+		// field access or array index
+		container, indexVal := v.resolveAssignTarget(innerExpr)
+		if container != nil {
+			return &Pointer{
+				VarName: fmt.Sprintf("%v", indexVal),
+				Env:     v.currEnv,
+				Get: func() any {
+					switch obj := container.(type) {
+					case *[]any:
+						return (*obj)[indexVal.(int)]
+					case *map[string]any:
+						return (*obj)[fmt.Sprintf("%v", indexVal)]
+					}
+					return nil
+				},
+				Set: func(newValue any) bool {
+					switch obj := container.(type) {
+					case *[]any:
+						(*obj)[indexVal.(int)] = newValue
+						return true
+					case *map[string]any:
+						(*obj)[fmt.Sprintf("%v", indexVal)] = newValue
+						return true
+					}
+					return false
+				},
+			}
 		}
-		return &Pointer{
-			VarName: idCtx.IDENTIFIER().GetText(),
-			Env:     v.currEnv,
+
+		// plain variable name
+		if idCtx, ok := innerExpr.(*parser.IdentifierContext); ok {
+			name := idCtx.IDENTIFIER().GetText()
+			capturedEnv := v.currEnv
+			return &Pointer{
+				VarName: name,
+				Env:     capturedEnv,
+				Get: func() any {
+					val, _ := capturedEnv.Lookup(name)
+					return val
+				},
+				Set: func(newValue any) bool {
+					return capturedEnv.Assign(name, newValue)
+				},
+			}
 		}
+
+		panic(RuntimeError("ReferenceError", "Cannot take the address of a non-variable / r-value expression", ctx))
 
 	case "*":
 		val := ctx.Expr().Accept(v)
@@ -1303,6 +1354,11 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 		if !ok {
 			panic(RuntimeError("TypeError", "Cannot dereference a non-pointer type", ctx))
 		}
+
+		if ptr.Get != nil {
+			return ptr.Get()
+		}
+
 		targetVal, found := ptr.Env.Lookup(ptr.VarName)
 		if !found {
 			panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' no longer exists", ptr.VarName), ctx))
