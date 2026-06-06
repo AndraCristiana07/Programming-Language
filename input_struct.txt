@@ -63,4 +63,10 @@ func main() {
 
     print **pptr // 10
 
+    var v1 = 42
+    var p1 = &v1
+    var p2 = &v1
+
+    print p1 == p2
+
 }

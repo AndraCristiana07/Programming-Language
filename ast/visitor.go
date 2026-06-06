@@ -795,7 +795,29 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 	op := ctx.GetOp().GetText()
 
 	switch op {
+	// case "==":
+	// 	switch left.(type) {
+	// 	case *[]any, *Tuple:
+	// 		return reflect.DeepEqual(left, right)
+	// 	default:
+	// 		return left == right
+	// 	}
+
+	// case "!=":
+	// 	switch left.(type) {
+	// 	case *[]any, *Tuple:
+	// 		return !reflect.DeepEqual(left, right)
+	// 	default:
+	// 		return left != right
+	// 	}
 	case "==":
+		// pointer equality
+		ptr1, isPtr1 := left.(*Pointer)
+		ptr2, isPtr2 := right.(*Pointer)
+		if isPtr1 && isPtr2 {
+			return ptr1.VarName == ptr2.VarName && ptr1.Env == ptr2.Env
+		}
+
 		switch left.(type) {
 		case *[]any, *Tuple:
 			return reflect.DeepEqual(left, right)
@@ -804,6 +826,13 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		}
 
 	case "!=":
+		// pointer equality
+		ptr1, isPtr1 := left.(*Pointer)
+		ptr2, isPtr2 := right.(*Pointer)
+		if isPtr1 && isPtr2 {
+			return !(ptr1.VarName == ptr2.VarName && ptr1.Env == ptr2.Env)
+		}
+
 		switch left.(type) {
 		case *[]any, *Tuple:
 			return !reflect.DeepEqual(left, right)
@@ -847,6 +876,7 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
+
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	val := ctx.Expr().Accept(v)
 
@@ -1374,6 +1404,7 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 		if idCtx, ok := innerExpr.(*parser.IdentifierContext); ok {
 			name := idCtx.IDENTIFIER().GetText()
 			capturedEnv := v.currEnv
+			capturedEnv.MarkUsed(name)
 			return &Pointer{
 				VarName: name,
 				Env:     capturedEnv,

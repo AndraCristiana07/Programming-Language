@@ -60,6 +60,17 @@ func TestPointers(t *testing.T) {
             `,
 			expected: 1,
 		},
+		{
+			name: "Pointers comparison",
+			input: `
+                var v1 = 1
+				var p1 = &v1
+				var p2 = &v1
+
+				var testResult = p1 == p2
+            `,
+			expected: true,
+		},
 	}
 
 	for _, tc := range tests {
