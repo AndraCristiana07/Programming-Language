@@ -156,6 +156,10 @@ func (v *BaseGrammarVisitor) VisitOr(ctx *OrContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitDoubleDereference(ctx *DoubleDereferenceContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitExponential(ctx *ExponentialContext) interface{} {
 	return v.VisitChildren(ctx)
 }

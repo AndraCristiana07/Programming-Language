@@ -56,4 +56,11 @@ func main() {
     *itemPtr = 999
     printf("Mutated Array Element: %s\n", numbers) // [100, 999, 300]
 
+
+    var x = 10
+    var ptr = &x
+    var pptr = &ptr 
+
+    print **pptr // 10
+
 }

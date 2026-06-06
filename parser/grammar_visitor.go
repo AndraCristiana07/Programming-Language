@@ -119,6 +119,9 @@ type GrammarVisitor interface {
 	// Visit a parse tree produced by GrammarParser#Or.
 	VisitOr(ctx *OrContext) interface{}
 
+	// Visit a parse tree produced by GrammarParser#DoubleDereference.
+	VisitDoubleDereference(ctx *DoubleDereferenceContext) interface{}
+
 	// Visit a parse tree produced by GrammarParser#Exponential.
 	VisitExponential(ctx *ExponentialContext) interface{}
 

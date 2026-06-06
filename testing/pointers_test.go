@@ -49,6 +49,17 @@ func TestPointers(t *testing.T) {
             `,
 			expected: &[]any{1, 4, 3},
 		},
+		{
+			name: "Double Pointer",
+			input: `
+                var x = 1
+				var ptr = &x
+				var pptr = &ptr 
+
+				var testResult = **pptr 
+            `,
+			expected: 1,
+		},
 	}
 
 	for _, tc := range tests {

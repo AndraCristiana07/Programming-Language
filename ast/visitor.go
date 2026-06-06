@@ -351,8 +351,49 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 		leftSide = parenCtx.Expr()
 	}
 
+	if doubleDerefCtx, ok := leftSide.(*parser.DoubleDereferenceContext); ok {
+		val := doubleDerefCtx.Expr().Accept(v)
+
+		if val == nil || val == "null" || val == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Cannot assign through a null pointer double dereference", ctx))
+		}
+
+		pptr, isPtr := val.(*Pointer)
+		if !isPtr {
+			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer reference", ctx))
+		}
+
+		var ptrVal any
+		if pptr.Get != nil {
+			ptrVal = pptr.Get()
+		} else {
+			ptrVal, _ = pptr.Env.Lookup(pptr.VarName)
+		}
+
+		if ptrVal == nil || ptrVal == "null" || ptrVal == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Inner reference is a null pointer", ctx))
+		}
+
+		ptr, isInnerPtr := ptrVal.(*Pointer)
+		if !isInnerPtr {
+			panic(RuntimeError("TypeError", "Target is not a multi-layer pointer reference", ctx))
+		}
+
+		if ptr.Set != nil {
+			ptr.Set(assignedValue)
+		} else {
+			ptr.Env.Assign(ptr.VarName, assignedValue)
+		}
+		return nil
+	}
+
 	if unaryCtx, ok := leftSide.(*parser.UnaryContext); ok && unaryCtx.GetOp().GetText() == "*" {
 		ptrVal := unaryCtx.Expr().Accept(v)
+
+		if ptrVal == nil || ptrVal == "null" || ptrVal == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Cannot assign through a null pointer dereference", ctx))
+		}
+
 		ptr, isPtr := ptrVal.(*Pointer)
 		if !isPtr {
 			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer dereference", ctx))
@@ -1350,6 +1391,11 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 
 	case "*":
 		val := ctx.Expr().Accept(v)
+
+		if val == nil || val == "null" || val == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer reference", ctx))
+		}
+
 		ptr, ok := val.(*Pointer)
 		if !ok {
 			panic(RuntimeError("TypeError", "Cannot dereference a non-pointer type", ctx))
@@ -1368,6 +1414,48 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 	default:
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown unary operator: %s", op), ctx))
 	}
+}
+
+func (v *Visitor) VisitDoubleDereference(ctx *parser.DoubleDereferenceContext) any {
+	// eval to get the middle pointer
+	val := ctx.Expr().Accept(v)
+	if val == nil {
+		panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer", ctx))
+	}
+
+	// dreference pptr
+	firstPtr, ok := val.(*Pointer)
+	if !ok {
+		panic(RuntimeError("TypeError", "Cannot double-dereference a non-pointer type", ctx))
+	}
+
+	var middleVal any
+	if firstPtr.Get != nil {
+		middleVal = firstPtr.Get()
+	} else {
+		var found bool
+		middleVal, found = firstPtr.Env.Lookup(firstPtr.VarName)
+		if !found {
+			panic(RuntimeError("ReferenceError", "Target variable no longer exists", ctx))
+		}
+	}
+
+	if middleVal == nil {
+		panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer", ctx))
+	}
+
+	// dereference ptr
+	secondPtr, ok := middleVal.(*Pointer)
+	if !ok {
+		panic(RuntimeError("TypeError", "Cannot double-dereference a single pointer context layer", ctx))
+	}
+
+	if secondPtr.Get != nil {
+		return secondPtr.Get()
+	}
+
+	finalVal, _ := secondPtr.Env.Lookup(secondPtr.VarName)
+	return finalVal
 }
 
 func (v *Visitor) VisitBitShift(ctx *parser.BitShiftContext) any {

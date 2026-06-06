@@ -243,6 +243,12 @@ func (s *BaseGrammarListener) EnterOr(ctx *OrContext) {}
 // ExitOr is called when production Or is exited.
 func (s *BaseGrammarListener) ExitOr(ctx *OrContext) {}
 
+// EnterDoubleDereference is called when production DoubleDereference is entered.
+func (s *BaseGrammarListener) EnterDoubleDereference(ctx *DoubleDereferenceContext) {}
+
+// ExitDoubleDereference is called when production DoubleDereference is exited.
+func (s *BaseGrammarListener) ExitDoubleDereference(ctx *DoubleDereferenceContext) {}
+
 // EnterExponential is called when production Exponential is entered.
 func (s *BaseGrammarListener) EnterExponential(ctx *ExponentialContext) {}
 
