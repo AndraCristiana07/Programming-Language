@@ -58,8 +58,7 @@ type NullValue struct{}
 
 var LanguageNull = &NullValue{}
 
-// TODO: warning for unused vars
-// maybe specific file extension for the lang
+// TODO:? maybe specific file extension for the lang
 
 func NewVisitor() *Visitor {
 	return &Visitor{
@@ -306,7 +305,9 @@ func (v *Visitor) VisitForPost(ctx *parser.ForPostContext) any {
 func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 	value := ctx.Expr().Accept(v)
 
-	// var (a, b) =
+	lineNum := ctx.GetStart().GetLine()
+
+	// var (a, b) = ...
 	if ctx.LPAREN() != nil {
 		runtimeTuple, ok := value.(*Tuple)
 		if !ok {
@@ -318,17 +319,19 @@ func (v *Visitor) VisitVarDecl(ctx *parser.VarDeclContext) any {
 			panic(RuntimeError("ValueError", fmt.Sprintf("ValueError: Value mismatch during unpacking: variables (%d) vs tuple elements (%d)", len(identifiers), len(runtimeTuple.Elements)), ctx))
 		}
 
-		// define each variable in the current scope
 		for i, idToken := range identifiers {
 			varName := idToken.GetText()
-			v.currEnv.Define(varName, runtimeTuple.Elements[i])
+			// each individual unpacked variable is tracked
+			v.currEnv.DefineWithLine(varName, runtimeTuple.Elements[i], lineNum)
 		}
 		return nil
 	}
 
 	// simple var declaration
 	varName := ctx.IDENTIFIER(0).GetText()
-	v.currEnv.Define(varName, value)
+
+	// lineNum to register it inside tracking metadata
+	v.currEnv.DefineWithLine(varName, value, lineNum)
 	return nil
 }
 
@@ -1806,8 +1809,11 @@ func (f *RuntimeFunction) Call(v *Visitor, args []any) any {
 		f.Body.Accept(v)
 	}()
 
+	v.currEnv.CheckUnusedVars()
+
 	// safely restore parent scope state
 	v.currEnv = previousEnv
+
 	return returnedVal
 }
 

@@ -1,0 +1,10 @@
+func main() {
+    var usedVar = "Hello World"
+    var unusedVar = 42         
+    
+    var (x, y) = (100, 200)    
+    var (z, w) = (300, 400)
+
+    print(usedVar)
+    print(x + y)
+}
