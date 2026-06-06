@@ -101,6 +101,31 @@ func TestArray(t *testing.T) {
 			`,
 			expected: 2,
 		},
+		{
+			name: "Dequque",
+			input: `
+				var q = [1,5]
+				var testResult = dequeue(q)
+			`,
+			expected: 1,
+		},
+		{
+			name: "Enquque",
+			input: `
+				var q = [1,5]
+				var t = enqueue(q,5)
+				var testResult = q
+			`,
+			expected: &[]any{1, 5, 5},
+		},
+		{
+			name: "Queue front",
+			input: `
+				var q = [1,5]
+				var testResult = front(q)
+			`,
+			expected: 1,
+		},
 	}
 
 	for _, tc := range tests {

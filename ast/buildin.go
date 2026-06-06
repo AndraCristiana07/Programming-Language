@@ -192,6 +192,85 @@ func NewGlobalEnvironment() *Environment {
 		},
 	})
 
+	// enqueue(arr, item)
+	globals.Define("enqueue", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "enqueue() expects an array as the first argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			newItem := args[1]
+
+			if len(arr) > 0 {
+				firstItem := arr[0]
+				firstType := reflect.TypeOf(firstItem)
+				newType := reflect.TypeOf(newItem)
+
+				if firstType != newType {
+					expectedName := firstType.String()
+					gotName := newType.String()
+
+					if expectedName == "[]interface {}" || expectedName == "[]main.any" {
+						expectedName = "array"
+					}
+					if gotName == "[]interface {}" || gotName == "[]main.any" {
+						gotName = "array"
+					}
+
+					panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot enqueue %s into a queue of %s", gotName, expectedName), v.currCtx))
+				}
+			}
+
+			*arrPtr = append(arr, newItem)
+			return nil
+		},
+	})
+
+	// dequeue(arr)
+	globals.Define("dequeue", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "dequeue() expects an array as its argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic(RuntimeError("IndexError", "IndexError: dequeue from an empty queue", v.currCtx))
+			}
+
+			// grab the first item
+			firstItem := arr[0]
+
+			*arrPtr = arr[1:]
+
+			return firstItem
+		},
+	})
+
+	// front(arr)
+	globals.Define("front", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "front() expects an array as its argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic(RuntimeError("IndexError", "IndexError: front from an empty queue", v.currCtx))
+			}
+
+			// first element
+			return arr[0]
+		},
+	})
+
 	// int(value)
 	globals.Define("int", &NativeFunction{
 		ArgsCount: 1,
