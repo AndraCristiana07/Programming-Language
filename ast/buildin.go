@@ -16,8 +16,6 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-// TODO: stack-queues fct, ll
-
 type NativeFunction struct {
 	ArgsCount int
 	Body      func(v *Visitor, args []any) any
@@ -299,7 +297,7 @@ func NewGlobalEnvironment() *Environment {
 	globals.Define("str", &NativeFunction{
 		ArgsCount: 1,
 		Body: func(v *Visitor, args []any) any {
-			return stringify(args[0])
+			return Stringify(args[0])
 		},
 	})
 
@@ -1924,7 +1922,7 @@ func NewGlobalEnvironment() *Environment {
 
 			processedArgs := make([]any, len(args[1:]))
 			for i, arg := range args[1:] {
-				processedArgs[i] = stringify(arg)
+				processedArgs[i] = Stringify(arg)
 			}
 
 			normalizedFormat := normalizeFormatVerbs(formatStr)
@@ -1947,7 +1945,7 @@ func NewGlobalEnvironment() *Environment {
 
 			processedArgs := make([]any, len(args[1:]))
 			for i, arg := range args[1:] {
-				processedArgs[i] = stringify(arg)
+				processedArgs[i] = Stringify(arg)
 			}
 
 			normalizedFormat := normalizeFormatVerbs(formatStr)
@@ -1965,12 +1963,18 @@ func normalizeFormatVerbs(format string) string {
 	return formatVerbRegex.ReplaceAllString(format, "%s")
 }
 
-func stringify(val any) string {
-	if val == nil {
-		return "nil"
+func Stringify(val any) string {
+	return stringifySafe(val, make(map[any]bool))
+}
+
+func stringifySafe(val any, visited map[any]bool) string {
+	if val == nil || val == LanguageNull {
+		return "null"
 	}
 
 	switch actual := val.(type) {
+	case *Pointer:
+		return fmt.Sprintf("<pointer to %s>", actual.VarName)
 	case string:
 		return actual
 	case *[]any:
@@ -1978,7 +1982,7 @@ func stringify(val any) string {
 		var sb strings.Builder
 		sb.WriteString("[")
 		for i, element := range elements {
-			sb.WriteString(stringify(element))
+			sb.WriteString(stringifySafe(element, visited))
 			if i < len(elements)-1 {
 				sb.WriteString(", ")
 			}
@@ -1990,7 +1994,7 @@ func stringify(val any) string {
 		var sb strings.Builder
 		sb.WriteString("(")
 		for i, element := range actual.Elements {
-			sb.WriteString(stringify(element))
+			sb.WriteString(stringifySafe(element, visited))
 			if i < len(actual.Elements)-1 {
 				sb.WriteString(", ")
 			}
@@ -2001,8 +2005,19 @@ func stringify(val any) string {
 	case *map[string]any:
 		targetMap := *actual
 
-		// check if struct instance with a type tag metadata
+		if visited[actual] {
+			return "<circular reference>"
+		}
+		visited[actual] = true
+
 		if t, exists := targetMap["__type__"].(string); exists {
+			nextVal, hasNext := targetMap["next"]
+			currentVal, hasVal := targetMap["val"]
+
+			if hasNext && hasVal {
+				return fmt.Sprintf("Node(%v) -> %s", currentVal, stringifySafe(nextVal, visited))
+			}
+
 			return fmt.Sprintf("<object Instance of %s>", t)
 		}
 
@@ -2018,7 +2033,7 @@ func stringify(val any) string {
 			if strVal, isStr := targetMap[k].(string); isStr {
 				fmt.Fprintf(&sb, `"%s" : "%s"`, k, strVal)
 			} else {
-				fmt.Fprintf(&sb, `"%s" : %s`, k, stringify(targetMap[k]))
+				fmt.Fprintf(&sb, `"%s" : %s`, k, stringifySafe(targetMap[k], visited))
 			}
 			if i < len(keys)-1 {
 				sb.WriteString(", ")
@@ -2036,7 +2051,7 @@ func stringify(val any) string {
 func preprocessArgs(args []any) []any {
 	processed := make([]any, len(args))
 	for i, arg := range args {
-		processed[i] = stringify(arg)
+		processed[i] = Stringify(arg)
 	}
 	return processed
 }

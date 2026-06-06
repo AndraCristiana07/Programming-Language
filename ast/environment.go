@@ -124,3 +124,18 @@ func (e *Environment) CheckUnusedVars() {
 		}
 	}
 }
+
+func (e *Environment) MarkUsed(name string) bool {
+	val, exists := e.vars[name]
+	if exists {
+		if meta, ok := val.(*VariableMetadata); ok {
+			meta.IsUsed = true
+			return true
+		}
+		return true
+	}
+	if e.parent != nil {
+		return e.parent.MarkUsed(name)
+	}
+	return false
+}

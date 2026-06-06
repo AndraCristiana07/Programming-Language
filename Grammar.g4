@@ -84,7 +84,8 @@ expr        : expr LBRACKET expr RBRACKET                               # ArrayI
             | expr DOT IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN   # MethodCall
             | expr DOT IDENTIFIER                                       # FieldAccess
             | IDENTIFIER LPAREN (expr (COMMA expr)*)? RPAREN            # FunctionCall
-            | op=(NOT | BITNOT | MINUS) expr                            # Unary
+            | EXPONENTIAL expr                                            # DoubleDereference
+            | op=(NOT | BITNOT | MINUS | BITAND | STAR) expr            # Unary
             | expr op=EXPONENTIAL expr                                  # Exponential
             | expr op=(STAR | SLASH | MODULO) expr                      # MulDivMod
             | expr op=(PLUS | MINUS) expr                               # AddSub

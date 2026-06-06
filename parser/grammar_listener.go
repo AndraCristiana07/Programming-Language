@@ -119,6 +119,9 @@ type GrammarListener interface {
 	// EnterOr is called when entering the Or production.
 	EnterOr(c *OrContext)
 
+	// EnterDoubleDereference is called when entering the DoubleDereference production.
+	EnterDoubleDereference(c *DoubleDereferenceContext)
+
 	// EnterExponential is called when entering the Exponential production.
 	EnterExponential(c *ExponentialContext)
 
@@ -328,6 +331,9 @@ type GrammarListener interface {
 
 	// ExitOr is called when exiting the Or production.
 	ExitOr(c *OrContext)
+
+	// ExitDoubleDereference is called when exiting the DoubleDereference production.
+	ExitDoubleDereference(c *DoubleDereferenceContext)
 
 	// ExitExponential is called when exiting the Exponential production.
 	ExitExponential(c *ExponentialContext)

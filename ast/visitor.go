@@ -26,6 +26,13 @@ type Visitor struct {
 	currCtx           antlr.ParserRuleContext
 }
 
+type Pointer struct {
+	VarName string       // name of the targeted variable
+	Env     *Environment // the scope where target is
+	Get     func() any
+	Set     func(newValue any) bool
+}
+
 type Interface struct {
 	Name    string
 	Methods map[string]int // map methodName -> expectedArgCount
@@ -342,6 +349,65 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 	// left side  wrapped in parentheses -> unwrap its inner expression
 	if parenCtx, isParen := leftSide.(*parser.ParenthesesContext); isParen {
 		leftSide = parenCtx.Expr()
+	}
+
+	if doubleDerefCtx, ok := leftSide.(*parser.DoubleDereferenceContext); ok {
+		val := doubleDerefCtx.Expr().Accept(v)
+
+		if val == nil || val == "null" || val == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Cannot assign through a null pointer double dereference", ctx))
+		}
+
+		pptr, isPtr := val.(*Pointer)
+		if !isPtr {
+			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer reference", ctx))
+		}
+
+		var ptrVal any
+		if pptr.Get != nil {
+			ptrVal = pptr.Get()
+		} else {
+			ptrVal, _ = pptr.Env.Lookup(pptr.VarName)
+		}
+
+		if ptrVal == nil || ptrVal == "null" || ptrVal == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Inner reference is a null pointer", ctx))
+		}
+
+		ptr, isInnerPtr := ptrVal.(*Pointer)
+		if !isInnerPtr {
+			panic(RuntimeError("TypeError", "Target is not a multi-layer pointer reference", ctx))
+		}
+
+		if ptr.Set != nil {
+			ptr.Set(assignedValue)
+		} else {
+			ptr.Env.Assign(ptr.VarName, assignedValue)
+		}
+		return nil
+	}
+
+	if unaryCtx, ok := leftSide.(*parser.UnaryContext); ok && unaryCtx.GetOp().GetText() == "*" {
+		ptrVal := unaryCtx.Expr().Accept(v)
+
+		if ptrVal == nil || ptrVal == "null" || ptrVal == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Cannot assign through a null pointer dereference", ctx))
+		}
+
+		ptr, isPtr := ptrVal.(*Pointer)
+		if !isPtr {
+			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer dereference", ctx))
+		}
+
+		if ptr.Set != nil {
+			if !ptr.Set(assignedValue) {
+				panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable assignment target '%s' missing", ptr.VarName), ctx))
+			}
+			return nil
+		}
+
+		ptr.Env.Assign(ptr.VarName, assignedValue)
+		return nil
 	}
 
 	// tuple
@@ -729,7 +795,29 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 	op := ctx.GetOp().GetText()
 
 	switch op {
+	// case "==":
+	// 	switch left.(type) {
+	// 	case *[]any, *Tuple:
+	// 		return reflect.DeepEqual(left, right)
+	// 	default:
+	// 		return left == right
+	// 	}
+
+	// case "!=":
+	// 	switch left.(type) {
+	// 	case *[]any, *Tuple:
+	// 		return !reflect.DeepEqual(left, right)
+	// 	default:
+	// 		return left != right
+	// 	}
 	case "==":
+		// pointer equality
+		ptr1, isPtr1 := left.(*Pointer)
+		ptr2, isPtr2 := right.(*Pointer)
+		if isPtr1 && isPtr2 {
+			return ptr1.VarName == ptr2.VarName && ptr1.Env == ptr2.Env
+		}
+
 		switch left.(type) {
 		case *[]any, *Tuple:
 			return reflect.DeepEqual(left, right)
@@ -738,6 +826,13 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		}
 
 	case "!=":
+		// pointer equality
+		ptr1, isPtr1 := left.(*Pointer)
+		ptr2, isPtr2 := right.(*Pointer)
+		if isPtr1 && isPtr2 {
+			return !(ptr1.VarName == ptr2.VarName && ptr1.Env == ptr2.Env)
+		}
+
 		switch left.(type) {
 		case *[]any, *Tuple:
 			return !reflect.DeepEqual(left, right)
@@ -781,6 +876,7 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown operator: %s", op), ctx))
 	}
 }
+
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	val := ctx.Expr().Accept(v)
 
@@ -1248,31 +1344,149 @@ func (v *Visitor) VisitParentheses(ctx *parser.ParenthesesContext) any {
 
 func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 	op := ctx.GetOp().GetText()
-	value := ctx.Expr().Accept(v)
 
 	switch op {
 	case "not":
+		value := ctx.Expr().Accept(v)
 		boolVal, ok := value.(bool)
 		if !ok {
 			panic(RuntimeError("TypeError", "Operand of 'not' must be boolean", ctx))
 		}
 		return !boolVal
 	case "~":
+		value := ctx.Expr().Accept(v)
 		intVal, ok := value.(int)
 		if !ok {
-			panic(RuntimeError("TypeError", "Operand of '~' must be boolean", ctx))
+			panic(RuntimeError("TypeError", "Operand of '~' must be an integer", ctx))
 		}
 		return ^intVal
 	case "-":
+		value := ctx.Expr().Accept(v)
 		intVal, ok := value.(int)
 		if !ok {
 			panic(RuntimeError("TypeError", "Unary minus operator can only be applied to an integer", ctx))
-
 		}
 		return -intVal
+
+	case "&":
+		innerExpr := ctx.Expr()
+
+		// field access or array index
+		container, indexVal := v.resolveAssignTarget(innerExpr)
+		if container != nil {
+			return &Pointer{
+				VarName: fmt.Sprintf("%v", indexVal),
+				Env:     v.currEnv,
+				Get: func() any {
+					switch obj := container.(type) {
+					case *[]any:
+						return (*obj)[indexVal.(int)]
+					case *map[string]any:
+						return (*obj)[fmt.Sprintf("%v", indexVal)]
+					}
+					return nil
+				},
+				Set: func(newValue any) bool {
+					switch obj := container.(type) {
+					case *[]any:
+						(*obj)[indexVal.(int)] = newValue
+						return true
+					case *map[string]any:
+						(*obj)[fmt.Sprintf("%v", indexVal)] = newValue
+						return true
+					}
+					return false
+				},
+			}
+		}
+
+		// plain variable name
+		if idCtx, ok := innerExpr.(*parser.IdentifierContext); ok {
+			name := idCtx.IDENTIFIER().GetText()
+			capturedEnv := v.currEnv
+			capturedEnv.MarkUsed(name)
+			return &Pointer{
+				VarName: name,
+				Env:     capturedEnv,
+				Get: func() any {
+					val, _ := capturedEnv.Lookup(name)
+					return val
+				},
+				Set: func(newValue any) bool {
+					return capturedEnv.Assign(name, newValue)
+				},
+			}
+		}
+
+		panic(RuntimeError("ReferenceError", "Cannot take the address of a non-variable / r-value expression", ctx))
+
+	case "*":
+		val := ctx.Expr().Accept(v)
+
+		if val == nil || val == "null" || val == LanguageNull {
+			panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer reference", ctx))
+		}
+
+		ptr, ok := val.(*Pointer)
+		if !ok {
+			panic(RuntimeError("TypeError", "Cannot dereference a non-pointer type", ctx))
+		}
+
+		if ptr.Get != nil {
+			return ptr.Get()
+		}
+
+		targetVal, found := ptr.Env.Lookup(ptr.VarName)
+		if !found {
+			panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' no longer exists", ptr.VarName), ctx))
+		}
+		return targetVal
+
 	default:
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown unary operator: %s", op), ctx))
 	}
+}
+
+func (v *Visitor) VisitDoubleDereference(ctx *parser.DoubleDereferenceContext) any {
+	// eval to get the middle pointer
+	val := ctx.Expr().Accept(v)
+	if val == nil {
+		panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer", ctx))
+	}
+
+	// dreference pptr
+	firstPtr, ok := val.(*Pointer)
+	if !ok {
+		panic(RuntimeError("TypeError", "Cannot double-dereference a non-pointer type", ctx))
+	}
+
+	var middleVal any
+	if firstPtr.Get != nil {
+		middleVal = firstPtr.Get()
+	} else {
+		var found bool
+		middleVal, found = firstPtr.Env.Lookup(firstPtr.VarName)
+		if !found {
+			panic(RuntimeError("ReferenceError", "Target variable no longer exists", ctx))
+		}
+	}
+
+	if middleVal == nil {
+		panic(RuntimeError("NullPointerError", "Panic: Attempted to dereference a null pointer", ctx))
+	}
+
+	// dereference ptr
+	secondPtr, ok := middleVal.(*Pointer)
+	if !ok {
+		panic(RuntimeError("TypeError", "Cannot double-dereference a single pointer context layer", ctx))
+	}
+
+	if secondPtr.Get != nil {
+		return secondPtr.Get()
+	}
+
+	finalVal, _ := secondPtr.Env.Lookup(secondPtr.VarName)
+	return finalVal
 }
 
 func (v *Visitor) VisitBitShift(ctx *parser.BitShiftContext) any {
