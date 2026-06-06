@@ -7,6 +7,7 @@ import (
 	"my_language/parser"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -94,7 +95,6 @@ func NewGlobalEnvironment() *Environment {
 						gotName = newType.String()
 					}
 
-					// clean up Go-specific naming repr
 					if expectedName == "[]interface {}" || expectedName == "*[]interface {}" || expectedName == "[]main.any" {
 						expectedName = "array"
 					}
@@ -108,6 +108,166 @@ func NewGlobalEnvironment() *Environment {
 
 			*arrPtr = append(arr, newItem)
 			return arrPtr
+		},
+	})
+
+	// push(arr, item)
+	globals.Define("push", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "push() expects an array as the first argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			newItem := args[1]
+
+			if len(arr) > 0 {
+				firstItem := arr[0]
+				firstType := reflect.TypeOf(firstItem)
+				newType := reflect.TypeOf(newItem)
+
+				if firstType != newType {
+					expectedName := firstType.String()
+					gotName := newType.String()
+
+					if expectedName == "[]interface {}" || expectedName == "[]main.any" {
+						expectedName = "array"
+					}
+					if gotName == "[]interface {}" || gotName == "[]main.any" {
+						gotName = "array"
+					}
+
+					panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot push %s to an array of %s", gotName, expectedName), v.currCtx))
+				}
+			}
+
+			*arrPtr = append(arr, newItem)
+			return nil
+		},
+	})
+
+	//  peek(arr)
+	globals.Define("peek", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "peek() expects an array as its argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic(RuntimeError("IndexError", "IndexError: peek from an empty array", v.currCtx))
+			}
+
+			return arr[len(arr)-1]
+		},
+	})
+
+	//isEmpty(arr)
+	globals.Define("isEmpty", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "isEmpty() expects an array as its argument", v.currCtx))
+			}
+
+			return len(*arrPtr) == 0
+		},
+	})
+
+	// size(arr)
+	globals.Define("size", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "size() expects an array as its argument", v.currCtx))
+			}
+
+			return len(*arrPtr)
+		},
+	})
+
+	// enqueue(arr, item)
+	globals.Define("enqueue", &NativeFunction{
+		ArgsCount: 2,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "enqueue() expects an array as the first argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			newItem := args[1]
+
+			if len(arr) > 0 {
+				firstItem := arr[0]
+				firstType := reflect.TypeOf(firstItem)
+				newType := reflect.TypeOf(newItem)
+
+				if firstType != newType {
+					expectedName := firstType.String()
+					gotName := newType.String()
+
+					if expectedName == "[]interface {}" || expectedName == "[]main.any" {
+						expectedName = "array"
+					}
+					if gotName == "[]interface {}" || gotName == "[]main.any" {
+						gotName = "array"
+					}
+
+					panic(RuntimeError("TypeError", fmt.Sprintf("TypeError: Cannot enqueue %s into a queue of %s", gotName, expectedName), v.currCtx))
+				}
+			}
+
+			*arrPtr = append(arr, newItem)
+			return nil
+		},
+	})
+
+	// dequeue(arr)
+	globals.Define("dequeue", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "dequeue() expects an array as its argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic(RuntimeError("IndexError", "IndexError: dequeue from an empty queue", v.currCtx))
+			}
+
+			// grab the first item
+			firstItem := arr[0]
+
+			*arrPtr = arr[1:]
+
+			return firstItem
+		},
+	})
+
+	// front(arr)
+	globals.Define("front", &NativeFunction{
+		ArgsCount: 1,
+		Body: func(v *Visitor, args []any) any {
+			arrPtr, ok := args[0].(*[]any)
+			if !ok {
+				panic(RuntimeError("TypeError", "front() expects an array as its argument", v.currCtx))
+			}
+
+			arr := *arrPtr
+			if len(arr) == 0 {
+				panic(RuntimeError("IndexError", "IndexError: front from an empty queue", v.currCtx))
+			}
+
+			// first element
+			return arr[0]
 		},
 	})
 
@@ -1762,16 +1922,14 @@ func NewGlobalEnvironment() *Environment {
 				panic(RuntimeError("TypeError", "printf() first argument must be a string", v.currCtx))
 			}
 
-			// clean strings
 			processedArgs := make([]any, len(args[1:]))
 			for i, arg := range args[1:] {
 				processedArgs[i] = stringify(arg)
 			}
 
-			finalOutput := fmt.Sprintf(formatStr, processedArgs...)
+			normalizedFormat := normalizeFormatVerbs(formatStr)
 
-			// print cleanly message
-			fmt.Print(finalOutput)
+			fmt.Printf(normalizedFormat, processedArgs...)
 			return nil
 		},
 	})
@@ -1792,11 +1950,19 @@ func NewGlobalEnvironment() *Environment {
 				processedArgs[i] = stringify(arg)
 			}
 
-			return fmt.Sprintf(formatStr, processedArgs...)
+			normalizedFormat := normalizeFormatVerbs(formatStr)
+
+			return fmt.Sprintf(normalizedFormat, processedArgs...)
 		},
 	})
 
 	return globals
+}
+
+var formatVerbRegex = regexp.MustCompile(`%[dvt f]`)
+
+func normalizeFormatVerbs(format string) string {
+	return formatVerbRegex.ReplaceAllString(format, "%s")
 }
 
 func stringify(val any) string {
