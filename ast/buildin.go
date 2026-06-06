@@ -1971,6 +1971,8 @@ func stringify(val any) string {
 	}
 
 	switch actual := val.(type) {
+	case *Pointer:
+		return fmt.Sprintf("<pointer to %s>", actual.VarName)
 	case string:
 		return actual
 	case *[]any:

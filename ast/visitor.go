@@ -26,6 +26,11 @@ type Visitor struct {
 	currCtx           antlr.ParserRuleContext
 }
 
+type Pointer struct {
+	VarName string       // name of the targeted variable
+	Env     *Environment // the scope where target is
+}
+
 type Interface struct {
 	Name    string
 	Methods map[string]int // map methodName -> expectedArgCount
@@ -342,6 +347,18 @@ func (v *Visitor) VisitAssignStmt(ctx *parser.AssignStmtContext) any {
 	// left side  wrapped in parentheses -> unwrap its inner expression
 	if parenCtx, isParen := leftSide.(*parser.ParenthesesContext); isParen {
 		leftSide = parenCtx.Expr()
+	}
+
+	if unaryCtx, ok := leftSide.(*parser.UnaryContext); ok && unaryCtx.GetOp().GetText() == "*" {
+		ptrVal := unaryCtx.Expr().Accept(v)
+		ptr, isPtr := ptrVal.(*Pointer)
+		if !isPtr {
+			panic(RuntimeError("TypeError", "Cannot assign through a non-pointer dereference", ctx))
+		}
+
+		ptr.Env.Assign(ptr.VarName, assignedValue)
+
+		return nil
 	}
 
 	// tuple
@@ -1270,6 +1287,28 @@ func (v *Visitor) VisitUnary(ctx *parser.UnaryContext) any {
 
 		}
 		return -intVal
+	case "&":
+		idCtx, ok := ctx.Expr().(*parser.IdentifierContext)
+		if !ok {
+			panic(RuntimeError("ReferenceError", "Cannot take the address of a non-variable", ctx))
+		}
+		return &Pointer{
+			VarName: idCtx.IDENTIFIER().GetText(),
+			Env:     v.currEnv,
+		}
+
+	case "*":
+		val := ctx.Expr().Accept(v)
+		ptr, ok := val.(*Pointer)
+		if !ok {
+			panic(RuntimeError("TypeError", "Cannot dereference a non-pointer type", ctx))
+		}
+		targetVal, found := ptr.Env.Lookup(ptr.VarName)
+		if !found {
+			panic(RuntimeError("ReferenceError", fmt.Sprintf("Variable '%s' no longer exists", ptr.VarName), ctx))
+		}
+		return targetVal
+
 	default:
 		panic(RuntimeError("SyntaxError", fmt.Sprintf("Unknown unary operator: %s", op), ctx))
 	}

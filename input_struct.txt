@@ -20,3 +20,16 @@ func (u User) greet() {
 var player2 = User { name: "Anna", age: 24 }
 
 print player2.greet()
+
+func main() {
+    var x = 42
+    
+    var ptr = &x 
+    printf("ptr holds a reference to x\n")
+
+    printf("Value via dereference: %d\n", *ptr) // 42
+
+    *ptr = 999
+
+    printf("Value of x after pointer mutation: %d\n", x) // 999
+}

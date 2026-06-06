@@ -136,13 +136,13 @@ func grammarParserInit() {
 		0, 1, 68, 39, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
 		32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66,
 		68, 70, 72, 74, 76, 0, 9, 2, 0, 38, 38, 75, 75, 2, 0, 44, 49, 56, 60, 1,
-		0, 40, 41, 3, 0, 16, 16, 55, 55, 69, 69, 1, 0, 65, 66, 2, 0, 17, 18, 42,
-		42, 1, 0, 15, 16, 1, 0, 53, 54, 1, 0, 19, 24, 692, 0, 83, 1, 0, 0, 0, 2,
-		108, 1, 0, 0, 0, 4, 113, 1, 0, 0, 0, 6, 117, 1, 0, 0, 0, 8, 119, 1, 0,
-		0, 0, 10, 138, 1, 0, 0, 0, 12, 143, 1, 0, 0, 0, 14, 175, 1, 0, 0, 0, 16,
-		190, 1, 0, 0, 0, 18, 192, 1, 0, 0, 0, 20, 200, 1, 0, 0, 0, 22, 203, 1,
-		0, 0, 0, 24, 205, 1, 0, 0, 0, 26, 207, 1, 0, 0, 0, 28, 235, 1, 0, 0, 0,
-		30, 245, 1, 0, 0, 0, 32, 254, 1, 0, 0, 0, 34, 270, 1, 0, 0, 0, 36, 272,
+		0, 40, 41, 4, 0, 16, 17, 50, 50, 55, 55, 69, 69, 1, 0, 65, 66, 2, 0, 17,
+		18, 42, 42, 1, 0, 15, 16, 1, 0, 53, 54, 1, 0, 19, 24, 692, 0, 83, 1, 0,
+		0, 0, 2, 108, 1, 0, 0, 0, 4, 113, 1, 0, 0, 0, 6, 117, 1, 0, 0, 0, 8, 119,
+		1, 0, 0, 0, 10, 138, 1, 0, 0, 0, 12, 143, 1, 0, 0, 0, 14, 175, 1, 0, 0,
+		0, 16, 190, 1, 0, 0, 0, 18, 192, 1, 0, 0, 0, 20, 200, 1, 0, 0, 0, 22, 203,
+		1, 0, 0, 0, 24, 205, 1, 0, 0, 0, 26, 207, 1, 0, 0, 0, 28, 235, 1, 0, 0,
+		0, 30, 245, 1, 0, 0, 0, 32, 254, 1, 0, 0, 0, 34, 270, 1, 0, 0, 0, 36, 272,
 		1, 0, 0, 0, 38, 279, 1, 0, 0, 0, 40, 296, 1, 0, 0, 0, 42, 300, 1, 0, 0,
 		0, 44, 307, 1, 0, 0, 0, 46, 311, 1, 0, 0, 0, 48, 314, 1, 0, 0, 0, 50, 339,
 		1, 0, 0, 0, 52, 345, 1, 0, 0, 0, 54, 355, 1, 0, 0, 0, 56, 366, 1, 0, 0,
@@ -738,7 +738,7 @@ func (p *GrammarParser) Program() (localctx IProgramContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&-2269813676833693026) != 0) || ((int64((_la-64)) & ^0x3f) == 0 && ((int64(1)<<(_la-64))&2535) != 0) {
+	for ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&-2268687776926719330) != 0) || ((int64((_la-64)) & ^0x3f) == 0 && ((int64(1)<<(_la-64))&2535) != 0) {
 		p.SetState(81)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
@@ -746,7 +746,7 @@ func (p *GrammarParser) Program() (localctx IProgramContext) {
 		}
 
 		switch p.GetTokenStream().LA(1) {
-		case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+		case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 			{
 				p.SetState(78)
 				p.Statement()
@@ -3915,7 +3915,7 @@ func (p *GrammarParser) CaseBlock() (localctx ICaseBlockContext) {
 			}
 
 			switch p.GetTokenStream().LA(1) {
-			case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+			case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 				{
 					p.SetState(238)
 					p.Statement()
@@ -4168,7 +4168,7 @@ func (p *GrammarParser) DefaultBlock() (localctx IDefaultBlockContext) {
 			}
 
 			switch p.GetTokenStream().LA(1) {
-			case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+			case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 				{
 					p.SetState(247)
 					p.Statement()
@@ -7000,7 +7000,7 @@ func (p *GrammarParser) BlockStmt() (localctx IBlockStmtContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&-2269813676833693026) != 0) || ((int64((_la-64)) & ^0x3f) == 0 && ((int64(1)<<(_la-64))&2535) != 0) {
+	for ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&-2268687776926719330) != 0) || ((int64((_la-64)) & ^0x3f) == 0 && ((int64(1)<<(_la-64))&2535) != 0) {
 		p.SetState(359)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
@@ -7008,7 +7008,7 @@ func (p *GrammarParser) BlockStmt() (localctx IBlockStmtContext) {
 		}
 
 		switch p.GetTokenStream().LA(1) {
-		case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+		case GrammarParserT__0, GrammarParserINTERFACE, GrammarParserSTRUCT, GrammarParserSWITCH, GrammarParserTRY, GrammarParserTHROW, GrammarParserVAR, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserIF, GrammarParserWHILE, GrammarParserFOR, GrammarParserBREAK, GrammarParserCONTINUE, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserRETURN, GrammarParserPRINT, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 			{
 				p.SetState(356)
 				p.Statement()
@@ -7642,7 +7642,7 @@ func (p *GrammarParser) IfInit() (localctx IIfInitContext) {
 			p.VarDecl()
 		}
 
-	case GrammarParserT__0, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+	case GrammarParserT__0, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(401)
@@ -7793,7 +7793,7 @@ func (p *GrammarParser) ForInit() (localctx IForInitContext) {
 			p.VarDecl()
 		}
 
-	case GrammarParserT__0, GrammarParserMINUS, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
+	case GrammarParserT__0, GrammarParserMINUS, GrammarParserSTAR, GrammarParserLBRACE, GrammarParserLPAREN, GrammarParserLBRACKET, GrammarParserBITAND, GrammarParserBITNOT, GrammarParserLAMBDA, GrammarParserTRUE, GrammarParserFALSE, GrammarParserNOT, GrammarParserIDENTIFIER, GrammarParserNUMBER, GrammarParserSTRING:
 		p.EnterOuterAlt(localctx, 2)
 		{
 			p.SetState(405)
@@ -10039,6 +10039,14 @@ func (s *UnaryContext) MINUS() antlr.TerminalNode {
 	return s.GetToken(GrammarParserMINUS, 0)
 }
 
+func (s *UnaryContext) BITAND() antlr.TerminalNode {
+	return s.GetToken(GrammarParserBITAND, 0)
+}
+
+func (s *UnaryContext) STAR() antlr.TerminalNode {
+	return s.GetToken(GrammarParserSTAR, 0)
+}
+
 func (s *UnaryContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(GrammarListener); ok {
 		listenerT.EnterUnary(s)
@@ -10649,7 +10657,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 			{
 				p.SetState(418)
 				p.expr(0)
@@ -10706,7 +10714,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 
 			_la = p.GetTokenStream().LA(1)
 
-			if !((int64((_la-16)) & ^0x3f) == 0 && ((int64(1)<<(_la-16))&9007749010554881) != 0) {
+			if !((int64((_la-16)) & ^0x3f) == 0 && ((int64(1)<<(_la-16))&9007766190424067) != 0) {
 				var _ri = p.GetErrorHandler().RecoverInline(p)
 
 				localctx.(*UnaryContext).op = _ri
@@ -10757,7 +10765,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 			{
 				p.SetState(434)
 				p.MapEntry()
@@ -11513,7 +11521,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				}
 				_la = p.GetTokenStream().LA(1)
 
-				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 					{
 						p.SetState(534)
 
@@ -11538,7 +11546,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				}
 				_la = p.GetTokenStream().LA(1)
 
-				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 					{
 						p.SetState(538)
 
@@ -11571,7 +11579,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 					}
 					_la = p.GetTokenStream().LA(1)
 
-					if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+					if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 						{
 							p.SetState(542)
 
@@ -11632,7 +11640,7 @@ func (p *GrammarParser) expr(_p int) (localctx IExprContext) {
 				}
 				_la = p.GetTokenStream().LA(1)
 
-				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+				if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 					{
 						p.SetState(552)
 						p.expr(0)
@@ -11917,7 +11925,7 @@ func (p *GrammarParser) StructLiteral() (localctx IStructLiteralContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+	if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 		{
 			p.SetState(573)
 			p.MapEntry()
@@ -12580,7 +12588,7 @@ func (p *GrammarParser) ArrayLit() (localctx IArrayLitContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2341871806870257666) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
+		if ((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2342997706777231362) != 0) || ((int64((_la-65)) & ^0x3f) == 0 && ((int64(1)<<(_la-65))&243) != 0) {
 			{
 				p.SetState(595)
 				p.expr(0)
