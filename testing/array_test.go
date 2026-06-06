@@ -68,6 +68,39 @@ func TestArray(t *testing.T) {
             `,
 			expected: &[]any{6, 4, 1},
 		},
+		{
+			name: "Stack push",
+			input: `
+				var stack = [1,5]
+				var t = push(stack, 5)
+				var testResult = stack
+			`,
+			expected: &[]any{1, 5, 5},
+		},
+		{
+			name: "Stack peek",
+			input: `
+				var stack = [1,5]
+				var testResult = peek(stack)
+			`,
+			expected: 5,
+		},
+		{
+			name: "Stack is empty",
+			input: `
+				var stack = [1,5]
+				var testResult = isEmpty(stack)
+			`,
+			expected: false,
+		},
+		{
+			name: "Stack size",
+			input: `
+				var stack = [1,5]
+				var testResult = size(stack)
+			`,
+			expected: 2,
+		},
 	}
 
 	for _, tc := range tests {

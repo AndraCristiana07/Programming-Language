@@ -1,0 +1,20 @@
+func main() {
+    var stack = [100]
+
+    printf("Is stack empty? %s\n", isEmpty(stack)) 
+
+    push(stack, 200)
+    push(stack, 300)
+
+    printf("Stack Size: %d\n", size(stack))       
+    printf("Top Item (Peek): %d\n", peek(stack))  
+
+    // Verify it didn't remove the element
+    printf("Popped Item: %d\n", pop(stack))      
+    printf("New Top Item: %d\n", peek(stack))     
+    
+    pop(stack)
+    pop(stack)
+    
+    printf("Is stack empty now? %s\n", isEmpty(stack)) 
+}
