@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"my_language/ast"
 	"my_language/parser"
 	"os"
+	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -17,13 +19,69 @@ func (p *PanicErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingS
 	panic(fmt.Sprintf("SyntaxError: Line %d:%d - %s", line, column, msg))
 }
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run main.go <filename>")
-		os.Exit(1)
-	}
+func StartREPL() {
+	eval := ast.NewVisitor()
 
-	filename := os.Args[1]
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Welcome to the language REPL!")
+	fmt.Println("Type your commands below. Type 'exit' to quit.")
+	fmt.Println("-------------------------------------------")
+
+	for {
+		fmt.Print(">>> ")
+		if !scanner.Scan() {
+			break
+		}
+
+		line := scanner.Text()
+		trimmed := strings.TrimSpace(line)
+
+		if trimmed == "exit" {
+			fmt.Println("Goodbye!")
+			break
+		}
+		if trimmed == "" {
+			continue
+		}
+
+		// protect the shell session from dying on errors
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					// map based error structure
+					if errObjPtr, ok := r.(*map[string]any); ok && errObjPtr != nil {
+						errObj := *errObjPtr
+						if errorText, exists := errObj["text"].(string); exists {
+							fmt.Fprintf(os.Stderr, "Runtime Error: %s\n", errorText)
+						} else {
+							fmt.Fprintf(os.Stderr, "Runtime Error [%v]: %v (Line %v)\n", errObj["type"], errObj["message"], errObj["line"])
+						}
+					} else {
+						fmt.Fprintf(os.Stderr, "Internal Crash: %v\n", r)
+					}
+				}
+			}()
+
+			// parse the line typed by the user
+			input := antlr.NewInputStream(line)
+			lexer := parser.NewGrammarLexer(input)
+			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+			p := parser.NewGrammarParser(tokens)
+
+			// catch syntax typos
+			panicListener := &PanicErrorListener{}
+			lexer.AddErrorListener(panicListener)
+			p.AddErrorListener(panicListener)
+
+			tree := p.Program()
+
+			// execute statement
+			tree.Accept(eval)
+		}()
+	}
+}
+
+func runFile(filename string) {
 
 	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
@@ -84,4 +142,14 @@ func main() {
 	} else {
 		fmt.Println("Warning: No main() function discovered. Executing script top-to-bottom.")
 	}
+
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		StartREPL()
+		return
+	}
+
+	runFile(os.Args[1])
 }

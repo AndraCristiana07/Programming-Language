@@ -1,6 +1,6 @@
 # Programming-Language
 
-To run the program you need to give it a file as input from the command line:
+To run the program you need to give it a file as input from the command line or just run it without any args to open the REPL:
 
 ```sh
   go run main.go <input_filename>
