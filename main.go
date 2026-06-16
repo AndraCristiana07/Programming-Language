@@ -27,8 +27,17 @@ func StartREPL() {
 	fmt.Println("Type your commands below. Type 'exit' to quit.")
 	fmt.Println("-------------------------------------------")
 
+	var blockBuilder strings.Builder
+	openBraces := 0
+
 	for {
-		fmt.Print(">>> ")
+		// choose prompt based on whether inside a multi-line block
+		if openBraces == 0 {
+			fmt.Print(">>> ")
+		} else {
+			fmt.Print("... ")
+		}
+
 		if !scanner.Scan() {
 			break
 		}
@@ -36,13 +45,36 @@ func StartREPL() {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
 
-		if trimmed == "exit" {
+		// exit check only matters if it;s not mid-block
+		if openBraces == 0 && trimmed == "exit" {
 			fmt.Println("Goodbye!")
 			break
 		}
-		if trimmed == "" {
+		if trimmed == "" && openBraces == 0 {
 			continue
 		}
+
+		// track braces on line
+		// count open and close braces
+		openBraces += strings.Count(line, "{") - strings.Count(line, "}")
+
+		// safety check ->if user types an extra closing brace, clamp it to 0
+		if openBraces < 0 {
+			openBraces = 0
+		}
+
+		// add line into total block code
+		blockBuilder.WriteString(line)
+		blockBuilder.WriteString("\n")
+
+		// if there's still unclosed braces -> skip execution and keep reading lines
+		if openBraces > 0 {
+			continue
+		}
+
+		// pull entire completed block and reset tracking variables
+		sourceCode := blockBuilder.String()
+		blockBuilder.Reset()
 
 		// protect the shell session from dying on errors
 		func() {
@@ -56,14 +88,15 @@ func StartREPL() {
 						} else {
 							fmt.Fprintf(os.Stderr, "Runtime Error [%v]: %v (Line %v)\n", errObj["type"], errObj["message"], errObj["line"])
 						}
+					} else if syntaxErr, isString := r.(string); isString {
+						fmt.Fprintf(os.Stderr, "%s\n", syntaxErr)
 					} else {
 						fmt.Fprintf(os.Stderr, "Internal Crash: %v\n", r)
 					}
 				}
 			}()
 
-			// parse the line typed by the user
-			input := antlr.NewInputStream(line)
+			input := antlr.NewInputStream(sourceCode)
 			lexer := parser.NewGrammarLexer(input)
 			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 			p := parser.NewGrammarParser(tokens)
@@ -75,7 +108,7 @@ func StartREPL() {
 
 			tree := p.Program()
 
-			// execute statement
+			// execute block statement
 			tree.Accept(eval)
 		}()
 	}
