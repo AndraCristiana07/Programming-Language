@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"my_language/ast"
 	"my_language/parser"
 	"os"
 	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
+	"github.com/chzyer/readline"
 )
 
 type PanicErrorListener struct {
@@ -22,7 +23,19 @@ func (p *PanicErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingS
 func StartREPL() {
 	eval := ast.NewVisitor()
 
-	scanner := bufio.NewScanner(os.Stdin)
+	// init the Readline instance
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          ">>> ",
+		HistoryFile:     ".repl_history", // saves command history to a local dotfile
+		InterruptPrompt: "^C",            // prints ^C  on manual cancels
+		EOFPrompt:       "exit",          // matches standard termination keyword
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize terminal engine: %v\n", err)
+		return
+	}
+	defer rl.Close() // clean terminal
+
 	fmt.Println("Welcome to the language REPL!")
 	fmt.Println("Type your commands below. Type 'exit' to quit.")
 	fmt.Println("-------------------------------------------")
@@ -31,21 +44,29 @@ func StartREPL() {
 	openBraces := 0
 
 	for {
-		// choose prompt based on whether inside a multi-line block
-		if openBraces == 0 {
-			fmt.Print(">>> ")
-		} else {
-			fmt.Print("... ")
-		}
+		// read a line from the text engine
+		line, err := rl.Readline()
 
-		if !scanner.Scan() {
+		// handle special keyboard inputs
+		if err == readline.ErrInterrupt {
+			// User pressed Ctrl+C
+			if openBraces > 0 {
+				// clear any partially typed multi-line blocks
+				openBraces = 0
+				blockBuilder.Reset()
+				rl.SetPrompt(">>> ")
+				fmt.Println(" (Cleared block)")
+				continue
+			}
+			break // quit REPL
+		} else if err == io.EOF {
+			// user pressed Ctrl+D
+			fmt.Println("Goodbye!")
 			break
 		}
 
-		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
 
-		// exit check only matters if it;s not mid-block
 		if openBraces == 0 && trimmed == "exit" {
 			fmt.Println("Goodbye!")
 			break
@@ -57,19 +78,19 @@ func StartREPL() {
 		// track braces on line
 		// count open and close braces
 		openBraces += strings.Count(line, "{") - strings.Count(line, "}")
-
-		// safety check ->if user types an extra closing brace, clamp it to 0
 		if openBraces < 0 {
 			openBraces = 0
 		}
 
-		// add line into total block code
 		blockBuilder.WriteString(line)
 		blockBuilder.WriteString("\n")
 
-		// if there's still unclosed braces -> skip execution and keep reading lines
+		// choose prompt based on whether inside a multi-line block
 		if openBraces > 0 {
+			rl.SetPrompt("... ")
 			continue
+		} else {
+			rl.SetPrompt(">>> ")
 		}
 
 		// pull entire completed block and reset tracking variables
@@ -80,7 +101,6 @@ func StartREPL() {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					// map based error structure
 					if errObjPtr, ok := r.(*map[string]any); ok && errObjPtr != nil {
 						errObj := *errObjPtr
 						if errorText, exists := errObj["text"].(string); exists {
@@ -101,14 +121,11 @@ func StartREPL() {
 			tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 			p := parser.NewGrammarParser(tokens)
 
-			// catch syntax typos
 			panicListener := &PanicErrorListener{}
 			lexer.AddErrorListener(panicListener)
 			p.AddErrorListener(panicListener)
 
 			tree := p.Program()
-
-			// execute block statement
 			tree.Accept(eval)
 		}()
 	}
