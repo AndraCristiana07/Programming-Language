@@ -5,7 +5,6 @@ import (
 	"my_language/parser"
 	"reflect"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -589,7 +588,7 @@ func (v *Visitor) VisitAddSub(ctx *parser.AddSubContext) any {
 
 	if leftIsString || rightIsString {
 		if op == "+" {
-			return cleanStringRepr(left) + cleanStringRepr(right)
+			return Stringify(left) + Stringify(right)
 		} else {
 			panic(RuntimeError("SyntaxError", fmt.Sprintf("Unsupported operator for strings: %s", op), ctx))
 		}
@@ -880,7 +879,7 @@ func (v *Visitor) VisitComparison(ctx *parser.ComparisonContext) any {
 func (v *Visitor) VisitPrintStmt(ctx *parser.PrintStmtContext) any {
 	val := ctx.Expr().Accept(v)
 
-	fmt.Println(cleanStringRepr(val))
+	fmt.Println(Stringify(val))
 
 	return nil
 }
@@ -1255,7 +1254,7 @@ func (v *Visitor) VisitCompoundAssignStmt(ctx *parser.CompoundAssignStmtContext)
 	// string concatenation
 	if op == "+=" {
 		if strVal, ok := currentValue.(string); ok {
-			result = strVal + cleanStringRepr(value)
+			result = strVal + Stringify(value)
 		}
 	}
 
@@ -2144,7 +2143,7 @@ func (v *Visitor) VisitThrowStmt(ctx *parser.ThrowStmtContext) any {
 	// eval the expression thrown
 	thrownVal := ctx.Expr().Accept(v)
 
-	panic(cleanStringRepr(thrownVal))
+	panic(Stringify(thrownVal))
 }
 
 func RuntimeError(errorType string, message string, ctx antlr.ParserRuleContext) *map[string]any {
@@ -2175,92 +2174,92 @@ func (v *Visitor) power(base, exp int) int {
 	return result
 }
 
-// helper for standard print outputs
-func cleanStringRepr(val any) string {
-	if val == nil || val == LanguageNull {
-		return "null"
-	}
+// // helper for standard print outputs
+// func cleanStringRepr(val any) string {
+// 	if val == nil || val == LanguageNull {
+// 		return "null"
+// 	}
 
-	switch v := val.(type) {
-	case string:
-		return v
-	case float64:
-		// check if whole nr
-		if v == float64(int64(v)) {
-			return fmt.Sprintf("%.1f", v) // 5.0
-		}
-		return fmt.Sprintf("%g", v) //5.3
-	case *[]any:
-		var sb strings.Builder
-		sb.WriteString("[")
-		for i, element := range *v {
-			sb.WriteString(cleanStringRepr(element))
-			if i < len(*v)-1 {
-				sb.WriteString(", ")
-			}
-		}
-		sb.WriteString("]")
-		return sb.String()
-	case *Tuple:
-		var sb strings.Builder
-		sb.WriteString("(")
-		for i, element := range v.Elements {
-			sb.WriteString(cleanStringRepr(element))
-			if i < len(v.Elements)-1 {
-				sb.WriteString(", ")
-			}
-		}
-		// (10,)
-		if len(v.Elements) == 1 {
-			sb.WriteString(",")
-		}
-		sb.WriteString(")")
-		return sb.String()
-	case *map[string]any:
-		m := *v
-		// struct
-		if typeName, isStruct := m["__type__"].(string); isStruct {
-			var sb strings.Builder
-			sb.WriteString(typeName + "{")
+// 	switch v := val.(type) {
+// 	case string:
+// 		return v
+// 	case float64:
+// 		// check if whole nr
+// 		if v == float64(int64(v)) {
+// 			return fmt.Sprintf("%.1f", v) // 5.0
+// 		}
+// 		return fmt.Sprintf("%g", v) //5.3
+// 	case *[]any:
+// 		var sb strings.Builder
+// 		sb.WriteString("[")
+// 		for i, element := range *v {
+// 			sb.WriteString(cleanStringRepr(element))
+// 			if i < len(*v)-1 {
+// 				sb.WriteString(", ")
+// 			}
+// 		}
+// 		sb.WriteString("]")
+// 		return sb.String()
+// 	case *Tuple:
+// 		var sb strings.Builder
+// 		sb.WriteString("(")
+// 		for i, element := range v.Elements {
+// 			sb.WriteString(cleanStringRepr(element))
+// 			if i < len(v.Elements)-1 {
+// 				sb.WriteString(", ")
+// 			}
+// 		}
+// 		// (10,)
+// 		if len(v.Elements) == 1 {
+// 			sb.WriteString(",")
+// 		}
+// 		sb.WriteString(")")
+// 		return sb.String()
+// 	case *map[string]any:
+// 		m := *v
+// 		// struct
+// 		if typeName, isStruct := m["__type__"].(string); isStruct {
+// 			var sb strings.Builder
+// 			sb.WriteString(typeName + "{")
 
-			// get field names
-			fields := make([]string, 0)
-			for k := range m {
-				if k != "__type__" {
-					fields = append(fields, k)
-				}
-			}
-			sort.Strings(fields)
+// 			// get field names
+// 			fields := make([]string, 0)
+// 			for k := range m {
+// 				if k != "__type__" {
+// 					fields = append(fields, k)
+// 				}
+// 			}
+// 			sort.Strings(fields)
 
-			for i, key := range fields {
-				fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(m[key]))
-				if i < len(fields)-1 {
-					sb.WriteString(", ")
-				}
-			}
-			sb.WriteString("}")
-			return sb.String()
-		}
+// 			for i, key := range fields {
+// 				fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(m[key]))
+// 				if i < len(fields)-1 {
+// 					sb.WriteString(", ")
+// 				}
+// 			}
+// 			sb.WriteString("}")
+// 			return sb.String()
+// 		}
 
-		// dict/map
-		var sb strings.Builder
-		sb.WriteString("{")
-		i := 0
-		for key, element := range m {
-			fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(element))
-			if i < len(m)-1 {
-				sb.WriteString(", ")
-			}
-			i++
-		}
-		sb.WriteString("}")
-		return sb.String()
+// 		// dict/map
+// 		var sb strings.Builder
+// 		sb.WriteString("{")
+// 		i := 0
+// 		for key, element := range m {
+// 			fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(element))
+// 			if i < len(m)-1 {
+// 				sb.WriteString(", ")
+// 			}
+// 			i++
+// 		}
+// 		sb.WriteString("}")
+// 		return sb.String()
 
-	default:
-		return fmt.Sprintf("%v", v)
+// 	default:
+// 		return fmt.Sprintf("%v", v)
 
-	}
-}
+// 	}
+// }
 
 func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 	// braket lookup
