@@ -2,7 +2,8 @@ grammar Grammar;
 
 program    : (statement | funcStmt | terminator)* EOF ;
 
-statement   : (varDecl      
+statement   : ( importStmt
+            | varDecl      
             | assignStmt   
             | structStmt    
             | interfaceStmt 
@@ -42,7 +43,9 @@ switchStmt          : SWITCH LPAREN expr RPAREN LBRACE terminator* caseBlock* de
 caseBlock           : CASE expr COLON (statement | terminator)* ;
 defaultBlock        : DEFAULT COLON (statement | terminator)* ;
 
-forInStmt : FOR LPAREN loopTarget IN expr RPAREN body=blockStmt ;
+forInStmt           : FOR LPAREN loopTarget IN expr RPAREN body=blockStmt ;
+
+importStmt          : 'import' STRING ';' ;
 
 loopTarget
     : VAR? id=IDENTIFIER           # SingleLoopVar        

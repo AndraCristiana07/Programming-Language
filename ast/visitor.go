@@ -23,6 +23,7 @@ type Visitor struct {
 	MethodRegistry    map[string]map[string]*parser.FuncStmtContext // for member methods
 	InterfaceRegistry map[string]Interface
 	currCtx           antlr.ParserRuleContext
+	ImportHandler     func(filename string) any
 }
 
 type Pointer struct {
@@ -96,7 +97,9 @@ func (v *Visitor) VisitExprStmt(ctx *parser.ExprStmtContext) any {
 }
 
 func (v *Visitor) VisitStatement(ctx *parser.StatementContext) any {
-	if ctx.VarDecl() != nil {
+	if ctx.ImportStmt() != nil {
+		return ctx.ImportStmt().Accept(v)
+	} else if ctx.VarDecl() != nil {
 		return ctx.VarDecl().Accept(v)
 	} else if ctx.AssignStmt() != nil {
 		return ctx.AssignStmt().Accept(v)
@@ -218,6 +221,26 @@ func (v *Visitor) VisitStructStmt(ctx *parser.StructStmtContext) any {
 		v.StructRegistry = make(map[string][]string)
 	}
 	v.StructRegistry[structName] = fields
+
+	return nil
+}
+
+func (v *Visitor) VisitImportStmt(ctx *parser.ImportStmtContext) any {
+	// get file name
+	rawPath := ctx.STRING().GetText()
+	filename := strings.Trim(rawPath, `"'`)
+
+	if v.ImportHandler == nil {
+		panic("ImportError: No import handler registered on the active execution visitor")
+	}
+
+	rawTree := v.ImportHandler(filename)
+	moduleTree, ok := rawTree.(antlr.ParseTree)
+	if !ok {
+		panic(fmt.Sprintf("ImportError: Failed to execute module '%s'", filename))
+	}
+
+	moduleTree.Accept(v)
 
 	return nil
 }
@@ -2173,93 +2196,6 @@ func (v *Visitor) power(base, exp int) int {
 	}
 	return result
 }
-
-// // helper for standard print outputs
-// func cleanStringRepr(val any) string {
-// 	if val == nil || val == LanguageNull {
-// 		return "null"
-// 	}
-
-// 	switch v := val.(type) {
-// 	case string:
-// 		return v
-// 	case float64:
-// 		// check if whole nr
-// 		if v == float64(int64(v)) {
-// 			return fmt.Sprintf("%.1f", v) // 5.0
-// 		}
-// 		return fmt.Sprintf("%g", v) //5.3
-// 	case *[]any:
-// 		var sb strings.Builder
-// 		sb.WriteString("[")
-// 		for i, element := range *v {
-// 			sb.WriteString(cleanStringRepr(element))
-// 			if i < len(*v)-1 {
-// 				sb.WriteString(", ")
-// 			}
-// 		}
-// 		sb.WriteString("]")
-// 		return sb.String()
-// 	case *Tuple:
-// 		var sb strings.Builder
-// 		sb.WriteString("(")
-// 		for i, element := range v.Elements {
-// 			sb.WriteString(cleanStringRepr(element))
-// 			if i < len(v.Elements)-1 {
-// 				sb.WriteString(", ")
-// 			}
-// 		}
-// 		// (10,)
-// 		if len(v.Elements) == 1 {
-// 			sb.WriteString(",")
-// 		}
-// 		sb.WriteString(")")
-// 		return sb.String()
-// 	case *map[string]any:
-// 		m := *v
-// 		// struct
-// 		if typeName, isStruct := m["__type__"].(string); isStruct {
-// 			var sb strings.Builder
-// 			sb.WriteString(typeName + "{")
-
-// 			// get field names
-// 			fields := make([]string, 0)
-// 			for k := range m {
-// 				if k != "__type__" {
-// 					fields = append(fields, k)
-// 				}
-// 			}
-// 			sort.Strings(fields)
-
-// 			for i, key := range fields {
-// 				fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(m[key]))
-// 				if i < len(fields)-1 {
-// 					sb.WriteString(", ")
-// 				}
-// 			}
-// 			sb.WriteString("}")
-// 			return sb.String()
-// 		}
-
-// 		// dict/map
-// 		var sb strings.Builder
-// 		sb.WriteString("{")
-// 		i := 0
-// 		for key, element := range m {
-// 			fmt.Fprintf(&sb, "%s: %s", key, cleanStringRepr(element))
-// 			if i < len(m)-1 {
-// 				sb.WriteString(", ")
-// 			}
-// 			i++
-// 		}
-// 		sb.WriteString("}")
-// 		return sb.String()
-
-// 	default:
-// 		return fmt.Sprintf("%v", v)
-
-// 	}
-// }
 
 func (v *Visitor) resolveAssignTarget(leftCtx parser.IExprContext) (any, any) {
 	// braket lookup

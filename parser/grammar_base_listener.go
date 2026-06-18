@@ -123,6 +123,12 @@ func (s *BaseGrammarListener) EnterForInStmt(ctx *ForInStmtContext) {}
 // ExitForInStmt is called when production forInStmt is exited.
 func (s *BaseGrammarListener) ExitForInStmt(ctx *ForInStmtContext) {}
 
+// EnterImportStmt is called when production importStmt is entered.
+func (s *BaseGrammarListener) EnterImportStmt(ctx *ImportStmtContext) {}
+
+// ExitImportStmt is called when production importStmt is exited.
+func (s *BaseGrammarListener) ExitImportStmt(ctx *ImportStmtContext) {}
+
 // EnterSingleLoopVar is called when production SingleLoopVar is entered.
 func (s *BaseGrammarListener) EnterSingleLoopVar(ctx *SingleLoopVarContext) {}
 

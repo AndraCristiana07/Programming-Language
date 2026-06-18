@@ -59,6 +59,9 @@ type GrammarListener interface {
 	// EnterForInStmt is called when entering the forInStmt production.
 	EnterForInStmt(c *ForInStmtContext)
 
+	// EnterImportStmt is called when entering the importStmt production.
+	EnterImportStmt(c *ImportStmtContext)
+
 	// EnterSingleLoopVar is called when entering the SingleLoopVar production.
 	EnterSingleLoopVar(c *SingleLoopVarContext)
 
@@ -271,6 +274,9 @@ type GrammarListener interface {
 
 	// ExitForInStmt is called when exiting the forInStmt production.
 	ExitForInStmt(c *ForInStmtContext)
+
+	// ExitImportStmt is called when exiting the importStmt production.
+	ExitImportStmt(c *ImportStmtContext)
 
 	// ExitSingleLoopVar is called when exiting the SingleLoopVar production.
 	ExitSingleLoopVar(c *SingleLoopVarContext)

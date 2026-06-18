@@ -1,0 +1,8 @@
+import "utils_test.txt";
+
+func main() {
+    var head = createList(10, 20);
+    
+    print "Successfully loaded file!";
+    print head;
+}
