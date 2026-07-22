@@ -11,6 +11,8 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TODO: swap like python a,b = b,a
+// TODO: if (a) possible (now it;s just a != null)
 type Callable interface {
 	NrArgs() int
 	Call(v *Visitor, args []any) any
