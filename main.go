@@ -20,9 +20,28 @@ func (p *PanicErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingS
 	panic(fmt.Sprintf("SyntaxError: Line %d:%d - %s", line, column, msg))
 }
 
+func parseFileToTree(filename string) any {
+	fileBytes, err := os.ReadFile(filename)
+	if err != nil {
+		panic(fmt.Sprintf("ImportError: Failed to read module '%s': %v", filename, err))
+	}
+
+	input := antlr.NewInputStream(string(fileBytes))
+	lexer := parser.NewGrammarLexer(input)
+	tokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
+	p := parser.NewGrammarParser(tokens)
+
+	panicListener := &PanicErrorListener{}
+	lexer.AddErrorListener(panicListener)
+	p.AddErrorListener(panicListener)
+
+	return p.Program() // returns the parsed *parser.ProgramContext
+}
+
 func StartREPL() {
 	eval := ast.NewVisitor()
 
+	eval.ImportHandler = parseFileToTree
 	// init the Readline instance
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:          ">>> ",
@@ -177,6 +196,9 @@ func runFile(filename string) {
 	fmt.Println(tree.ToStringTree(nil, p))
 
 	eval := ast.NewVisitor()
+
+	eval.ImportHandler = parseFileToTree
+
 	tree.Accept(eval)
 
 	env := eval.GetEnvironment()

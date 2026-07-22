@@ -1,0 +1,8 @@
+struct Node {
+    val;
+    next;
+}
+
+func createList(v1, v2) {
+    return Node { val: v1, next: Node { val: v2, next: null } };
+}

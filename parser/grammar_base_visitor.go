@@ -76,6 +76,10 @@ func (v *BaseGrammarVisitor) VisitForInStmt(ctx *ForInStmtContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseGrammarVisitor) VisitImportStmt(ctx *ImportStmtContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseGrammarVisitor) VisitSingleLoopVar(ctx *SingleLoopVarContext) interface{} {
 	return v.VisitChildren(ctx)
 }
